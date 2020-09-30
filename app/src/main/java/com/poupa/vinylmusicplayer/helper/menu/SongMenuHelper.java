@@ -80,9 +80,7 @@ public class SongMenuHelper {
             this.activity = activity;
         }
 
-        public int getMenuRes() {
-            return MENU_RES;
-        }
+        public int getMenuRes() { return MENU_RES; }
 
         @Override
         public void onClick(View v) {

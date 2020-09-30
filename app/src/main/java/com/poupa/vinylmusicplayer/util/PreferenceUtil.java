@@ -83,6 +83,8 @@ public final class PreferenceUtil {
     public static final String SYNCHRONIZED_LYRICS_SHOW = "synchronized_lyrics_show";
     public static final String ANIMATE_PLAYING_SONG_ICON = "animate_playing_song_icon";
     public static final String SHOW_SONG_NUMBER = "show_song_number_on_playing_queue";
+    public static final String ALLOW_RANDOM_ALBUM = "allow_random_album_shuffling";
+    public static final String RANDOM_ALBUM_BY_GENRE = "genre_album_shuffling";
 
     public static final String INITIALIZED_BLACKLIST = "initialized_blacklist";
 
@@ -541,6 +543,14 @@ public final class PreferenceUtil {
 
     public final boolean showSongNumber() {
         return mPreferences.getBoolean(SHOW_SONG_NUMBER, false);
+    }
+
+    public final boolean allowRandomAlbum() {
+        return mPreferences.getBoolean(ALLOW_RANDOM_ALBUM, false);
+    }
+
+    public final boolean randomAlbumByGenre() {
+        return mPreferences.getBoolean(RANDOM_ALBUM_BY_GENRE, false);
     }
 
     public final boolean maintainSkippedSongsPlaylist() {

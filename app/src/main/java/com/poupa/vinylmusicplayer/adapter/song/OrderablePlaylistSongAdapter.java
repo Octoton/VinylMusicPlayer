@@ -111,7 +111,7 @@ public class OrderablePlaylistSongAdapter extends PlaylistSongAdapter implements
         }
 
         @Override
-        protected int getSongMenuRes() {
+        protected int getSongMenuRes(int itemViewType) {
             return R.menu.menu_item_playlist_song;
         }
 

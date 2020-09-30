@@ -224,7 +224,7 @@ public class SongAdapter extends AbsMultiSelectAdapter<SongAdapter.ViewHolder, S
 
                 @Override
                 public int getMenuRes() {
-                    return getSongMenuRes();
+                    return getSongMenuRes(getItemViewType());
                 }
 
                 @Override
@@ -241,7 +241,7 @@ public class SongAdapter extends AbsMultiSelectAdapter<SongAdapter.ViewHolder, S
             return dataSet.get(getAdapterPosition());
         }
 
-        protected int getSongMenuRes() {
+        protected int getSongMenuRes(int itemViewType) {
             return DEFAULT_MENU_RES;
         }
 

@@ -45,6 +45,7 @@ import java.util.regex.Pattern;
  * @author Karim Abou Zeid (kabouzeid)
  */
 public class MusicUtil {
+
     public static Uri getMediaStoreAlbumCoverUri(long albumId) {
         final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
 
@@ -96,8 +97,7 @@ public class MusicUtil {
 
     @NonNull
     public static String getSongInfoString(@NonNull final Song song) {
-        if (PreferenceUtil.getInstance().showSongNumber()) {
-
+        if (PreferenceUtil.getInstance().showSongNumber() && song.id != -1) {
             return MusicUtil.buildInfoString(
                     MusicUtil.getTrackNumberInfoString(song),
                     song.artistName,

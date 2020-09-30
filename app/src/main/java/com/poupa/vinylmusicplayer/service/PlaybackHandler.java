@@ -7,9 +7,16 @@ import android.os.Message;
 
 import androidx.annotation.NonNull;
 
+import com.poupa.vinylmusicplayer.helper.SearchQueryHelper;
+import com.poupa.vinylmusicplayer.loader.AlbumLoader;
+import com.poupa.vinylmusicplayer.loader.SongLoader;
+import com.poupa.vinylmusicplayer.model.Album;
+import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+
 
 final class PlaybackHandler extends Handler {
     @NonNull
@@ -19,6 +26,37 @@ final class PlaybackHandler extends Handler {
     public PlaybackHandler(final MusicService service, @NonNull final Looper looper) {
         super(looper);
         mService = new WeakReference<>(service);
+    }
+
+    private boolean accessNextAlbum(MusicService service, int nextPosition) {
+        if (nextPosition >= 0 && nextPosition < service.getPlayingQueue().size()) {
+            Song song = service.getPlayingQueue().get(nextPosition);
+
+            if (song.id == -1) {
+                Album album =
+                        AlbumLoader.getAlbum(service.getApplicationContext(),
+                                song.albumId);
+
+                ArrayList<Song> songs = SongLoader.getSongs(
+                        SongLoader.makeSongCursor(service.getApplicationContext(),
+                                SearchQueryHelper.ALBUM_SELECTION,
+                                new String[] { album.getTitle().toLowerCase().trim() },
+                                PreferenceUtil.getInstance().getAlbumSongSortOrder()));
+
+                service.notifyChange(MusicService.QUEUE_CHANGED);
+
+                service.clearQueue();
+
+                service.openQueue(songs,
+                        0,
+                        true);
+
+                service.setShuffleMode(MusicService.SHUFFLE_MODE_SHUFFLE_ALBUM);
+
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -70,19 +108,27 @@ final class PlaybackHandler extends Handler {
 
             case MusicService.TRACK_ENDED:
                 // if there is a timer finished, don't continue
-                if (service.pendingQuit ||
-                        service.getRepeatMode() == MusicService.REPEAT_MODE_NONE && service.isLastTrack()) {
-                    service.notifyChange(MusicService.PLAY_STATE_CHANGED);
-                    service.seek(0);
-                    if (service.pendingQuit) {
-                        service.pendingQuit = false;
-                        service.quit();
-                        break;
+                boolean shuffleModeAlbum = false;
+                if (service.getShuffleMode() == MusicService.SHUFFLE_MODE_SHUFFLE_ALBUM) {
+                    shuffleModeAlbum = accessNextAlbum(service, service.getNextPosition(false));
+                }
+
+                if (!shuffleModeAlbum) {
+                    if (service.pendingQuit ||
+                            service.getRepeatMode() == MusicService.REPEAT_MODE_NONE &&
+                                    service.isLastTrack()) {
+                        service.notifyChange(MusicService.PLAY_STATE_CHANGED);
+                        service.seek(0);
+                        if (service.pendingQuit) {
+                            service.pendingQuit = false;
+                            service.quit();
+                            break;
+                        }
+                        service.notifyChange(MusicService.PLAY_STATE_CHANGED);
+                        service.seek(0);
+                    } else {
+                        service.playNextSong(false);
                     }
-                    service.notifyChange(MusicService.PLAY_STATE_CHANGED);
-                    service.seek(0);
-                } else {
-                    service.playNextSong(false);
                 }
                 sendEmptyMessage(MusicService.RELEASE_WAKELOCK);
                 break;
@@ -92,7 +138,14 @@ final class PlaybackHandler extends Handler {
                 break;
 
             case MusicService.PLAY_SONG:
-                service.playSongAtImpl(msg.arg1);
+                shuffleModeAlbum = false;
+                if (service.getShuffleMode() == MusicService.SHUFFLE_MODE_SHUFFLE_ALBUM) {
+                    shuffleModeAlbum = accessNextAlbum(service, msg.arg1);
+                }
+
+                if (!shuffleModeAlbum) {
+                    service.playSongAtImpl(msg.arg1);
+                }
                 break;
 
             case MusicService.SET_POSITION:

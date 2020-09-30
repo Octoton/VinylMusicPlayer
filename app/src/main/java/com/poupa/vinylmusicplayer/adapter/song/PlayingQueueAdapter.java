@@ -27,6 +27,7 @@ import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
 import com.poupa.vinylmusicplayer.interfaces.CabHolder;
 import com.poupa.vinylmusicplayer.model.Song;
+import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 import com.poupa.vinylmusicplayer.util.ViewUtil;
 
 import java.util.ArrayList;
@@ -40,17 +41,28 @@ public class PlayingQueueAdapter extends SongAdapter
     private static final int HISTORY = 0;
     private static final int CURRENT = 1;
     private static final int UP_NEXT = 2;
+    private static final int RANDOM_ALBUM = 3;
 
     public Song songToRemove;
 
     private static Snackbar currentlyShownSnackbar;
 
     private int current;
+    private boolean lastIsRandomAlbum;
+
+    private void setLastIsRandomAlbum() {
+        if (dataSet.size() > 0)
+            lastIsRandomAlbum = (dataSet.get(dataSet.size()-1).id == -1);
+        else
+            lastIsRandomAlbum = false;
+    }
 
     public PlayingQueueAdapter(AppCompatActivity activity, ArrayList<Song> dataSet, int current, @LayoutRes int itemLayoutRes, boolean usePalette, @Nullable CabHolder cabHolder) {
         super(activity, dataSet, itemLayoutRes, usePalette, cabHolder);
         this.showAlbumImage = false; // We don't want to load it in this adapter
         this.current = current;
+
+        setLastIsRandomAlbum();
     }
 
     @Override
@@ -63,7 +75,10 @@ public class PlayingQueueAdapter extends SongAdapter
         super.onBindViewHolder(holder, position);
 
         if (holder.imageText != null) {
-            holder.imageText.setText(String.valueOf(position - current));
+            if (position == dataSet.size()-1 && lastIsRandomAlbum)
+                holder.imageText.setText("-");
+            else
+                holder.imageText.setText(String.valueOf(position - current));
         }
 
         if (holder.getItemViewType() == HISTORY) {
@@ -73,7 +88,9 @@ public class PlayingQueueAdapter extends SongAdapter
 
     @Override
     public int getItemViewType(int position) {
-        if (position < current) {
+        if (position == dataSet.size()-1 && lastIsRandomAlbum) {
+            return RANDOM_ALBUM;
+        } else if (position < current) {
             return HISTORY;
         } else if (position > current) {
             return UP_NEXT;
@@ -84,6 +101,8 @@ public class PlayingQueueAdapter extends SongAdapter
     public void swapDataSet(ArrayList<Song> dataSet, int position) {
         this.dataSet = dataSet;
         current = position;
+
+        setLastIsRandomAlbum();
         notifyDataSetChanged();
     }
 
@@ -197,13 +216,21 @@ public class PlayingQueueAdapter extends SongAdapter
         }
 
         @Override
-        protected int getSongMenuRes() {
+        protected int getSongMenuRes(int itemViewType) {
+            if (itemViewType == RANDOM_ALBUM)
+                return R.menu.menu_item_random_album_queue_song;
             return R.menu.menu_item_playing_queue_song;
         }
 
         @Override
         protected boolean onSongMenuItemClick(MenuItem item) {
-            if (item.getItemId() == R.id.action_remove_from_playing_queue) {
+            if (item.getItemId() == R.id.action_shuffle_random_album) {
+                MusicPlayerRemote.shuffleRandomAlbum(false);
+                return true;
+            } else if (item.getItemId() == R.id.action_shuffle_genre_album) {
+                MusicPlayerRemote.shuffleRandomAlbum(true);
+                return true;
+            } else if (item.getItemId() == R.id.action_remove_from_playing_queue) {
                 // If song removed was the playing song, then play the next song
                 if (MusicPlayerRemote.isPlaying(getSong()))
                 {

@@ -340,4 +340,12 @@
     <string name="scanning_x_songs_in_progress">Mise à jour de %1$d titres…</string>
     <string name="scanning_x_songs_finished">%1$d titres mis à jour</string>
     <string name="reset_discography">Réanalyser la bibliothèque</string>
+    <string name="pref_summary_allow_random_album">A la fin de la liste de lecture, un nouvel album va être chargé aléatoire</string>
+    <string name="pref_title_allow_random_album">Album aléatoire en fin de file de lecture</string>
+    <string name="pref_summary_genre_album_shuffling">Choisir un album ayant le même genre que la dernière chanson plutôt que choisir aléatoirement</string>
+    <string name="pref_title_genre_album_shuffling">Album aléatoire par genre</string>
+    <string name="next_album">Album suivant :</string>
+    <string name="shuffle_album">Recharger album aléatoirement</string>
+    <string name="shuffle_album_genre">Recharger album dans le même genre</string>
+
 </resources>

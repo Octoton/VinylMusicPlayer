@@ -265,6 +265,8 @@ public class SettingsActivity extends AbsBaseActivity implements ColorChooserDia
                 });
             }
 
+            findPreference("genre_album_shuffling").setEnabled(PreferenceUtil.getInstance().allowRandomAlbum());
+
             final TwoStatePreference colorAppShortcuts = (TwoStatePreference) findPreference("should_color_app_shortcuts");
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) {
                 colorAppShortcuts.setVisible(false);
@@ -342,6 +344,9 @@ public class SettingsActivity extends AbsBaseActivity implements ColorChooserDia
                         pref.setEnabled(false);
                         pref.setSummary(getResources().getString(R.string.pref_rg_disabled));
                     }
+                    break;
+                case PreferenceUtil.ALLOW_RANDOM_ALBUM:
+                    findPreference("genre_album_shuffling").setEnabled(sharedPreferences.getBoolean(key, false));
                     break;
             }
         }

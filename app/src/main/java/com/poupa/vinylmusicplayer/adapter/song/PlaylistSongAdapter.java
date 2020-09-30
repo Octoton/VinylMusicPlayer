@@ -73,7 +73,7 @@ public class PlaylistSongAdapter extends AbsOffsetSongAdapter {
         }
 
         @Override
-        protected int getSongMenuRes() {
+        protected int getSongMenuRes(int itemViewType) {
             return R.menu.menu_item_cannot_delete_single_songs_playlist_song;
         }
 
