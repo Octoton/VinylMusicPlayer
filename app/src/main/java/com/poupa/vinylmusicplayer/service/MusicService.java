@@ -153,7 +153,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
     private Playback playback;
     private ArrayList<Song> playingQueue = new ArrayList<>();
     private ArrayList<Song> originalPlayingQueue = new ArrayList<>();
-    private  ArrayList<Album> albums; // Used by randomAlbum shuffling
+    private ArrayList<Album> albums; // Used by randomAlbum shuffling
     private int position = -1;
     private int nextPosition = -1;
     private int shuffleMode;
@@ -1103,9 +1103,9 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
     }
 
     // necessary as albumId are unique but neither in order, neither consecutive (only certainty is albumId > 0)
-    private int getAlbumPosition(ArrayList<Album> albums, long albumId) {
+    private int getAlbumPosition(ArrayList<Album> albumList, long albumId) {
         int i = 0;
-        for (Album album: albums) {
+        for (Album album: albumList) {
             if (album.getId() == albumId) {
                 return i;
             }
@@ -1119,19 +1119,57 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
             Song lastSong = playingQueue.get(playingQueue.size() - 1);
             int lastSongPosition = getAlbumPosition(albums, lastSong.albumId);
             int randomAlbumOldPosition = -1;
+            ArrayList<Album> genre = new ArrayList<>();
+
             if (lastSong.id == -1) {
-                randomAlbumOldPosition = lastSongPosition;
-                lastSong = playingQueue.get(playingQueue.size() - 2);
-                lastSongPosition = getAlbumPosition(albums, lastSong.albumId);
+                if (sameGenreNeeded) {
+                    long oldId = lastSong.albumId;
+                    lastSong = playingQueue.get(playingQueue.size() - 2);
+                    for (Album albumGenre : albums) {
+                        if (lastSong.genre.equals(albumGenre.songs.get(0).genre)) {
+                            genre.add(albumGenre);
+                        }
+                    }
+                    randomAlbumOldPosition = getAlbumPosition(genre, oldId);
+                    lastSongPosition = getAlbumPosition(genre, lastSong.albumId);
+                } else {
+                    randomAlbumOldPosition = lastSongPosition;
+                    lastSong = playingQueue.get(playingQueue.size() - 2);
+                    lastSongPosition = getAlbumPosition(albums, lastSong.albumId);
+                }
 
                 removedRandomAlbum(false);
+            } else {
+                if (sameGenreNeeded) {
+                    for (Album albumGenre : albums) {
+                        if (lastSong.genre.equals(albumGenre.songs.get(0).genre)) {
+                            genre.add(albumGenre);
+                        }
+                    }
+                    lastSongPosition = getAlbumPosition(genre, lastSong.albumId);
+                }
             }
             // How to get the genre so that i can do a less random new album ? lastSong.artistId;
             //      then add preference to activate total random, or genre random or remove album shuffle
             //ArrayList<Genre> genres = GenreLoader.getAllGenres(getApplicationContext());
-            int randomAlbumPosition = 1;
+            int randomAlbumPosition = 0;
+            Album album;
             if (sameGenreNeeded) {
-                randomAlbumPosition = lastSongPosition;
+                int albumSize = genre.size();
+                if (albumSize > 2) {
+                    int i = 0;
+                    int maxLoop = 10;
+                    do {
+                        randomAlbumPosition = new Random().nextInt(albumSize);
+                        i++;
+                    } while (i < maxLoop && (randomAlbumPosition == lastSongPosition ||
+                            randomAlbumPosition == randomAlbumOldPosition));
+
+                } else if (albumSize == 2) {
+                    randomAlbumPosition = (lastSongPosition + 1) % albumSize;
+                }
+                album = genre.get(randomAlbumPosition);
+
             } else {
                 int albumSize = albums.size();
                 if (albumSize > 2) {
@@ -1146,8 +1184,9 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
                 } else if (albumSize == 2) {
                     randomAlbumPosition = (lastSongPosition + 1) % albumSize;
                 }
+                album = albums.get(randomAlbumPosition);
             }
-            Album album = albums.get(randomAlbumPosition);
+
             Song song =
                     new Song(-1, getResources().getString(R.string.next_album), 0, -1, -1, "", -1, -1, album.getId(),
                             album.getTitle(), album.getArtistId(), album.getArtistName());

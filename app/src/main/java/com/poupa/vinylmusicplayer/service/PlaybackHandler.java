@@ -37,11 +37,7 @@ final class PlaybackHandler extends Handler {
                         AlbumLoader.getAlbum(service.getApplicationContext(),
                                 song.albumId);
 
-                ArrayList<Song> songs = SongLoader.getSongs(
-                        SongLoader.makeSongCursor(service.getApplicationContext(),
-                                SearchQueryHelper.ALBUM_SELECTION,
-                                new String[] { album.getTitle().toLowerCase().trim() },
-                                PreferenceUtil.getInstance().getAlbumSongSortOrder()));
+                ArrayList<Song> songs = album.songs;
 
                 service.notifyChange(MusicService.QUEUE_CHANGED);
 
