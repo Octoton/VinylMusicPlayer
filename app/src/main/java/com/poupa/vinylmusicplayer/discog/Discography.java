@@ -18,6 +18,7 @@ import com.poupa.vinylmusicplayer.model.Genre;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.ui.activities.MainActivity;
 
+import com.poupa.vinylmusicplayer.service.MusicService;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.FieldKey;
@@ -153,7 +154,7 @@ public class Discography implements MusicServiceEventListener {
     boolean addSongImpl(@NonNull Song song, boolean cacheOnly) {
         synchronized (cache) {
             // Race condition check: If the song has been added -> skip
-            if (cache.songsById.containsKey(song.id)) {
+            if (song.id == MusicService.RANDOM_ALBUM_SONG_ID || cache.songsById.containsKey(song.id)) {
                 return false;
             }
 

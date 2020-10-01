@@ -97,7 +97,7 @@ public class MusicUtil {
 
     @NonNull
     public static String getSongInfoString(@NonNull final Song song) {
-        if (PreferenceUtil.getInstance().showSongNumber() && song.id != -1) {
+        if (PreferenceUtil.getInstance().showSongNumber() && song.id != MusicService.RANDOM_ALBUM_SONG_ID) {
             return MusicUtil.buildInfoString(
                     MusicUtil.getTrackNumberInfoString(song),
                     song.artistName,

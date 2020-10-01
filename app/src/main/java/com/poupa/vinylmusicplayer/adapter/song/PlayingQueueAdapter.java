@@ -27,6 +27,7 @@ import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
 import com.poupa.vinylmusicplayer.interfaces.CabHolder;
 import com.poupa.vinylmusicplayer.model.Song;
+import com.poupa.vinylmusicplayer.service.MusicService;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 import com.poupa.vinylmusicplayer.util.ViewUtil;
 
@@ -52,7 +53,7 @@ public class PlayingQueueAdapter extends SongAdapter
 
     private void setLastIsRandomAlbum() {
         if (dataSet.size() > 0)
-            lastIsRandomAlbum = (dataSet.get(dataSet.size()-1).id == -1);
+            lastIsRandomAlbum = (dataSet.get(dataSet.size()-1).id == MusicService.RANDOM_ALBUM_SONG_ID);
         else
             lastIsRandomAlbum = false;
     }

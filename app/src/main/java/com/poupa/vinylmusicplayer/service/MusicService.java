@@ -135,6 +135,8 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
     public static final int SHUFFLE_MODE_SHUFFLE = 1;
     public static final int SHUFFLE_MODE_SHUFFLE_ALBUM = 2;
 
+    public static  final int RANDOM_ALBUM_SONG_ID = -2;
+
     public static final int REPEAT_MODE_NONE = 0;
     public static final int REPEAT_MODE_ALL = 1;
     public static final int REPEAT_MODE_THIS = 2;
@@ -410,7 +412,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
             int restoredPosition = PreferenceManager.getDefaultSharedPreferences(this).getInt(SAVED_POSITION, -1);
             int restoredPositionInTrack = PreferenceManager.getDefaultSharedPreferences(this).getInt(SAVED_POSITION_IN_TRACK, -1);
 
-            if ((restoredQueue.size() > 0 && restoredQueue.get(restoredQueue.size() - 1).id == -1 ) ||
+            if ((restoredQueue.size() > 0 && restoredQueue.get(restoredQueue.size() - 1).id == RANDOM_ALBUM_SONG_ID ) ||
                     (restoredQueue.size() > 0 && restoredQueue.size() == restoredOriginalQueue.size() && restoredPosition != -1)) {
 
                 this.originalPlayingQueue = restoredOriginalQueue;
@@ -1019,7 +1021,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
                 if (getShuffleMode() != SHUFFLE_MODE_SHUFFLE_ALBUM)
                     setRepeatMode(REPEAT_MODE_ALL);
                 else
-                    Toast.makeText(getApplicationContext(), "Cannot activate the repeat mode when in album shuffling", Toast.LENGTH_LONG).show();;
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.error_random_album_repeat_mode), Toast.LENGTH_LONG).show();;
                 break;
             case REPEAT_MODE_ALL:
                 setRepeatMode(REPEAT_MODE_THIS);
@@ -1088,7 +1090,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
     public void removedRandomAlbum(boolean notify) {
         int lastSongPosition = playingQueue.size() - 1;
 
-        if (lastSongPosition >= 0 && playingQueue.get(lastSongPosition).id == -1) {
+        if (lastSongPosition >= 0 && playingQueue.get(lastSongPosition).id == RANDOM_ALBUM_SONG_ID) {
             playingQueue.remove(lastSongPosition);
 
             if (notify) {
@@ -1099,7 +1101,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     public void refreshRandomAlbumIfPossible(boolean notify) {
         boolean isGenreNeeded = PreferenceUtil.getInstance().randomAlbumByGenre();
-        refreshRandomAlbumIfPossible(isGenreNeeded, notify);
+        refreshRandomAlbumIfPossible(isGenreNeeded, notify, false);
     }
 
     // necessary as albumId are unique but neither in order, neither consecutive (only certainty is albumId > 0)
@@ -1114,22 +1116,55 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
         return -1;
     }
 
-    public void refreshRandomAlbumIfPossible(boolean sameGenreNeeded, boolean notify) {
+    private Album getRandomAlbum(ArrayList<Album> albumList, int lastSongPosition, int randomAlbumOldPosition, boolean runManually) {
+        if (albumList.size() > 0) {
+            int randomAlbumPosition = 0;
+            int albumSize = albumList.size();
+            if (albumSize > 2) {
+                int i = 0;
+                int maxLoop = 10;
+                do {
+                    randomAlbumPosition = new Random().nextInt(albumSize);
+                    i++;
+                } while (i < maxLoop && (randomAlbumPosition == lastSongPosition ||
+                        randomAlbumPosition == randomAlbumOldPosition));
+
+            } else if (albumSize == 2) {
+                randomAlbumPosition = (lastSongPosition + 1) % albumSize;
+
+                if (runManually && randomAlbumPosition == randomAlbumOldPosition) {
+                    Toast.makeText(this, getResources().getString(R.string.error_random_album_only_two_album), Toast.LENGTH_SHORT).show();
+                }
+            } else if (runManually) {
+                Toast.makeText(this, getResources().getString(R.string.error_random_album_only_one_album), Toast.LENGTH_SHORT).show();
+            }
+            return albumList.get(randomAlbumPosition);
+        }
+        return null;
+    }
+
+    private void constructGenreList(ArrayList<Album> genre, Song song) {
+        for (Album albumGenre : albums) {
+            if (song.genre.equals(albumGenre.songs.get(0).genre)) {
+                genre.add(albumGenre);
+            }
+        }
+    }
+
+    public void refreshRandomAlbumIfPossible(boolean sameGenreNeeded, boolean notify, boolean runManually) {
         if (shuffleMode == SHUFFLE_MODE_SHUFFLE_ALBUM && this.getPlayingQueue().size() > 0) {
             Song lastSong = playingQueue.get(playingQueue.size() - 1);
             int lastSongPosition = getAlbumPosition(albums, lastSong.albumId);
             int randomAlbumOldPosition = -1;
             ArrayList<Album> genre = new ArrayList<>();
 
-            if (lastSong.id == -1) {
+            if (lastSong.id == RANDOM_ALBUM_SONG_ID) { // if a random album was already in place
                 if (sameGenreNeeded) {
                     long oldId = lastSong.albumId;
                     lastSong = playingQueue.get(playingQueue.size() - 2);
-                    for (Album albumGenre : albums) {
-                        if (lastSong.genre.equals(albumGenre.songs.get(0).genre)) {
-                            genre.add(albumGenre);
-                        }
-                    }
+
+                    constructGenreList(genre, lastSong);
+
                     randomAlbumOldPosition = getAlbumPosition(genre, oldId);
                     lastSongPosition = getAlbumPosition(genre, lastSong.albumId);
                 } else {
@@ -1141,60 +1176,33 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
                 removedRandomAlbum(false);
             } else {
                 if (sameGenreNeeded) {
-                    for (Album albumGenre : albums) {
-                        if (lastSong.genre.equals(albumGenre.songs.get(0).genre)) {
-                            genre.add(albumGenre);
-                        }
-                    }
+                    constructGenreList(genre, lastSong);
+
                     lastSongPosition = getAlbumPosition(genre, lastSong.albumId);
                 }
             }
-            // How to get the genre so that i can do a less random new album ? lastSong.artistId;
-            //      then add preference to activate total random, or genre random or remove album shuffle
-            //ArrayList<Genre> genres = GenreLoader.getAllGenres(getApplicationContext());
-            int randomAlbumPosition = 0;
+
             Album album;
-            if (sameGenreNeeded) {
-                int albumSize = genre.size();
-                if (albumSize > 2) {
-                    int i = 0;
-                    int maxLoop = 10;
-                    do {
-                        randomAlbumPosition = new Random().nextInt(albumSize);
-                        i++;
-                    } while (i < maxLoop && (randomAlbumPosition == lastSongPosition ||
-                            randomAlbumPosition == randomAlbumOldPosition));
-
-                } else if (albumSize == 2) {
-                    randomAlbumPosition = (lastSongPosition + 1) % albumSize;
-                }
-                album = genre.get(randomAlbumPosition);
-
-            } else {
-                int albumSize = albums.size();
-                if (albumSize > 2) {
-                    int i = 0;
-                    int maxLoop = 10;
-                    do {
-                        randomAlbumPosition = new Random().nextInt(albumSize);
-                        i++;
-                    } while (i < maxLoop && (randomAlbumPosition == lastSongPosition ||
-                            randomAlbumPosition == randomAlbumOldPosition));
-
-                } else if (albumSize == 2) {
-                    randomAlbumPosition = (lastSongPosition + 1) % albumSize;
-                }
-                album = albums.get(randomAlbumPosition);
+            if (sameGenreNeeded)
+            {
+                album = getRandomAlbum(genre, lastSongPosition, randomAlbumOldPosition, runManually);
+            }
+            else
+            {
+                album = getRandomAlbum(albums, lastSongPosition, randomAlbumOldPosition, runManually);
             }
 
-            Song song =
-                    new Song(-1, getResources().getString(R.string.next_album), 0, -1, -1, "", -1, -1, album.getId(),
-                            album.getTitle(), album.getArtistId(), album.getArtistName());
+            if (album != null) {
+                Song song =
+                        new Song(RANDOM_ALBUM_SONG_ID, getResources().getString(R.string.next_album), 0, -1, -1, "",
+                                -1, -1, album.getId(),
+                                album.getTitle(), album.getArtistId(), album.getArtistName());
 
-            playingQueue.add(song);
+                playingQueue.add(song);
 
-            if (notify) {
-                notifyChange(QUEUE_CHANGED);
+                if (notify) {
+                    notifyChange(QUEUE_CHANGED);
+                }
             }
         }
     }

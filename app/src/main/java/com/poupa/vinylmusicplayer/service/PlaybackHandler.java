@@ -32,7 +32,7 @@ final class PlaybackHandler extends Handler {
         if (nextPosition >= 0 && nextPosition < service.getPlayingQueue().size()) {
             Song song = service.getPlayingQueue().get(nextPosition);
 
-            if (song.id == -1) {
+            if (song.id == MusicService.RANDOM_ALBUM_SONG_ID) {
                 Album album =
                         AlbumLoader.getAlbum(service.getApplicationContext(),
                                 song.albumId);
