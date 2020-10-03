@@ -1145,7 +1145,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     private void constructGenreList(ArrayList<Album> genre, Song song) {
         for (Album albumGenre : albums) {
-            if (song.genre.equals(albumGenre.songs.get(0).genre)) {
+            if (albumGenre.songs != null && albumGenre.songs.size() > 0 && song.genre.equals(albumGenre.songs.get(0).genre)) {
                 genre.add(albumGenre);
             }
         }
