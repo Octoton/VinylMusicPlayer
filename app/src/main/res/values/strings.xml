@@ -363,4 +363,5 @@
     <string name="next_album">Next album:</string>
     <string name="shuffle_album">Shuffle album</string>
     <string name="shuffle_album_genre">Shuffle album with same genre</string>
+    <string name="shuffle_album_artist">Shuffle album with same artist</string>
 </resources>

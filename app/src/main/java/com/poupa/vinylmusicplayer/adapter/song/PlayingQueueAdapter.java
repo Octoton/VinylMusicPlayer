@@ -26,6 +26,7 @@ import com.kabouzeid.appthemehelper.util.ATHUtil;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
 import com.poupa.vinylmusicplayer.interfaces.CabHolder;
+import com.poupa.vinylmusicplayer.misc.NextRandomAlbum;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.service.MusicService;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
@@ -226,10 +227,13 @@ public class PlayingQueueAdapter extends SongAdapter
         @Override
         protected boolean onSongMenuItemClick(MenuItem item) {
             if (item.getItemId() == R.id.action_shuffle_random_album) {
-                MusicPlayerRemote.shuffleRandomAlbum(false);
+                MusicPlayerRemote.shuffleRandomAlbum(NextRandomAlbum.BY_ALBUM);
+                return true;
+            } else if (item.getItemId() == R.id.action_shuffle_artist_album) {
+                MusicPlayerRemote.shuffleRandomAlbum(NextRandomAlbum.BY_ARTIST);
                 return true;
             } else if (item.getItemId() == R.id.action_shuffle_genre_album) {
-                MusicPlayerRemote.shuffleRandomAlbum(true);
+                MusicPlayerRemote.shuffleRandomAlbum(NextRandomAlbum.BY_GENRE);
                 return true;
             } else if (item.getItemId() == R.id.action_remove_from_playing_queue) {
                 // If song removed was the playing song, then play the next song
