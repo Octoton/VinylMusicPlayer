@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import com.poupa.vinylmusicplayer.helper.SearchQueryHelper;
 import com.poupa.vinylmusicplayer.loader.AlbumLoader;
 import com.poupa.vinylmusicplayer.loader.SongLoader;
+import com.poupa.vinylmusicplayer.misc.NextRandomAlbum;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
@@ -33,6 +34,9 @@ final class PlaybackHandler extends Handler {
             Song song = service.getPlayingQueue().get(nextPosition);
 
             if (song.id == MusicService.RANDOM_ALBUM_SONG_ID) {
+                Song previousSong = service.getPlayingQueue().get(nextPosition - 1);
+                NextRandomAlbum.getInstance().commit(previousSong.albumId);
+
                 Album album =
                         AlbumLoader.getAlbum(service.getApplicationContext(),
                                 song.albumId);
