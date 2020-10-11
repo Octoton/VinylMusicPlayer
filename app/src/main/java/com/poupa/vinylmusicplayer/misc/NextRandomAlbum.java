@@ -184,6 +184,7 @@ public class NextRandomAlbum {
                 if (isManual) {
                     Toast.makeText(context, context.getResources().getString(R.string.error_random_album_only_one_album), Toast.LENGTH_SHORT).show();
                 }
+                Log.d("TOTO", "RETURN: array size is 1");
             } else if (albumSize == 2) {
                 randomAlbumPosition = (lastSongPosition + 1) % albumSize;
 
@@ -191,9 +192,10 @@ public class NextRandomAlbum {
                 if (isManual && isIdForbidden(album.getId(), history.getSearchHistory())) {
                     Toast.makeText(context, context.getResources().getString(R.string.error_random_album_only_two_album), Toast.LENGTH_SHORT).show();
                 }
+                Log.d("TOTO", "RETURN: array size is 2");
                 return album;
             } else if (authorizeAlbumNumber >  0) {
-                Log.d("TOTO", "no error");
+                Log.d("TOTO", "RETURN: no error");
                 ArrayList<Integer> forbiddenPosition = new ArrayList<>();
                 forbiddenPosition.add(lastSongPosition);
                 forbiddenPosition.addAll(forbiddenListenPosition);
@@ -204,7 +206,7 @@ public class NextRandomAlbum {
                 authorizeAlbumNumber = authorizeAlbumNumber + forbiddenSearchPosition.size();
 
                 if (authorizeAlbumNumber > 0) { // search history forbid any new search
-                    Log.d("TOTO", "search error");
+                    Log.d("TOTO", "RETURN: search error");
                     ArrayList<Integer> forbiddenPosition = new ArrayList<>();
                     forbiddenPosition.add(lastSongPosition);
                     forbiddenPosition.addAll(forbiddenListenPosition);
@@ -217,18 +219,18 @@ public class NextRandomAlbum {
                         forbiddenSearchPosition.remove(firstElementPos);
                         forbiddenPosition.addAll(forbiddenSearchPosition);
                     } else {
-                        history.clearSearchHistory(); // no copy needed for automatic fallback as searchHistory is only for manual search (thus it is clear before every automatic search)
+                        history.clearSearchHistory();
                     }
 
                     randomAlbumPosition = randomIntWithinForbiddenNumber(albumSize, forbiddenPosition);
                 } else { // search AND listen history forbid any new search, then take first id of listen history
-                    Log.d("TOTO", "listen error");
+                    Log.d("TOTO", "RETURN: listen error");
                     while (randomAlbumPosition == -1 && history.listenHistory.size() > 0) {
-                        randomAlbumPosition = getAlbumPosition(albumArrayList, history.popListenHistory()); // should be done on a copy of the history as when automatic fallback is implemented, I want to search on more than one array
+                        randomAlbumPosition = getAlbumPosition(albumArrayList, history.popListenHistory());
                     }
 
                     while (randomAlbumPosition == -1 && history.searchHistory.size() > 0) {
-                        randomAlbumPosition = getAlbumPosition(albumArrayList, history.popSearchHistory()); // should be done on a copy of the history as when automatic fallback is implemented, I want to search on more than one array
+                        randomAlbumPosition = getAlbumPosition(albumArrayList, history.popSearchHistory());
                     }
                 }
             }
@@ -277,15 +279,18 @@ public class NextRandomAlbum {
         history.setLastAlbumIdSearched(song.albumId);
 
         if (!isManual) {
+            Log.d("TOTO", "AUTOMATIC SEARCH");
             history.clearSearchHistory();
+        } else {
+            Log.d("TOTO", "MANUAL SEARCH");
         }
 
         Log.d("TOTO", "Search album id: " + song.albumId);
         for (Long albumId: history.getSearchHistory()) {
-            Log.d("TOTO", "Search history: " + albumId);
+            Log.d("TOTO", "Search history: " + albumId + ", name: " + albums.get(getAlbumPosition(albums, albumId)).getTitle());
         }
         for (Long albumId: history.getListenHistory()) {
-            Log.d("TOTO", "Listen history: " + albumId);
+            Log.d("TOTO", "Listen history: " + albumId + ", name: " + albums.get(getAlbumPosition(albums, albumId)).getTitle());
         }
 
         int i = 0;
@@ -294,14 +299,14 @@ public class NextRandomAlbum {
             if (searchTypeIsTrue(song, album)) { //condition depend of array searchType
                 if (album.getId() == song.albumId) {
                     lastSongPosition = i;
-                    Log.d("TOTO", "forbidden last song pos: " + i);
+                    Log.d("TOTO", "    forbidden last song pos: " + i + ", name: " + album.getTitle());
                 } else if (isIdForbidden(album.getId(), history.getListenHistory())) {
                     forbiddenListenPosition.add(i);
-                    Log.d("TOTO", "forbidden listen pos: " + i);
+                    Log.d("TOTO", "    forbidden listen pos: " + i + ", name: " + album.getTitle());
                 } else if (isIdForbidden(album.getId(), history.getSearchHistory())) {
                     forbiddenSearchPosition.add(i);
                     forbiddenSearchId.add(album.getId());
-                    Log.d("TOTO", "forbidden search pos: " + i);
+                    Log.d("TOTO", "    forbidden search pos: " + i + ", name: " + album.getTitle());
                 }
 
                 albumArrayList.add(album);
@@ -312,8 +317,12 @@ public class NextRandomAlbum {
         Album album = getRandomAlbum(albumArrayList, lastSongPosition, forbiddenSearchPosition, forbiddenSearchId, forbiddenListenPosition, context);
 
         if (album != null) {
+            Log.d("TOTO", "Album is: " + album.getTitle());
             history.addIdToSearchHistory(album.getId());
-        }
+            history.synchronizeHistory();
+        } /*else { // will be use when fallback is Implemented
+            history.revertHistory();
+        }*/
         return album;
     }
 
@@ -354,6 +363,9 @@ public class NextRandomAlbum {
         private ArrayList<Long> searchHistory;
         private ArrayList<Long> listenHistory;
 
+        private ArrayList<Long> originalSearchHistory;
+        private ArrayList<Long> originalListenHistory;
+
         private final int historySize;
 
         public History(int historySize) {
@@ -362,6 +374,9 @@ public class NextRandomAlbum {
 
             searchHistory = new ArrayList<>();
             listenHistory = new ArrayList<>();
+
+            originalSearchHistory = new ArrayList<>();
+            originalListenHistory = new ArrayList<>();
         }
 
         public ArrayList<Long> getSearchHistory() {
@@ -383,16 +398,34 @@ public class NextRandomAlbum {
         }
 
         private void stop() {
-            clearSearchHistory();
-            listenHistory.clear();
+            clearHistory();
+            clearOriginalHistory();
             undefinedLastSearchAlbum();
             Log.d("TOTO", "stop");
+        }
+
+
+        private void clearOriginalSearchHistory() {
+            originalSearchHistory.clear();
+            Log.d("TOTO", "clear original search");
+        }
+
+        private void clearHistory() {
+            clearSearchHistory();
+            listenHistory.clear();
+        }
+
+        private void clearOriginalHistory() {
+            clearOriginalSearchHistory();
+            originalListenHistory.clear();
         }
 
         public long popListenHistory() {
             if (listenHistory.size() > 0) {
                 long id = listenHistory.get(0);
                 listenHistory.remove(0);
+
+                Log.d("TOTO", "    pop listen: " + id);
 
                 return id;
             }
@@ -404,9 +437,21 @@ public class NextRandomAlbum {
                 long id = searchHistory.get(0);
                 searchHistory.remove(0);
 
+                Log.d("TOTO", "    pop search: " + id);
+
                 return id;
             }
             return -1;
+        }
+
+        public void revertHistory() {
+            listenHistory = new ArrayList<>(originalListenHistory);
+            searchHistory = new ArrayList<>(originalSearchHistory);
+        }
+
+        public void synchronizeHistory() {
+            originalListenHistory = new ArrayList<>(listenHistory);
+            originalSearchHistory = new ArrayList<>(searchHistory);
         }
 
         public void setLastAlbumIdSearched(Long lastAlbumIdSearched) {
@@ -417,20 +462,23 @@ public class NextRandomAlbum {
             return lastAlbumIdSearched;
         }
 
-        private void addIdToHistory(long id, ArrayList<Long> history) {
+        private void addIdToHistory(long id, ArrayList<Long> history, ArrayList<Long> originalHistory) {
             if (history.size() >= historySize) {
                 history.remove(0);
+                originalHistory.remove(0);
             }
             if (!isIdForbidden(id, history)) { // i don't want duplication in this array as it complicate what to do when no new random album can be found because of this array
                 history.add(id);
+                originalHistory.add(id);
             }
         }
 
         public void addIdToListenHistory(long id) {
             Log.d("TOTO", "add to listen: " + id);
             clearSearchHistory();
+            clearOriginalSearchHistory();
 
-            addIdToHistory(id, listenHistory);
+            addIdToHistory(id, listenHistory, originalListenHistory);
         }
 
         public void addIdToSearchHistory(long id) {
@@ -442,7 +490,7 @@ public class NextRandomAlbum {
                 }
             }
 
-            addIdToHistory(id, searchHistory);
+            addIdToHistory(id, searchHistory, originalSearchHistory);
         }
     }
 }

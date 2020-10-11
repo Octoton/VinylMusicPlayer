@@ -775,7 +775,6 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
     public void removeSong(int position) {
         if (getShuffleMode() == SHUFFLE_MODE_NONE) {
             playingQueue.remove(position);
-            Log.d("TOTO", "removeSong by pos: " + position);
             originalPlayingQueue.remove(position);
         } else {
             originalPlayingQueue.remove(playingQueue.remove(position));
@@ -791,7 +790,6 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
         for (int i = 0; i < playingQueue.size(); i++) {
             if (playingQueue.get(i).id == song.id) {
                 playingQueue.remove(i);
-                Log.d("TOTO", "removeSong: " + i);
                 rePosition(i);
             }
         }
@@ -1078,7 +1076,6 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
                     this.shuffleMode = shuffleMode;
                     long currentSongId = getCurrentSong().id;
                     playingQueue = new ArrayList<>(originalPlayingQueue);
-                    Log.d("TOTO", "shuffle Changed");
                     int newPosition = 0;
                     for (Song song : getPlayingQueue()) {
                         if (song.id == currentSongId) {
@@ -1110,7 +1107,6 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
         if (lastSongPosition >= 0 && playingQueue.get(lastSongPosition).id == RANDOM_ALBUM_SONG_ID) {
             playingQueue.remove(lastSongPosition);
-            Log.d("TOTO", "Random album removed");
 
             if (notify) {
                 notifyChange(QUEUE_CHANGED);
@@ -1124,17 +1120,13 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     private void automaticRefreshRandomAlbumIfPossible(boolean notify) {
         if (this.playingQueue.size() > 0) {
-            Log.d("TOTO", "AUTOMATIC CALLED");
             Song lastSong = playingQueue.get(playingQueue.size() - 1);
             boolean randomAlbumIsActive = false;
             if (lastSong.id == RANDOM_ALBUM_SONG_ID) {
-                Log.d("TOTO", "random album already in queue");
                 randomAlbumIsActive = true;
                 lastSong = playingQueue.get(playingQueue.size() - 2);
             }
 
-            Log.d("TOTO", "actual rand: " + NextRandomAlbum.getInstance().getLastAlbumIdSearched());
-            Log.d("TOTO", "last song: " + lastSong.albumId);
             if (!randomAlbumIsActive || lastSong.albumId != NextRandomAlbum.getInstance().getLastAlbumIdSearched()) {
                 boolean isGenreNeeded = PreferenceUtil.getInstance().randomAlbumByGenre();
                 if (isGenreNeeded) {
@@ -1215,7 +1207,6 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
                                 album.getTitle(), album.getArtistId(), album.getArtistName());
 
                 playingQueue.add(song);
-                Log.d("TOTO", "new album not null: " + album.getId());
                 needToNotify = true;
             }
 
