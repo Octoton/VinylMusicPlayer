@@ -132,6 +132,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
     public static final int SHUFFLE_MODE_SHUFFLE_ALBUM = 2;
 
     public static final int RANDOM_ALBUM_SONG_ID = -2;
+    public static final int EMPTY_NEXT_RANDOM_ALBUM_ID = -3;
 
     public static final int REPEAT_MODE_NONE = 0;
     public static final int REPEAT_MODE_ALL = 1;
@@ -1114,8 +1115,8 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
         }
     }
 
-    public void refreshManuallyRandomAlbumIfPossible(int byWhichType, boolean notify) {
-        refreshRandomAlbumIfPossible(byWhichType, notify, true);
+    public void refreshManuallyRandomAlbumIfPossible(boolean notify) {
+        getRandomAlbumIfPossible(notify, false);
     }
 
     private void automaticRefreshRandomAlbumIfPossible(boolean notify) {
@@ -1129,84 +1130,57 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
             if (!randomAlbumIsActive || lastSong.albumId != NextRandomAlbum.getInstance().getLastAlbumIdSearched()) {
                 boolean isGenreNeeded = PreferenceUtil.getInstance().randomAlbumByGenre();
+
                 if (isGenreNeeded) {
-                    refreshRandomAlbumIfPossible(NextRandomAlbum.BY_GENRE, notify, false);
+                    // Prepare necessary data
+                    ArrayList<Integer> searchType = new ArrayList<>();
+                    searchType.add(NextRandomAlbum.BY_GENRE);
+                    NextRandomAlbum.getInstance().initSearch(searchType, false);
+
+                    getRandomAlbumIfPossible(notify, true);
                 } else {
-                    refreshRandomAlbumIfPossible(NextRandomAlbum.BY_ALBUM, notify, false);
+                    // Prepare necessary data
+                    ArrayList<Integer> searchType = new ArrayList<>();
+                    searchType.add(NextRandomAlbum.BY_ALBUM);
+                    NextRandomAlbum.getInstance().initSearch(searchType, false);
+
+                    getRandomAlbumIfPossible(notify, true);
                 }
             }
         }
     }
 
-    private void refreshRandomAlbumIfPossible(int byWhichType, boolean notify, boolean runManually) {
+    private void addNewRandomAlbum(long albumId, String albumName, long artistId, String artistName) {
+        Song song = new Song(RANDOM_ALBUM_SONG_ID,
+                getResources().getString(R.string.next_album), 0, -1, -1, "",
+                -1, -1, albumId, albumName, artistId, artistName);
+
+        playingQueue.add(song);
+    }
+
+    private void addEmptyRandomAlbum() {
+        addNewRandomAlbum(EMPTY_NEXT_RANDOM_ALBUM_ID, "None", -1,"Nothing found");
+    }
+
+    private void getRandomAlbumIfPossible(boolean notify, boolean isEmptyAlbumPossible) {
         if (shuffleMode == SHUFFLE_MODE_SHUFFLE_ALBUM && this.playingQueue.size() > 0) {
             boolean needToNotify = false;
             Song lastSong = playingQueue.get(playingQueue.size() - 1);
-            int lastSongPosition = NextRandomAlbum.getInstance().getAlbumPositionByAlbum(lastSong.albumId);
-            int randomAlbumOldPosition = -1;
 
-            // Prepare necessary data
-            ArrayList<Integer> searchType = new ArrayList<>();
-            searchType.add(byWhichType);
-            NextRandomAlbum.getInstance().initSearch(searchType, runManually);
             if (lastSong.id == RANDOM_ALBUM_SONG_ID) { // if a random album was already in place
-                long oldId = lastSong.albumId;
                 lastSong = playingQueue.get(playingQueue.size() - 2);
-
-                /*
-                 if (lastSong.id == RANDOM_ALBUM_SONG_ID)
-                nextRandomAlbum.newSearch(byWhichType, lastSongPosition, oldId); //oldId given just to be sure, in case it came from an fresh app start (Genius not save for know)
-                 else
-                nextRandomAlbum.newFreshSearch(byWhichType, lastSongPosition);
-                album = nextRandomAlbum.findAlbum(runManually);
-                nextRandomAlbum.commitFoundAlbum(id); //in playbackHandler: mService.get().getNextRandomAlbum.commitFoundAlbum(song.albumId);
-                */
-
-                /*if (byWhichType == NextRandomAlbum.BY_GENRE) {
-                    nextRandomAlbum.constructGenreList(lastSong);
-                    lastSongPosition = nextRandomAlbum.getAlbumPositionByGenre(lastSong.albumId);
-
-                    randomAlbumOldPosition = nextRandomAlbum.getAlbumPositionByGenre(oldId);
-                } else if (byWhichType == NextRandomAlbum.BY_ARTIST) {
-                    nextRandomAlbum.constructArtistList(lastSong);
-                    lastSongPosition = nextRandomAlbum.getAlbumPositionByArtist(lastSong.albumId);
-
-                    randomAlbumOldPosition = nextRandomAlbum.getAlbumPositionByArtist(oldId);
-                } else {
-                    randomAlbumOldPosition = lastSongPosition;
-                    lastSongPosition = nextRandomAlbum.getAlbumPositionByAlbum(lastSong.albumId);
-                } */
 
                 removedRandomAlbum(false);
                 needToNotify = true;
-            } /*else {
-                if (byWhichType == NextRandomAlbum.BY_GENRE) {
-                    nextRandomAlbum.constructGenreList(lastSong);
-                    lastSongPosition = nextRandomAlbum.getAlbumPositionByGenre(lastSong.albumId);
-                } else if (byWhichType == NextRandomAlbum.BY_ARTIST) {
-                    nextRandomAlbum.constructArtistList(lastSong);
-                    lastSongPosition = nextRandomAlbum.getAlbumPositionByGenre(lastSong.albumId);
-                }
-            } */
+            }
 
             Album album = NextRandomAlbum.getInstance().search(lastSong, getApplicationContext());
 
-            /*if (byWhichType == NextRandomAlbum.BY_GENRE) {
-                album = nextRandomAlbum.getRandomAlbumByGenre(lastSongPosition, randomAlbumOldPosition, runManually);
-            } else if (byWhichType == NextRandomAlbum.BY_ARTIST) {
-                album = nextRandomAlbum.getRandomAlbumByArtist(lastSongPosition, randomAlbumOldPosition, runManually);
-            } else {
-                album = nextRandomAlbum.getRandomAlbumByAlbum(lastSongPosition, randomAlbumOldPosition, runManually);
-            }*/
-
             if (album != null) {
-                Song song =
-                        new Song(RANDOM_ALBUM_SONG_ID,
-                                getResources().getString(R.string.next_album), 0, -1, -1, "",
-                                -1, -1, album.getId(),
-                                album.getTitle(), album.getArtistId(), album.getArtistName());
-
-                playingQueue.add(song);
+                addNewRandomAlbum(album.getId(), album.getTitle(), album.getArtistId(), album.getArtistName());
+                needToNotify = true;
+            } else if (isEmptyAlbumPossible) {
+                addEmptyRandomAlbum();
                 needToNotify = true;
             }
 

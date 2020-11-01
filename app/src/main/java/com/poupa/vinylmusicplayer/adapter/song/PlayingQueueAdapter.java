@@ -227,13 +227,25 @@ public class PlayingQueueAdapter extends SongAdapter
         @Override
         protected boolean onSongMenuItemClick(MenuItem item) {
             if (item.getItemId() == R.id.action_shuffle_random_album) {
-                MusicPlayerRemote.shuffleRandomAlbum(NextRandomAlbum.BY_ALBUM);
+                ArrayList<Integer> searchType = new ArrayList<>();
+                searchType.add(NextRandomAlbum.BY_ALBUM);
+                NextRandomAlbum.getInstance().initSearch(searchType, true);
+
+                MusicPlayerRemote.shuffleRandomAlbum();
                 return true;
             } else if (item.getItemId() == R.id.action_shuffle_artist_album) {
-                MusicPlayerRemote.shuffleRandomAlbum(NextRandomAlbum.BY_ARTIST);
+                ArrayList<Integer> searchType = new ArrayList<>();
+                searchType.add(NextRandomAlbum.BY_ARTIST);
+                NextRandomAlbum.getInstance().initSearch(searchType, true);
+
+                MusicPlayerRemote.shuffleRandomAlbum();
                 return true;
             } else if (item.getItemId() == R.id.action_shuffle_genre_album) {
-                MusicPlayerRemote.shuffleRandomAlbum(NextRandomAlbum.BY_GENRE);
+                ArrayList<Integer> searchType = new ArrayList<>();
+                searchType.add(NextRandomAlbum.BY_GENRE);
+                NextRandomAlbum.getInstance().initSearch(searchType, true);
+
+                MusicPlayerRemote.shuffleRandomAlbum();
                 return true;
             } else if (item.getItemId() == R.id.action_remove_from_playing_queue) {
                 // If song removed was the playing song, then play the next song

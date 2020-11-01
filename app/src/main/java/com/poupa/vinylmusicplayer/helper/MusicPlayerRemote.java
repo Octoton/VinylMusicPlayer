@@ -111,9 +111,9 @@ public class MusicPlayerRemote {
         }
     }
 
-    public static void shuffleRandomAlbum(int byWhichType) {
+    public static void shuffleRandomAlbum() {
         if (musicService != null) {
-            musicService.refreshManuallyRandomAlbumIfPossible(byWhichType, true);
+            musicService.refreshManuallyRandomAlbumIfPossible(true);
         }
     }
 

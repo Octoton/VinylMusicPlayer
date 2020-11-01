@@ -33,7 +33,7 @@ final class PlaybackHandler extends Handler {
         if (nextPosition >= 0 && nextPosition < service.getPlayingQueue().size()) {
             Song song = service.getPlayingQueue().get(nextPosition);
 
-            if (song.id == MusicService.RANDOM_ALBUM_SONG_ID) {
+            if (song.id == MusicService.RANDOM_ALBUM_SONG_ID && song.albumId != MusicService.EMPTY_NEXT_RANDOM_ALBUM_ID) {
                 Song previousSong = service.getPlayingQueue().get(nextPosition - 1);
                 NextRandomAlbum.getInstance().commit(previousSong.albumId);
 

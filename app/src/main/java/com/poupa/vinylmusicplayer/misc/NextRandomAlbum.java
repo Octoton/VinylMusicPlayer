@@ -30,6 +30,14 @@ public class NextRandomAlbum {
 
     static private NextRandomAlbum sInstance = new NextRandomAlbum();
 
+    private History listenHistory;
+    private History searchHistory;
+    private long nextRandomAlbumId;
+    private long lastAlbumIdSearched;
+    private ArrayList<Integer> searchType;
+    private boolean isManual;
+
+
     static public NextRandomAlbum getInstance() {
         return sInstance;
     }
@@ -48,26 +56,6 @@ public class NextRandomAlbum {
         return getAlbumPosition(albums, albumId);
     }
 
-    public int getAlbumPositionByGenre(long albumId) {
-        return getAlbumPosition(genre, albumId);
-    }
-
-    public int getAlbumPositionByArtist(long albumId) {
-        return getAlbumPosition(artist, albumId);
-    }
-
-    /*public Album getRandomAlbumByAlbum(int lastSongPosition, int randomAlbumOldPosition, boolean runManually) {
-        return getRandomAlbum(albums, lastSongPosition, randomAlbumOldPosition, runManually);
-    }
-
-    public Album getRandomAlbumByGenre(int lastSongPosition, int randomAlbumOldPosition, boolean runManually) {
-        return getRandomAlbum(genre, lastSongPosition, randomAlbumOldPosition, runManually);
-    }
-
-    public Album getRandomAlbumByArtist(int lastSongPosition, int randomAlbumOldPosition, boolean runManually) {
-        return getRandomAlbum(artist, lastSongPosition, randomAlbumOldPosition, runManually);
-    } */
-
     // necessary as albumId are unique but neither in order, neither consecutive (only certainty is albumId > 0)
     private int getAlbumPosition(ArrayList<Album> albumList, long albumId) {
         int i = 0;
@@ -79,78 +67,6 @@ public class NextRandomAlbum {
         }
         return -1;
     }
-
-    public void constructGenreList(Song song) {
-        genre.clear();
-
-        for (Album albumGenre : albums) {
-            if (albumGenre.songs != null && albumGenre.songs.size() > 0 &&
-                    song.genre.equals(albumGenre.songs.get(0).genre)) {
-                genre.add(albumGenre);
-            }
-        }
-    }
-
-    public void constructArtistList(Song song) {
-        artist.clear();
-
-        for (Album albumArtist : albums) {
-            if (albumArtist.songs != null && albumArtist.songs.size() > 0 &&
-                    song.artistId == albumArtist.songs.get(0).artistId) {
-                artist.add(albumArtist);
-            }
-        }
-    }
-
-    private Album getRandomAlbum(ArrayList<Album> albumList, int lastSongPosition,
-            int randomAlbumOldPosition, boolean runManually, Context context) {
-        if (albumList.size() > 0) {
-            int randomAlbumPosition = 0;
-            int albumSize = albumList.size();
-            if (albumSize > 2) {
-                /*int i = 0;
-                int maxLoop = 10;
-                do {
-                    randomAlbumPosition = new Random().nextInt(albumSize);
-                    i++;
-                } while (i < maxLoop && (randomAlbumPosition == lastSongPosition ||
-                        randomAlbumPosition == randomAlbumOldPosition));*/
-
-                int[] forbiddenNumbers = new int[] { lastSongPosition, randomAlbumOldPosition };
-                Arrays.sort(
-                        forbiddenNumbers); // sorting is needed to get sweet why of getting randomize exclusion
-                randomAlbumPosition = new Random().nextInt(albumSize - forbiddenNumbers.length);
-                for (int forbiddenNumber : forbiddenNumbers) {
-                    if (randomAlbumPosition >= forbiddenNumber) {
-                        randomAlbumPosition++;
-                    }
-                }
-
-
-            } else if (albumSize == 2) {
-                randomAlbumPosition = (lastSongPosition + 1) % albumSize;
-
-                if (runManually && randomAlbumPosition == randomAlbumOldPosition) {
-                    Toast.makeText(context, context.getResources()
-                                    .getString(R.string.error_random_album_only_two_album),
-                            Toast.LENGTH_SHORT).show();
-                }
-            } else if (runManually) {
-                Toast.makeText(context, context.getResources()
-                        .getString(R.string.error_random_album_only_one_album), Toast.LENGTH_SHORT)
-                        .show();
-            }
-            return albumList.get(randomAlbumPosition);
-        }
-        return null;
-    }
-
-    private History listenHistory;
-    private History searchHistory;
-    private long nextRandomAlbumId;
-    private long lastAlbumIdSearched;
-    private ArrayList<Integer> searchType;
-    private boolean isManual;
 
     public void initSearch(ArrayList<Integer> searchType, boolean isManual) {
         this.searchType = searchType;
@@ -178,15 +94,14 @@ public class NextRandomAlbum {
         return false;
     }
 
-    // fordiddenPosition array as special position
-    // index 0 is reserved with lastSong position
-    // index 1 is reserved with lastRandomAlbum position
-    private Album getRandomAlbum(ArrayList<Album> albumArrayList, History history, int lastSongPosition, int nextRandomAlbumPosition, ArrayList<Integer> forbiddenPositionOfArray, ArrayList<Long> forbiddenIdOfArray, Context context) {
-        Album album;
-        int albumSize = albumArrayList.size();
+
+    private static final int ERROR_ARRAY_SIZE_IS_1 = -2;
+    private static final int ERROR_ARRAY_SIZE_IS_0 = -3;
+    private static final int ERROR_UNRESOLVED = -4;
+    private int getRandomAlbumPosition(int albumSize, History history, int lastSongPosition, int nextRandomAlbumPosition, ArrayList<Integer> forbiddenPositionOfArray, ArrayList<Long> forbiddenIdOfArray, Context context) {
+        int randomAlbumPosition;
 
         if (albumSize > 0) {
-            int randomAlbumPosition = -1;
             int authorizeAlbumNumber;
             if (nextRandomAlbumPosition != -1) {
                 authorizeAlbumNumber = albumSize - forbiddenPositionOfArray.size() - 2; // -1 is to take into account lastSongPosition and nextRandomAlbumPosition
@@ -195,21 +110,10 @@ public class NextRandomAlbum {
             }
 
             if (albumSize == 1) {
-                if (isManual) {
-                    Toast.makeText(context, context.getResources().getString(R.string.error_random_album_only_one_album), Toast.LENGTH_SHORT).show();
-                }
-                Log.d("TOTO", "RETURN: array size is 1");
+                randomAlbumPosition = ERROR_ARRAY_SIZE_IS_1;
             } else if (albumSize == 2) {
                 randomAlbumPosition = (lastSongPosition + 1) % albumSize;
-
-                album = albumArrayList.get(randomAlbumPosition);
-                if (isManual && isIdForbidden(album.getId(), history.getHistory())) {
-                    Toast.makeText(context, context.getResources().getString(R.string.error_random_album_only_two_album), Toast.LENGTH_SHORT).show();
-                }
-                Log.d("TOTO", "RETURN: array size is 2");
-                return album;
             } else if (authorizeAlbumNumber >  0) {
-                Log.d("TOTO", "RETURN: no error");
                 ArrayList<Integer> forbiddenPosition = new ArrayList<>();
                 forbiddenPosition.add(lastSongPosition);
                 if (nextRandomAlbumPosition != -1) {
@@ -222,7 +126,6 @@ public class NextRandomAlbum {
                 authorizeAlbumNumber = authorizeAlbumNumber + forbiddenPositionOfArray.size();
 
                 if (authorizeAlbumNumber > 0) { // history forbid any new search
-                    Log.d("TOTO", "RETURN: history error");
                     ArrayList<Integer> forbiddenPosition = new ArrayList<>();
                     forbiddenPosition.add(lastSongPosition);
                     if (nextRandomAlbumPosition != -1) {
@@ -232,21 +135,20 @@ public class NextRandomAlbum {
                     int firstElementPos = -1;
                     while (firstElementPos == -1) {
                         firstElementPos = getAlbumIdPosition(forbiddenIdOfArray, history.popHistory()); // first element is now authorized
-                        //Log.d("TOTO", String.valueOf(firstElementPos));
                     }
                     forbiddenPositionOfArray.remove(firstElementPos);
                     forbiddenPosition.addAll(forbiddenPositionOfArray);
 
-
                     randomAlbumPosition = randomIntWithinForbiddenNumber(albumSize, forbiddenPosition);
+                } else {
+                    randomAlbumPosition = ERROR_UNRESOLVED;
                 }
             }
-
-            if (randomAlbumPosition != -1) {
-                return albumArrayList.get(randomAlbumPosition);
-            }
+        } else {
+            randomAlbumPosition = ERROR_ARRAY_SIZE_IS_0;
         }
-        return null;
+
+        return randomAlbumPosition;
     }
 
     private int randomIntWithinForbiddenNumber(int bound, ArrayList<Integer> forbiddenPosition) {
@@ -332,25 +234,44 @@ public class NextRandomAlbum {
             }
         }
 
-        Album album;
+        int albumPosition;
+        Album album = null;
         if (isManual) {
-            album = getRandomAlbum(albumArrayList, searchHistory, lastSongPosition, nextRandomAlbumPosition, forbiddenPosition, forbiddenId, context);
+            albumPosition = getRandomAlbumPosition(albumArrayList.size(), searchHistory, lastSongPosition, nextRandomAlbumPosition, forbiddenPosition, forbiddenId, context);
+
+            if (albumPosition == ERROR_ARRAY_SIZE_IS_1) {
+                Toast.makeText(context, context.getResources().getString(R.string.error_random_album_only_one_album), Toast.LENGTH_SHORT).show();
+            } else if (albumPosition >= 0) {
+
+                album = albumArrayList.get(albumPosition);
+                if (isIdForbidden(album.getId(), searchHistory.getHistory())) {
+                    Toast.makeText(context, context.getResources().getString(R.string.error_random_album_only_two_album), Toast.LENGTH_SHORT).show();
+                }
+            } else if (nextRandomAlbumPosition != -1) {
+                album = albumArrayList.get(nextRandomAlbumPosition);
+                Toast.makeText(context, "no other album where found with this criteria", Toast.LENGTH_SHORT).show();
+            }
+
+            if (album != null) {
+                searchHistory.addIdToHistory(nextRandomAlbumId);
+                searchHistory.synchronizeHistory();
+            }
+
         } else {
-            album = getRandomAlbum(albumArrayList, listenHistory, lastSongPosition, nextRandomAlbumPosition, forbiddenPosition, forbiddenId, context);
+            albumPosition = getRandomAlbumPosition(albumArrayList.size(), listenHistory, lastSongPosition, nextRandomAlbumPosition, forbiddenPosition, forbiddenId, context);
+
+            if (albumPosition >= 0) {
+                album = albumArrayList.get(albumPosition);
+            } /*else { // will be use when fallback is Implemented
+                listenHistory.revertHistory();
+            }*/
         }
 
         if (album != null) {
             Log.d("TOTO", "Album is: " + album.getTitle());
-            if (isManual) {
-                searchHistory.addIdToHistory(nextRandomAlbumId);
-                searchHistory.synchronizeHistory();
-            }
+
             nextRandomAlbumId = album.getId();
-        } /*else { // will be use when fallback is Implemented
-            if (isManual) {
-                history.revertHistory();
-            }
-        }*/
+        }
         return album;
     }
 
