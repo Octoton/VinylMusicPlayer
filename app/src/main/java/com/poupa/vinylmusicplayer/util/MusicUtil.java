@@ -23,6 +23,7 @@ import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.discog.Discography;
 import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
 import com.poupa.vinylmusicplayer.loader.PlaylistLoader;
+import com.poupa.vinylmusicplayer.misc.RandomAlbum.NextRandomAlbum;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Artist;
 import com.poupa.vinylmusicplayer.model.Genre;
@@ -97,7 +98,7 @@ public class MusicUtil {
 
     @NonNull
     public static String getSongInfoString(@NonNull final Song song) {
-        if (PreferenceUtil.getInstance().showSongNumber() && song.id != MusicService.RANDOM_ALBUM_SONG_ID) {
+        if (PreferenceUtil.getInstance().showSongNumber() && song.id != NextRandomAlbum.RANDOM_ALBUM_SONG_ID) {
             return MusicUtil.buildInfoString(
                     MusicUtil.getTrackNumberInfoString(song),
                     song.artistName,

@@ -7,15 +7,14 @@ import android.os.Message;
 
 import androidx.annotation.NonNull;
 
-import com.poupa.vinylmusicplayer.helper.SearchQueryHelper;
 import com.poupa.vinylmusicplayer.loader.AlbumLoader;
-import com.poupa.vinylmusicplayer.loader.SongLoader;
-import com.poupa.vinylmusicplayer.misc.NextRandomAlbum;
+import com.poupa.vinylmusicplayer.misc.RandomAlbum.NextRandomAlbum;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 
 import java.lang.ref.WeakReference;
+import java.security.Provider.Service;
 import java.util.ArrayList;
 
 
@@ -33,7 +32,7 @@ final class PlaybackHandler extends Handler {
         if (nextPosition >= 0 && nextPosition < service.getPlayingQueue().size()) {
             Song song = service.getPlayingQueue().get(nextPosition);
 
-            if (song.id == MusicService.RANDOM_ALBUM_SONG_ID && song.albumId != MusicService.EMPTY_NEXT_RANDOM_ALBUM_ID) {
+            if (song.id == NextRandomAlbum.RANDOM_ALBUM_SONG_ID && song.albumId != NextRandomAlbum.EMPTY_NEXT_RANDOM_ALBUM_ID) {
                 Song previousSong = service.getPlayingQueue().get(nextPosition - 1);
                 NextRandomAlbum.getInstance().commit(previousSong.albumId);
 
@@ -54,8 +53,24 @@ final class PlaybackHandler extends Handler {
                 service.setShuffleMode(MusicService.SHUFFLE_MODE_SHUFFLE_ALBUM);
 
                 return true;
+            } else if (song.id == NextRandomAlbum.RANDOM_ALBUM_SONG_ID) {
+                stopPlaying(service);
+                return true;
             }
         }
+        return false;
+    }
+
+    private boolean stopPlaying(MusicService service) {
+        service.notifyChange(MusicService.PLAY_STATE_CHANGED);
+        service.seek(0);
+        if (service.pendingQuit) {
+            service.pendingQuit = false;
+            service.quit();
+            return true;
+        }
+        service.notifyChange(MusicService.PLAY_STATE_CHANGED);
+        service.seek(0);
         return false;
     }
 
@@ -117,15 +132,9 @@ final class PlaybackHandler extends Handler {
                     if (service.pendingQuit ||
                             service.getRepeatMode() == MusicService.REPEAT_MODE_NONE &&
                                     service.isLastTrack()) {
-                        service.notifyChange(MusicService.PLAY_STATE_CHANGED);
-                        service.seek(0);
-                        if (service.pendingQuit) {
-                            service.pendingQuit = false;
-                            service.quit();
+                        if (stopPlaying(service)) {
                             break;
                         }
-                        service.notifyChange(MusicService.PLAY_STATE_CHANGED);
-                        service.seek(0);
                     } else {
                         service.playNextSong(false);
                     }

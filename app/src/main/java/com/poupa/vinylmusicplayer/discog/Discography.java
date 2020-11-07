@@ -12,6 +12,7 @@ import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.interfaces.MusicServiceEventListener;
 import com.poupa.vinylmusicplayer.loader.ReplayGainTagExtractor;
 import com.poupa.vinylmusicplayer.loader.SongLoader;
+import com.poupa.vinylmusicplayer.misc.RandomAlbum.NextRandomAlbum;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Artist;
 import com.poupa.vinylmusicplayer.model.Genre;
@@ -154,7 +155,7 @@ public class Discography implements MusicServiceEventListener {
     boolean addSongImpl(@NonNull Song song, boolean cacheOnly) {
         synchronized (cache) {
             // Race condition check: If the song has been added -> skip
-            if (song.id == MusicService.RANDOM_ALBUM_SONG_ID || cache.songsById.containsKey(song.id)) {
+            if (song.id == NextRandomAlbum.RANDOM_ALBUM_SONG_ID || cache.songsById.containsKey(song.id)) {
                 return false;
             }
 

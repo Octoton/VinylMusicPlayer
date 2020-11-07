@@ -26,10 +26,12 @@ import com.kabouzeid.appthemehelper.util.ATHUtil;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
 import com.poupa.vinylmusicplayer.interfaces.CabHolder;
-import com.poupa.vinylmusicplayer.misc.NextRandomAlbum;
+import com.poupa.vinylmusicplayer.misc.RandomAlbum.NextRandomAlbum;
+import com.poupa.vinylmusicplayer.misc.RandomAlbum.ManualAlbumSearch;
+import com.poupa.vinylmusicplayer.misc.RandomAlbum.ManualArtistSearch;
+import com.poupa.vinylmusicplayer.misc.RandomAlbum.ManualGenreSearch;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.service.MusicService;
-import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 import com.poupa.vinylmusicplayer.util.ViewUtil;
 
 import java.util.ArrayList;
@@ -54,7 +56,7 @@ public class PlayingQueueAdapter extends SongAdapter
 
     private void setLastIsRandomAlbum() {
         if (dataSet.size() > 0)
-            lastIsRandomAlbum = (dataSet.get(dataSet.size()-1).id == MusicService.RANDOM_ALBUM_SONG_ID);
+            lastIsRandomAlbum = (dataSet.get(dataSet.size()-1).id == NextRandomAlbum.RANDOM_ALBUM_SONG_ID);
         else
             lastIsRandomAlbum = false;
     }
@@ -227,23 +229,17 @@ public class PlayingQueueAdapter extends SongAdapter
         @Override
         protected boolean onSongMenuItemClick(MenuItem item) {
             if (item.getItemId() == R.id.action_shuffle_random_album) {
-                ArrayList<Integer> searchType = new ArrayList<>();
-                searchType.add(NextRandomAlbum.BY_ALBUM);
-                NextRandomAlbum.getInstance().initSearch(searchType, true);
+                NextRandomAlbum.getInstance().initSearch(new ManualAlbumSearch());
 
                 MusicPlayerRemote.shuffleRandomAlbum();
                 return true;
             } else if (item.getItemId() == R.id.action_shuffle_artist_album) {
-                ArrayList<Integer> searchType = new ArrayList<>();
-                searchType.add(NextRandomAlbum.BY_ARTIST);
-                NextRandomAlbum.getInstance().initSearch(searchType, true);
+                NextRandomAlbum.getInstance().initSearch(new ManualArtistSearch());
 
                 MusicPlayerRemote.shuffleRandomAlbum();
                 return true;
             } else if (item.getItemId() == R.id.action_shuffle_genre_album) {
-                ArrayList<Integer> searchType = new ArrayList<>();
-                searchType.add(NextRandomAlbum.BY_GENRE);
-                NextRandomAlbum.getInstance().initSearch(searchType, true);
+                NextRandomAlbum.getInstance().initSearch(new ManualGenreSearch());
 
                 MusicPlayerRemote.shuffleRandomAlbum();
                 return true;
