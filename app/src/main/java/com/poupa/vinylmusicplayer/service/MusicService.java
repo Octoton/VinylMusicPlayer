@@ -241,8 +241,6 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
         sendBroadcast(new Intent("com.poupa.vinylmusicplayer.VINYL_MUSIC_PLAYER_MUSIC_SERVICE_CREATED"));
 
         mediaStoreObserver.onChange(true);
-
-        NextRandomAlbum.getInstance().reloadAlbums(getApplicationContext());
     }
 
     private AudioManager getAudioManager() {

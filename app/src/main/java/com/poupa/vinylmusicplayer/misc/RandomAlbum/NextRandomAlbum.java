@@ -7,7 +7,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.poupa.vinylmusicplayer.R;
-import com.poupa.vinylmusicplayer.loader.AlbumLoader;
+import com.poupa.vinylmusicplayer.discog.Discography;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Song;
 
@@ -17,7 +17,7 @@ public class NextRandomAlbum {
     public static final int RANDOM_ALBUM_SONG_ID = -2;
     public static final int EMPTY_NEXT_RANDOM_ALBUM_ID = -3;
 
-    private ArrayList<Album> albums; // Used by randomAlbum shuffling
+    private ArrayList<Album> albums;
 
     static private NextRandomAlbum sInstance = new NextRandomAlbum();
 
@@ -33,18 +33,13 @@ public class NextRandomAlbum {
     }
 
     private NextRandomAlbum() {
-        int historySize =
-                5; // Should not be too big as history is there only so that we don't listen to the same set of album endlessly
+        int historySize = 5; // Doesn't need to be too big, as history is there only so that we don't listen to the same set of album endlessly
 
         searchHistory = new History(historySize, "search");
         listenHistory = new History(historySize, "listen");
 
         lastAlbumIdSearched = -1;
         nextRandomAlbumId = -1;
-    }
-
-    public int getAlbumPositionByAlbum(long albumId) {
-        return getAlbumPosition(albums, albumId);
     }
 
     // necessary as albumId are unique but neither in order, neither consecutive (only certainty is albumId > 0)
@@ -82,6 +77,10 @@ public class NextRandomAlbum {
     }
 
     public Song search(Song song, Context context) {
+
+        synchronized (Discography.getInstance()) {
+            albums = new ArrayList<>(Discography.getInstance().getAllAlbums());
+        }
 
         lastAlbumIdSearched = song.albumId;
 
@@ -141,11 +140,5 @@ public class NextRandomAlbum {
     public void clearSearchHistory() {
         searchHistory.clearHistory();
         lastAlbumIdSearched = -1;
-    }
-
-    // called when albums cache change
-    public void reloadAlbums(Context context) {
-        albums = AlbumLoader
-                .getAllAlbums(context); // not updated when device memory changed, what to do ?
     }
 }
