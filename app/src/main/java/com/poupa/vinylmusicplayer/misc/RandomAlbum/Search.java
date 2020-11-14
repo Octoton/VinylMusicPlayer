@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Random;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Song;
@@ -20,10 +19,6 @@ abstract public class Search {
     protected ArrayList<Long> forbiddenId;
     protected ArrayList<Album> albumArrayList;
     protected Album nextRandomAlbum;
-
-    Search () {
-
-    }
 
     public boolean isManual() {
         return false;
@@ -46,26 +41,18 @@ abstract public class Search {
             if (searchTypeIsTrue(song, album)) { // condition depend of search type
                 if (album.getId() == song.albumId) {
                     lastSongPosition = i;
-                    Log.d("TOTO",
-                            "    forbidden last song pos: " + i + ", name: " + album.getTitle());
                 } else if (album.getId() == nextRandomAlbumId) {
                     nextRandomAlbumPosition = i;
-                    Log.d("TOTO", "    forbidden next random album pos: " + i + ", name: " +
-                            album.getTitle());
                 } else {
                     if (isManual()) {
                         if (History.isIdForbidden(album.getId(), searchHistory.getHistory())) {
                             forbiddenPosition.add(i);
                             forbiddenId.add(album.getId());
-                            Log.d("TOTO", "    forbidden search pos: " + i + ", name: " +
-                                    album.getTitle());
                         }
                     } else {
                         if (History.isIdForbidden(album.getId(), listenHistory.getHistory())) {
                             forbiddenPosition.add(i);
                             forbiddenId.add(album.getId());
-                            Log.d("TOTO", "    forbidden listen pos: " + i + ", name: " +
-                                    album.getTitle());
                         }
                     }
                 }

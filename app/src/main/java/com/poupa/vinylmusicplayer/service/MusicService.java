@@ -417,7 +417,9 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
                 // restore search history for better manual search
                 Song lastSong = playingQueue.get(playingQueue.size() - 1);
-                if (lastSong.id == NextRandomAlbum.RANDOM_ALBUM_SONG_ID) NextRandomAlbum.getInstance().resetHistories(lastSong.albumId);
+                if (lastSong.id == NextRandomAlbum.RANDOM_ALBUM_SONG_ID) {
+                    NextRandomAlbum.getInstance().resetHistories(lastSong.albumId);
+                }
 
                 notHandledMetaChangedForCurrentTrack = true;
                 sendChangeInternal(META_CHANGED);

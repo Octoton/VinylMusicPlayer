@@ -34,9 +34,7 @@ final class PlaybackHandler extends Handler {
                 Song previousSong = service.getPlayingQueue().get(nextPosition - 1);
                 NextRandomAlbum.getInstance().commit(previousSong.albumId);
 
-                Album album =
-                        AlbumLoader.getAlbum(service.getApplicationContext(),
-                                song.albumId);
+                Album album = AlbumLoader.getAlbum(service.getApplicationContext(), song.albumId);
 
                 ArrayList<Song> songs = album.songs;
 

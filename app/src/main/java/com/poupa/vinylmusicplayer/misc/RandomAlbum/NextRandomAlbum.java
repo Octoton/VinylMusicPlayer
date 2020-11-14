@@ -4,7 +4,6 @@ package com.poupa.vinylmusicplayer.misc.RandomAlbum;
 import java.util.ArrayList;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.discog.Discography;
@@ -17,12 +16,10 @@ public class NextRandomAlbum {
     public static final int RANDOM_ALBUM_SONG_ID = -2;
     public static final int EMPTY_NEXT_RANDOM_ALBUM_ID = -3;
 
-    private ArrayList<Album> albums;
-
     static private NextRandomAlbum sInstance = new NextRandomAlbum();
 
-    private History listenHistory;
-    private History searchHistory;
+    private History listenHistory; // already listen album
+    private History searchHistory; // manually searched album (with 3-dot menu)
     private long nextRandomAlbumId;
     private long lastAlbumIdSearched;
     private Search searchFunction;
@@ -35,23 +32,11 @@ public class NextRandomAlbum {
     private NextRandomAlbum() {
         int historySize = 5; // Doesn't need to be too big, as history is there only so that we don't listen to the same set of album endlessly
 
-        searchHistory = new History(historySize, "search");
-        listenHistory = new History(historySize, "listen");
+        searchHistory = new History(historySize);
+        listenHistory = new History(historySize);
 
         lastAlbumIdSearched = -1;
         nextRandomAlbumId = -1;
-    }
-
-    // necessary as albumId are unique but neither in order, neither consecutive (only certainty is albumId > 0)
-    private int getAlbumPosition(ArrayList<Album> albumList, long albumId) {
-        int i = 0;
-        for (Album album : albumList) {
-            if (album.getId() == albumId) {
-                return i;
-            }
-            i++;
-        }
-        return -1;
     }
 
     public void initSearch(Search searchFunction) {
@@ -69,8 +54,7 @@ public class NextRandomAlbum {
 
     private Song addNewRandomAlbum(Album album, Context context) {
         if (album != null) {
-            return addNewRandomAlbum(album.getId(), album.getTitle(), album.getArtistId(),
-                    album.getArtistName(), context);
+            return addNewRandomAlbum(album.getId(), album.getTitle(), album.getArtistId(), album.getArtistName(), context);
         } else {
             return addEmptyRandomAlbum(context);
         }
@@ -78,34 +62,16 @@ public class NextRandomAlbum {
 
     public Song search(Song song, Context context) {
 
+        ArrayList<Album> albums;
         synchronized (Discography.getInstance()) {
             albums = new ArrayList<>(Discography.getInstance().getAllAlbums());
         }
 
         lastAlbumIdSearched = song.albumId;
 
-        if (!searchFunction.isManual()) {
-            Log.d("TOTO", "AUTOMATIC SEARCH");
-            searchHistory.clearHistory();
-        } else {
-            Log.d("TOTO", "MANUAL SEARCH");
-        }
-
-        Log.d("TOTO", "Search album id: " + song.albumId);
-        for (Long albumId : searchHistory.getHistory()) {
-            Log.d("TOTO", "Search history: " + albumId + ", name: " +
-                    albums.get(getAlbumPosition(albums, albumId)).getTitle());
-        }
-        for (Long albumId : listenHistory.getHistory()) {
-            Log.d("TOTO", "Listen history: " + albumId + ", name: " +
-                    albums.get(getAlbumPosition(albums, albumId)).getTitle());
-        }
-
         Album album = searchFunction.foundNextAlbum(song, albums, nextRandomAlbumId, listenHistory, searchHistory, context);
 
         if (album != null) {
-            Log.d("TOTO", "Album is: " + album.getTitle());
-
             nextRandomAlbumId = album.getId();
         }
         return addNewRandomAlbum(album, context);

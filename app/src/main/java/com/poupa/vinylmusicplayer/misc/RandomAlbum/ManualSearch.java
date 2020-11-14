@@ -29,9 +29,7 @@ abstract public class ManualSearch extends Search {
         int albumPosition = getRandomAlbumPosition(albumSize, lastSongPosition, nextRandomAlbumPosition, forbiddenPosition);
 
         if (albumPosition == Search.ERROR_ARRAY_SIZE_IS_1) {
-            Toast.makeText(context, context.getResources()
-                    .getString(R.string.error_random_album_only_one_album), Toast.LENGTH_SHORT)
-                    .show();
+            Toast.makeText(context, context.getResources().getString(R.string.error_random_album_only_one_album), Toast.LENGTH_SHORT).show();
             albumPositionAsChange = false;
         } else if (albumPosition == Search.ERROR_HISTORY) {
             ArrayList<Integer> newForbiddenPosition = new ArrayList<>();
@@ -54,20 +52,19 @@ abstract public class ManualSearch extends Search {
             if (albumPosition >= 0) {
                 album = albumArrayList.get(albumPosition);
                 if (album.getId() == nextRandomAlbum.getId() || History.isIdForbidden(album.getId(), searchHistory.getHistory())) {
-                    Toast.makeText(context, context.getResources()
-                                    .getString(R.string.error_random_album_only_two_album),
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, context.getResources().getString(R.string.error_random_album_only_two_album), Toast.LENGTH_SHORT).show();
                 }
             } else if (nextRandomAlbumPosition != -1) {
                 album = albumArrayList.get(nextRandomAlbumPosition);
-                Toast.makeText(context, "no other album where found with this criteria",
-                        Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getResources().getString(R.string.error_random_album_no_new_found), Toast.LENGTH_SHORT).show();
             }
         }
 
         if (album != null) {
             searchHistory.addIdToHistory(nextRandomAlbum.getId());
             searchHistory.synchronizeHistory();
+        } else {
+            searchHistory.revertHistory();
         }
 
         return album;
