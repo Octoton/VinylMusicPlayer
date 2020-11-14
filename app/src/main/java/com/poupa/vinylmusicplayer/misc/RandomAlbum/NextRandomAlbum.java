@@ -17,8 +17,6 @@ public class NextRandomAlbum {
     public static final int RANDOM_ALBUM_SONG_ID = -2;
     public static final int EMPTY_NEXT_RANDOM_ALBUM_ID = -3;
 
-    private ArrayList<Album> genre;
-    private ArrayList<Album> artist;
     private ArrayList<Album> albums; // Used by randomAlbum shuffling
 
     static private NextRandomAlbum sInstance = new NextRandomAlbum();
@@ -148,8 +146,6 @@ public class NextRandomAlbum {
     // called when albums cache change
     public void reloadAlbums(Context context) {
         albums = AlbumLoader
-                .getAllAlbums(context); // not updated when device memory changed, what to do
-        genre = new ArrayList<>();
-        artist = new ArrayList<>();
+                .getAllAlbums(context); // not updated when device memory changed, what to do ?
     }
 }

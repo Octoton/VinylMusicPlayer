@@ -70,7 +70,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-
 /**
  * @author Karim Abou Zeid (kabouzeid), Andrew Neal
  */
@@ -149,7 +148,6 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
     private Playback playback;
     private ArrayList<Song> playingQueue = new ArrayList<>();
     private ArrayList<Song> originalPlayingQueue = new ArrayList<>();
-    private ArrayList<Album> albums; // Used by randomAlbum shuffling
     private int position = -1;
     private int nextPosition = -1;
     private int shuffleMode;

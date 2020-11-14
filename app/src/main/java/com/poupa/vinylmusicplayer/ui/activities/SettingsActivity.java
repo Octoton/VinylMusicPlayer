@@ -343,9 +343,6 @@ public class SettingsActivity extends AbsBaseActivity implements ColorChooserDia
                         pref.setSummary(getResources().getString(R.string.pref_rg_disabled));
                     }
                     break;
-                case PreferenceUtil.ALLOW_RANDOM_ALBUM:
-                    // for futur use
-                    break;
             }
         }
 

@@ -31,7 +31,6 @@ import com.poupa.vinylmusicplayer.misc.RandomAlbum.ManualAlbumSearch;
 import com.poupa.vinylmusicplayer.misc.RandomAlbum.ManualArtistSearch;
 import com.poupa.vinylmusicplayer.misc.RandomAlbum.ManualGenreSearch;
 import com.poupa.vinylmusicplayer.model.Song;
-import com.poupa.vinylmusicplayer.service.MusicService;
 import com.poupa.vinylmusicplayer.util.ViewUtil;
 
 import java.util.ArrayList;

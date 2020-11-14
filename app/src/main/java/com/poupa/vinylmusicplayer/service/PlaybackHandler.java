@@ -14,9 +14,7 @@ import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 
 import java.lang.ref.WeakReference;
-import java.security.Provider.Service;
 import java.util.ArrayList;
-
 
 final class PlaybackHandler extends Handler {
     @NonNull
@@ -46,9 +44,7 @@ final class PlaybackHandler extends Handler {
 
                 service.clearQueue();
 
-                service.openQueue(songs,
-                        0,
-                        true);
+                service.openQueue(songs,0,true);
 
                 service.setShuffleMode(MusicService.SHUFFLE_MODE_SHUFFLE_ALBUM);
 
