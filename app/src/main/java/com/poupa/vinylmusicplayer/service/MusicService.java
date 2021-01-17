@@ -1101,11 +1101,16 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
     public void removedRandomAlbum(boolean notify) {
         int lastSongPosition = playingQueue.size() - 1;
 
-        if (lastSongPosition >= 0 && playingQueue.get(lastSongPosition).id == NextRandomAlbum.RANDOM_ALBUM_SONG_ID) {
-            playingQueue.remove(lastSongPosition);
+        if (lastSongPosition >= 0) {
+            for (int i = 0; i <= lastSongPosition; i++) {
+                if (playingQueue.get(i).id == NextRandomAlbum.RANDOM_ALBUM_SONG_ID) {
+                    playingQueue.remove(i--);
+                    lastSongPosition--;
 
-            if (notify) {
-                notifyChange(QUEUE_CHANGED);
+                    if (notify) {
+                        notifyChange(QUEUE_CHANGED);
+                    }
+                }
             }
         }
     }
@@ -1133,14 +1138,9 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     private void getRandomAlbumIfPossible(boolean notify) {
         if (shuffleMode == SHUFFLE_MODE_SHUFFLE_ALBUM && this.playingQueue.size() > 0) {
+            removedRandomAlbum(false);
+
             Song lastSong = playingQueue.get(playingQueue.size() - 1);
-
-            if (lastSong.id == NextRandomAlbum.RANDOM_ALBUM_SONG_ID) { // if a random album was already in place
-                lastSong = playingQueue.get(playingQueue.size() - 2);
-
-                removedRandomAlbum(false);
-            }
-
             Song nextAlbum = NextRandomAlbum.getInstance().search(lastSong, getApplicationContext());
 
             playingQueue.add(nextAlbum);

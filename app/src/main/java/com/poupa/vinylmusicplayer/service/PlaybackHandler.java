@@ -38,13 +38,12 @@ final class PlaybackHandler extends Handler {
 
                 ArrayList<Song> songs = album.songs;
 
-                service.notifyChange(MusicService.QUEUE_CHANGED);
-
                 service.clearQueue();
-
                 service.openQueue(songs,0,true);
 
                 service.setShuffleMode(MusicService.SHUFFLE_MODE_SHUFFLE_ALBUM);
+
+                service.notifyChange(MusicService.QUEUE_CHANGED);
 
                 return true;
             } else if (song.id == NextRandomAlbum.RANDOM_ALBUM_SONG_ID) {
@@ -115,8 +114,7 @@ final class PlaybackHandler extends Handler {
                 }
                 break;
 
-            case MusicService.TRACK_ENDED:
-                // if there is a timer finished, don't continue
+            case MusicService.TRACK_ENDED: // if there is a timer finished, don't continue
                 boolean shuffleModeAlbum = false;
                 if (service.getShuffleMode() == MusicService.SHUFFLE_MODE_SHUFFLE_ALBUM) {
                     shuffleModeAlbum = accessNextAlbum(service, service.getNextPosition(false));
