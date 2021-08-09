@@ -49,6 +49,7 @@ import com.poupa.vinylmusicplayer.glide.GlideApp;
 import com.poupa.vinylmusicplayer.glide.GlideRequest;
 import com.poupa.vinylmusicplayer.glide.VinylGlideExtension;
 import com.poupa.vinylmusicplayer.glide.VinylSimpleTarget;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicPlayingQueue;
 import com.poupa.vinylmusicplayer.misc.queue.IndexedSong;
 import com.poupa.vinylmusicplayer.misc.queue.StaticPlayingQueue;
 import com.poupa.vinylmusicplayer.model.Playlist;
@@ -147,7 +148,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     private Playback playback;
 
-    private StaticPlayingQueue playingQueue = new StaticPlayingQueue();
+    private StaticPlayingQueue playingQueue = new DynamicPlayingQueue(); //new StaticPlayingQueue();
 
     private boolean queuesRestored;
     private boolean pausedByTransientLossOfFocus;
@@ -392,7 +393,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
             int restoredPositionInTrack = PreferenceManager.getDefaultSharedPreferences(this).getInt(SAVED_POSITION_IN_TRACK, -1);
 
             if (restoredQueue.size() > 0 && restoredQueue.size() == restoredOriginalQueue.size() && restoredPosition != -1) {
-                playingQueue = new StaticPlayingQueue(restoredQueue, restoredOriginalQueue, restoredPosition, playingQueue.getShuffleMode());
+                playingQueue = new DynamicPlayingQueue(restoredQueue, restoredOriginalQueue, restoredPosition, playingQueue.getShuffleMode()); //StaticPlayingQueue
 
                 openCurrent();
                 prepareNext();
@@ -459,11 +460,21 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     public boolean openTrackAndPrepareNextAt(int position) {
         synchronized (this) {
-            playingQueue.setCurrentPosition(position);
-            boolean prepared = openCurrent();
-            if (prepared) prepareNextImpl();
-            notifyChange(META_CHANGED);
-            notHandledMetaChangedForCurrentTrack = false;
+            boolean prepared = false;
+
+            int status = playingQueue.setCurrentPosition(position);
+            if (status != StaticPlayingQueue.INVALID_POSITION) {
+                prepared = openCurrent();
+                if (prepared)
+                    prepareNextImpl();
+
+                if (status == StaticPlayingQueue.QUEUE_HAS_CHANGED)
+                    notifyChange(QUEUE_CHANGED);
+                else if (status == StaticPlayingQueue.VALID_POSITION)
+                    notifyChange(META_CHANGED);
+
+                notHandledMetaChangedForCurrentTrack = false;
+            }
             return prepared;
         }
     }
@@ -665,6 +676,13 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     public ArrayList<Song> getPlayingQueue() {
         return playingQueue.getPlayingQueueSongOnly();
+    }
+
+    public Song getDynamicElement() {
+        //if (playingQueue instanceof DynamicPlayingQueue)
+            return ((DynamicPlayingQueue)playingQueue).getPseudoSong();
+
+        //return Song.EMPTY_SONG;
     }
 
     public int getRepeatMode() {
