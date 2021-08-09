@@ -251,7 +251,7 @@ public class SongAdapter
 
                 @Override
                 public int getMenuRes() {
-                    return getSongMenuRes();
+                    return getSongMenuRes(getItemViewType());
                 }
 
                 @Override
@@ -268,7 +268,7 @@ public class SongAdapter
             return dataSet.get(position);
         }
 
-        protected int getSongMenuRes() {
+        protected int getSongMenuRes(int itemViewType) {
             return DEFAULT_MENU_RES;
         }
 

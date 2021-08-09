@@ -29,7 +29,8 @@ import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchAct
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
 import com.kabouzeid.appthemehelper.util.ToolbarContentTintHelper;
 import com.poupa.vinylmusicplayer.R;
-import com.poupa.vinylmusicplayer.adapter.song.PlayingQueueAdapter;
+import com.poupa.vinylmusicplayer.adapter.song.DynamicPlayingQueueAdapter;
+import com.poupa.vinylmusicplayer.adapter.song.StaticPlayingQueueAdapter;
 import com.poupa.vinylmusicplayer.dialogs.AddToPlaylistDialog;
 import com.poupa.vinylmusicplayer.dialogs.CreatePlaylistDialog;
 import com.poupa.vinylmusicplayer.dialogs.LyricsDialog;
@@ -56,7 +57,7 @@ public abstract class AbsPlayerFragment
     @Nullable
     private Callbacks callbacks;
 
-    protected PlayingQueueAdapter playingQueueAdapter;
+    protected StaticPlayingQueueAdapter playingQueueAdapter;
     private RecyclerView.Adapter wrappedAdapter;
     protected RecyclerViewDragDropManager recyclerViewDragDropManager;
     private RecyclerViewSwipeManager recyclerViewSwipeManager;
@@ -78,6 +79,8 @@ public abstract class AbsPlayerFragment
         callbacks = null;
     }
 
+    public abstract void recreate();
+
     protected void setUpRecyclerView(RecyclerView recyclerView, final SlidingUpPanelLayout slidingUpPanelLayout) {
         RecyclerViewTouchActionGuardManager recyclerViewTouchActionGuardManager = new RecyclerViewTouchActionGuardManager();
         recyclerViewSwipeManager = new RecyclerViewSwipeManager();
@@ -89,12 +92,23 @@ public abstract class AbsPlayerFragment
         // Disable the change animation in order to make turning back animation of swiped item works properly.
         animator.setSupportsChangeAnimations(false);
 
-        playingQueueAdapter = new PlayingQueueAdapter(
-                ((AbsThemeActivity) requireActivity()),
-                MusicPlayerRemote.getPlayingQueue(),
-                MusicPlayerRemote.getPosition(),
-                false,
-                null);
+        if (MusicPlayerRemote.isDynamicQueueActivated()) {
+            playingQueueAdapter = new DynamicPlayingQueueAdapter(
+                    ((AbsThemeActivity) requireActivity()),
+                    MusicPlayerRemote.getPlayingQueue(),
+                    MusicPlayerRemote.getPosition(),
+                    false,
+                    null,
+                    MusicPlayerRemote.getDynamicAdapter());
+        } else {
+            playingQueueAdapter = new StaticPlayingQueueAdapter(
+                    ((AbsThemeActivity) requireActivity()),
+                    MusicPlayerRemote.getPlayingQueue(),
+                    MusicPlayerRemote.getPosition(),
+                    false,
+                    null);
+        }
+
         wrappedAdapter = recyclerViewDragDropManager.createWrappedAdapter(playingQueueAdapter);
         wrappedAdapter = recyclerViewSwipeManager.createWrappedAdapter(wrappedAdapter);
 
@@ -144,6 +158,9 @@ public abstract class AbsPlayerFragment
             return true;
         } else if (itemId == R.id.action_clear_playing_queue) {
             MusicPlayerRemote.clearQueue();
+            return true;
+        } else if (itemId == R.id.action_dynamic_queue) {
+            MusicPlayerRemote.setQueueToDynamicQueue();
             return true;
         } else if (itemId == R.id.action_save_playing_queue) {
             CreatePlaylistDialog.create(MusicPlayerRemote.getPlayingQueue()).show(requireActivity().getSupportFragmentManager(), "ADD_TO_PLAYLIST");

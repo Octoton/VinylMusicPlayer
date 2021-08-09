@@ -23,6 +23,7 @@ import com.kabouzeid.appthemehelper.util.ATHUtil;
 import com.kabouzeid.appthemehelper.util.ColorUtil;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.adapter.base.MediaEntryViewHolder;
+import com.poupa.vinylmusicplayer.adapter.song.DynamicPlayingQueueAdapter;
 import com.poupa.vinylmusicplayer.databinding.FragmentFlatPlayerBinding;
 import com.poupa.vinylmusicplayer.databinding.ItemListBinding;
 import com.poupa.vinylmusicplayer.dialogs.SongShareDialog;
@@ -69,6 +70,10 @@ public class FlatPlayerFragment extends AbsPlayerFragment implements SlidingUpPa
         playerQueueSubHeader = binding.playerQueueSubHeader;
 
         return binding.getRoot();
+    }
+
+    public void recreate() {
+        setUpRecyclerView(recyclerView,slidingUpPanelLayout);
     }
 
     @Override
@@ -156,6 +161,10 @@ public class FlatPlayerFragment extends AbsPlayerFragment implements SlidingUpPa
         playerQueueSubHeader.setText(MusicPlayerRemote.getQueueInfoString());
         if (slidingUpPanelLayout == null || slidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
             resetToCurrentPosition();
+        }
+
+        if (playingQueueAdapter instanceof DynamicPlayingQueueAdapter) {
+            ((DynamicPlayingQueueAdapter) playingQueueAdapter).reloadDynamicElement();
         }
     }
 

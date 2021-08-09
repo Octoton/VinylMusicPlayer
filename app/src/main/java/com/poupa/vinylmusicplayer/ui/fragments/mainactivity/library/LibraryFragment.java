@@ -28,6 +28,7 @@ import com.poupa.vinylmusicplayer.databinding.FragmentLibraryBinding;
 import com.poupa.vinylmusicplayer.dialogs.CreatePlaylistDialog;
 import com.poupa.vinylmusicplayer.discog.Discography;
 import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingQueueLoader;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Artist;
 import com.poupa.vinylmusicplayer.model.Song;
@@ -194,6 +195,11 @@ public class LibraryFragment
             menu.removeItem(R.id.action_colored_footers);
             menu.removeItem(R.id.action_sort_order);
         }
+
+        if (currentFragment instanceof AlbumsFragment) {
+            menu.findItem(R.id.action_shuffle_all).setTitle(R.string.action_shuffle_all_albums);
+        }
+
         ToolbarContentTintHelper.handleOnCreateOptionsMenu(
                 requireActivity(),
                 layoutBinding.toolbar,
@@ -232,7 +238,12 @@ public class LibraryFragment
 
         final int id = item.getItemId();
         if (id == R.id.action_shuffle_all) {
-            MusicPlayerRemote.openAndShuffleQueue(Discography.getInstance().getAllSongs(null), true);
+            if (currentFragment instanceof AlbumsFragment) {
+                MusicPlayerRemote.openQueue(AlbumShufflingQueueLoader.getNextRandomQueue(), 0, true);
+                MusicPlayerRemote.setQueueToDynamicQueue();
+            } else {
+                MusicPlayerRemote.openAndShuffleQueue(Discography.getInstance().getAllSongs(null), true);
+            }
             return true;
         } else if (id == R.id.action_new_playlist) {
             CreatePlaylistDialog.create().show(getChildFragmentManager(), "CREATE_PLAYLIST");

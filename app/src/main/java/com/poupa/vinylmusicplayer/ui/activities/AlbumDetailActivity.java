@@ -108,6 +108,11 @@ public class AlbumDetailActivity
         public void onScrollChanged(int scrollY, boolean firstScroll, boolean dragging) {
             int y = scrollY + headerViewHeight;
 
+            // value can be incorrect at activity creation/recreation
+            if (scrollY < 0) {
+                scrollY = 0;
+            }
+
             // Change alpha of overlay
             final float headerAlpha = Math.max(0, Math.min(1, (float) 2 * y / headerViewHeight));
             layoutBinding.headerOverlay.setBackgroundColor(ColorUtil.withAlpha(toolbarColor, headerAlpha));
@@ -287,6 +292,10 @@ public class AlbumDetailActivity
             return true;
         } else if (id == R.id.action_add_to_current_playing) {
             MusicPlayerRemote.enqueue(songs);
+            return true;
+        } else if (id == R.id.action_open_playing_queue_in_album_shuffling_mode) {
+            MusicPlayerRemote.openQueue(songs, 0, true);
+            MusicPlayerRemote.setQueueToDynamicQueue();
             return true;
         } else if (id == R.id.action_add_to_playlist) {
             AddToPlaylistDialog.create(songs).show(getSupportFragmentManager(), "ADD_PLAYLIST");

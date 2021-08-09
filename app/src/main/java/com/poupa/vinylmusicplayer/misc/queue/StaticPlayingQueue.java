@@ -3,34 +3,42 @@ package com.poupa.vinylmusicplayer.misc.queue;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import android.content.Context;
+
 import com.poupa.vinylmusicplayer.helper.ShuffleHelper;
 import com.poupa.vinylmusicplayer.model.Song;
+import com.poupa.vinylmusicplayer.provider.MusicPlaybackQueueStore;
+
+import static com.poupa.vinylmusicplayer.service.MusicService.TAG;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/** Provide playing queue management (save list of songs, add/move/remove, know currently played position, restore, ...) */
 public class StaticPlayingQueue {
 
     public static final int REPEAT_MODE_NONE = 0;
     public static final int REPEAT_MODE_ALL = 1;
     public static final int REPEAT_MODE_THIS = 2;
 
-    private int repeatMode;
+    protected int repeatMode;
 
-    public static final int INVALID_POSITION = IndexedSong.INVALID_INDEX;
     public static final int SHUFFLE_MODE_NONE = 0;
     public static final int SHUFFLE_MODE_SHUFFLE = 1;
-    private int shuffleMode;
+    protected int shuffleMode;
 
-    private int currentPosition;
+    public static final int INVALID_POSITION = IndexedSong.INVALID_INDEX;
+    public static final int VALID_POSITION = INVALID_POSITION - 1;
+    public static final int QUEUE_HAS_CHANGED = VALID_POSITION - 1;
+    protected int currentPosition;
 
-    private int nextPosition;
+    protected int nextPosition;
 
     /** List of element currently saved (way better than songs to ensure only the correct occurrence of a song is modified) */
-    private ArrayList<IndexedSong> queue;
+    protected ArrayList<IndexedSong> queue;
     /** Copy of the queue used to allow revert of history last operation */
-    private final ArrayList<IndexedSong> originalQueue;
+    protected final ArrayList<IndexedSong> originalQueue;
 
     private long nextUniqueId;
 
@@ -43,31 +51,23 @@ public class StaticPlayingQueue {
         restoreUniqueId();
     }
 
-    public StaticPlayingQueue(ArrayList<IndexedSong> restoreQueue, ArrayList<IndexedSong> restoreOriginalQueue, int restoredPosition, int shuffleMode, int repeatMode) {
-        final int queueSize = restoreQueue.size();
-        if (queueSize != restoreOriginalQueue.size()) {
-            throw new IllegalArgumentException("Mismatching queue size: queue=" + queueSize + " vs originalQueue=" + restoreOriginalQueue.size());
+    public StaticPlayingQueue(StaticPlayingQueue queue) {
+        final int queueSize = queue.queue.size();
+        if (queueSize != queue.originalQueue.size()) {
+            throw new IllegalArgumentException("Mismatching queue size: queue=" + queueSize + " vs originalQueue=" + queue.originalQueue.size());
         }
-        if ((queueSize > 0) && (restoredPosition < 0 || restoredPosition > restoreQueue.size() - 1)) {
-            throw new IllegalArgumentException("Queue size=" + queueSize + " vs position=" + restoredPosition);
-        }
-
-        this.queue = new ArrayList<>(restoreQueue);
-        this.originalQueue = new ArrayList<>(restoreOriginalQueue);
-        this.shuffleMode = shuffleMode;
-        this.repeatMode = repeatMode;
-
-        currentPosition = restoredPosition;
-
-        // Adjust for removed songs, marked with Song.EMPTY in the restored queues
-        // See MusicPlaybackQueueStore.getSongPosition
-        for (int i = queueSize - 1; i >= 0; --i) {
-            if (restoreQueue.get(i).id == Song.EMPTY_SONG.id) {
-                remove(i);
-            }
+        if ((queueSize > 0) && (queue.currentPosition < 0 || queue.currentPosition > queue.queue.size() - 1)) {
+            throw new IllegalArgumentException("Queue size=" + queueSize + " vs position=" + queue.currentPosition);
         }
 
-        restoreUniqueId();
+        this.queue = new ArrayList<>(queue.queue);
+        this.originalQueue = new ArrayList<>(queue.originalQueue);
+        this.shuffleMode = queue.shuffleMode;
+        this.repeatMode = queue.repeatMode;
+
+        this.nextPosition = queue.nextPosition;
+
+        this.nextUniqueId = queue.nextUniqueId;
     }
 
     public void restoreMode(int shuffleMode, int repeatMode) {
@@ -86,6 +86,44 @@ public class StaticPlayingQueue {
                 originalQueue.get(index).setUniqueId(uniqueId);
             }
         }
+    }
+
+    /** @return is restore successful */
+    public boolean restoreQueue(Context context, int restoredPosition) {
+        ArrayList<IndexedSong> restoredQueue = MusicPlaybackQueueStore.getInstance(context).getSavedPlayingQueue();
+        ArrayList<IndexedSong> restoredOriginalQueue = MusicPlaybackQueueStore.getInstance(context).getSavedOriginalPlayingQueue();
+
+        if (restoredQueue.size() > 0 && restoredQueue.size() == restoredOriginalQueue.size() && restoredPosition != -1) {
+            this.queue = restoredQueue;
+            this.originalQueue = restoredOriginalQueue;
+            this.currentPosition = restoredPosition;
+
+            // Adjust for removed songs, marked with Song.EMPTY in the restored queues
+            // See MusicPlaybackQueueStore.getSongPosition
+            for (int i = restoredQueue.size() - 1; i >= 0; --i) {
+                if (restoredQueue.get(i).id == Song.EMPTY_SONG.id) {
+                    remove(i);
+                }
+            }
+
+            try {
+                restoreUniqueId();
+            } catch (ArrayIndexOutOfBoundsException queueCopiesOutOfSync) {
+                // fallback, when the copies of the restored queues are out of sync or the queues are corrupted
+                Log.e(TAG, "Restored queues are corrupted", queueCopiesOutOfSync);
+                this.queue = new ArrayList<>();
+                this.originalQueue = new ArrayList<>();
+                this.currentPosition = INVALID_POSITION;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public void saveQueue(Context context) {
+        MusicPlaybackQueueStore.getInstance(context).saveQueues(this.queue, this.originalQueue);
     }
 
     /* -------------------- queue modification (add, remove, move, ...) -------------------- */
@@ -121,11 +159,14 @@ public class StaticPlayingQueue {
         }
     }
 
-    private void updateQueueIndexesAfterSongsModification(int position, int occurrence, int previousPosition, int direction) {
+    /**
+     * @param direction songs starting at position until position+occurrence where added (direction = +1) or remove (direction = -1)
+     */
+    private void updateQueueIndexesAfterSongsModification(int position, int occurrence, int originalPosition, int direction) {
         for (int i = 0; i < queue.size(); i++) {
             originalQueue.get(i).index = i;
 
-            if (!(i >= position && i <= position+occurrence) && queue.get(i).index >= previousPosition  ) {
+            if (!(i >= position && i <= position+occurrence) && queue.get(i).index >= originalPosition  ) {
                 queue.get(i).index = queue.get(i).index + direction*(occurrence + 1);
 
                 int index = queue.get(i).index;
@@ -134,12 +175,12 @@ public class StaticPlayingQueue {
         }
     }
 
-    private void addOneSong(int position, int previousPosition, Song song) {
+    private void addOneSong(int position, int originalPosition, Song song) {
         long uniqueId = getNextUniqueId();
-        originalQueue.add(previousPosition, new IndexedSong(song, previousPosition, uniqueId));
-        queue.add(position, new IndexedSong(song, previousPosition, uniqueId));
+        originalQueue.add(originalPosition, new IndexedSong(song, originalPosition, uniqueId));
+        queue.add(position, new IndexedSong(song, originalPosition, uniqueId));
 
-        updateQueueIndexesAfterSongsModification(position, 0, previousPosition, +1);
+        updateQueueIndexesAfterSongsModification(position, 0, originalPosition, +1);
     }
 
     /**
@@ -239,12 +280,17 @@ public class StaticPlayingQueue {
         }
     }
 
+    /**
+     *
+     * @param deletedPosition position of the removed song
+     * @return INVALID_POSITION if the remove song doesn't change the song at {@link StaticPlayingQueue#currentPosition}, new position for {@link StaticPlayingQueue#currentPosition} otherwise
+     */
     private int rePosition(int deletedPosition) {
         int position = this.currentPosition;
 
         if (deletedPosition < position) {
             this.currentPosition = position - 1;
-        } else if (deletedPosition == position) { //the current position was deleted
+        } else if (deletedPosition == position) { //the current position song was deleted
             if (queue.size() > deletedPosition) {
                 return position;
             } else {
@@ -257,6 +303,7 @@ public class StaticPlayingQueue {
 
     /**
      * Remove song at index position, numbering need to be redone for every song after this position (-1)
+     * @return see {@link StaticPlayingQueue#rePosition(int)}
      */
     public int remove(int position) {
         IndexedSong o = queue.remove(position);
@@ -267,6 +314,9 @@ public class StaticPlayingQueue {
         return rePosition(position);
     }
 
+    /**
+     * @return see {@link StaticPlayingQueue#rePosition(int)}
+     */
     private int removeAllOccurrences(Song song) {
         int hasPositionChanged = INVALID_POSITION;
 
@@ -282,6 +332,9 @@ public class StaticPlayingQueue {
         return hasPositionChanged;
     }
 
+    /**
+     * @return see {@link StaticPlayingQueue#rePosition(int)}
+     */
     public int removeSongs(@NonNull List<Song> songs) {
         int hasPositionChanged = INVALID_POSITION;
 
@@ -308,6 +361,9 @@ public class StaticPlayingQueue {
 
     /* -------------------- queue getter info -------------------- */
 
+    /**
+     * @return has queue been opened
+     */
     public boolean openQueue(@Nullable final Collection<? extends Song> playingQueue, final int startPosition, int shuffleMode) {
         if (playingQueue == null || playingQueue.isEmpty() || startPosition < 0 || startPosition >= playingQueue.size()) {
             return false;
@@ -341,11 +397,15 @@ public class StaticPlayingQueue {
         return currentPosition;
     }
 
-    public void setCurrentPosition(int position) {
+    /**
+     * @return new position was valid or not
+     */
+    public int setCurrentPosition(int position) {
         if (position >= queue.size())
-            return;
+            return INVALID_POSITION;
 
         currentPosition = position;
+        return VALID_POSITION;
     }
 
     public void setPositionToNextPosition() {
@@ -359,21 +419,17 @@ public class StaticPlayingQueue {
         nextPosition = position;
     }
 
-    public boolean isLastTrack() {
-        return getCurrentPosition() == queue.size() - 1;
-    }
-
     public int getNextPosition(boolean skippedLast) {
         int position = getCurrentPosition() + 1;
         switch (getRepeatMode()) {
             case REPEAT_MODE_ALL:
-                if (isLastTrack()) {
+                if (isLastTrackInner()) {
                     position = 0;
                 }
                 break;
             case REPEAT_MODE_THIS:
                 if (skippedLast) {
-                    if (isLastTrack()) {
+                    if (isLastTrackInner()) {
                         position = 0;
                     }
                 } else {
@@ -381,10 +437,7 @@ public class StaticPlayingQueue {
                 }
                 break;
             default:
-            case REPEAT_MODE_NONE:
-                if (isLastTrack()) {
-                    position -= 1;
-                }
+            case REPEAT_MODE_NONE: // nothing to do as position is already set correctly
                 break;
         }
         return position;
@@ -415,6 +468,15 @@ public class StaticPlayingQueue {
                 break;
         }
         return newPosition;
+    }
+
+    /** Used internally to ensure subclass will not override repeat mode functionality */
+    private boolean isLastTrackInner() {
+        return getCurrentPosition() == queue.size() - 1;
+    }
+
+    public boolean isLastTrack() {
+        return isLastTrackInner();
     }
 
     /* -------------------- song getter info -------------------- */

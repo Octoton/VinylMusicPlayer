@@ -48,13 +48,16 @@ import com.poupa.vinylmusicplayer.glide.audiocover.SongCover;
 import com.poupa.vinylmusicplayer.glide.audiocover.SongCoverFetcher;
 import com.poupa.vinylmusicplayer.helper.PendingIntentCompat;
 import com.poupa.vinylmusicplayer.helper.WeakMethodReference;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingQueueLoader;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElement;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicPlayingQueue;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueItemAdapter;
 import com.poupa.vinylmusicplayer.misc.queue.IndexedSong;
 import com.poupa.vinylmusicplayer.misc.queue.StaticPlayingQueue;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Playlist;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.provider.HistoryStore;
-import com.poupa.vinylmusicplayer.provider.MusicPlaybackQueueStore;
 import com.poupa.vinylmusicplayer.provider.SongPlayCountStore;
 import com.poupa.vinylmusicplayer.service.notification.CrashNotification;
 import com.poupa.vinylmusicplayer.service.notification.IdleNotification;
@@ -120,6 +123,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
     private static final String SAVED_POSITION_IN_TRACK = PrefKey.nonExportableKey("POSITION_IN_TRACK");
     private static final String SAVED_SHUFFLE_MODE = PrefKey.exportableKey("SHUFFLE_MODE");
     private static final String SAVED_REPEAT_MODE = PrefKey.exportableKey("REPEAT_MODE");
+    private static final String SAVED_QUEUE_TYPE = PrefKey.exportableKey("QUEUE_TYPE");
 
     static final int RELEASE_WAKELOCK = 0;
     static final int TRACK_ENDED = 1;
@@ -154,6 +158,8 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
     final AppWidgetCard appWidgetCard = AppWidgetCard.getInstance();
 
     private StaticPlayingQueue playingQueue = new StaticPlayingQueue();
+    /** is {@link MusicService#playingQueue} instance of {@link com.poupa.vinylmusicplayer.misc.queue.DynamicPlayingQueue} or not  */
+    private boolean queueIsDynamic = false;
 
     private boolean queuesRestored;
     private boolean pausedByTransientLossOfFocus;
@@ -405,18 +411,8 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
         return musicBind;
     }
 
-    void saveQueuesImpl() {
-        ArrayList<IndexedSong> queue;
-        ArrayList<IndexedSong> originalQueue;
-        synchronized (this) {
-            // Get a copy of the queues
-            queue = new ArrayList<>(playingQueue.getPlayingQueue());
-            originalQueue = new ArrayList<>(playingQueue.getOriginalPlayingQueue());
-        }
-        MusicPlaybackQueueStore.getInstance(this).saveQueues(
-                queue,
-                originalQueue
-        );
+    public void saveQueuesImpl() {
+        playingQueue.saveQueue(this);
     }
 
     private void savePosition() {
@@ -427,10 +423,16 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
         PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(SAVED_POSITION_IN_TRACK, getSongProgressMillis()).apply();
     }
 
-    private void saveState() {
+    public void saveQueueType() {
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(SAVED_QUEUE_TYPE, isDynamicQueueActivated()).apply();
+    }
+
+    public void saveState() {
         saveQueues();
         savePosition();
         savePositionInTrack();
+
+        saveQueueType();
     }
 
     private void saveQueues() {
@@ -457,28 +459,21 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     void restoreQueuesAndPosition() {
         synchronized (this) {
-            try {
-                // The current playback state
-                final long savedSongId = getCurrentSong().id;
+            // The current playback state
+            final long savedSongId = getCurrentSong().id;
 
-                // The saved state
-                final MusicPlaybackQueueStore queueStore = MusicPlaybackQueueStore.getInstance(this);
-                final ArrayList<IndexedSong> restoredQueue = queueStore.getSavedPlayingQueue();
-                final ArrayList<IndexedSong> restoredOriginalQueue = queueStore.getSavedOriginalPlayingQueue();
-                final int restoredPosition = PreferenceManager.getDefaultSharedPreferences(this)
-                        .getInt(SAVED_POSITION, StaticPlayingQueue.INVALID_POSITION);
-                final int restoredPositionInTrack = PreferenceManager.getDefaultSharedPreferences(this)
-                        .getInt(SAVED_POSITION_IN_TRACK, -1);
+            // The saved state
+            final int restoredPosition = PreferenceManager.getDefaultSharedPreferences(this)
+                    .getInt(SAVED_POSITION, StaticPlayingQueue.INVALID_POSITION);
+            final int restoredPositionInTrack = PreferenceManager.getDefaultSharedPreferences(this)
+                    .getInt(SAVED_POSITION_IN_TRACK, -1);
 
-                playingQueue = new StaticPlayingQueue(
-                        restoredQueue,
-                        restoredOriginalQueue,
-                        restoredPosition,
-                        playingQueue.getShuffleMode(),
-                        playingQueue.getRepeatMode()
-                );
-                queuesRestored = true;
+            queueIsDynamic = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SAVED_QUEUE_TYPE, false);
+            if (queueIsDynamic) {
+                playingQueue = new DynamicPlayingQueue(playingQueue, new AlbumShufflingQueueLoader()); // For album shuffling V2: Will depend on a saved preference to have the same than before
+            }
 
+            if (playingQueue.restoreQueue(this, restoredPosition)) {
                 // Before altering the player state, check that it is really necessary
                 // ie. we are changing song in between
                 // This prevents changing the player state, as it will stop the playback
@@ -493,15 +488,9 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
                 prepareNext();
                 sendChangeInternal(QUEUE_CHANGED);
-            } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException queueCopiesOutOfSync) {
-                // fallback, when the copies of the restored queues are out of sync or the queues are corrupted
-                OopsHandler.collectStackTrace(queueCopiesOutOfSync);
-                SafeToast.show(this, R.string.failed_restore_playing_queue);
-
-                final int shuffleMode = playingQueue.getShuffleMode();
-                playingQueue = new StaticPlayingQueue();
-                playingQueue.setShuffle(shuffleMode);
             }
+
+            queuesRestored = true;
         }
     }
 
@@ -563,11 +552,21 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     boolean openTrackAndPrepareNextAt(int position) {
         synchronized (this) {
-            playingQueue.setCurrentPosition(position);
-            boolean prepared = openCurrent();
-            if (prepared) prepareNextImpl();
-            notifyChange(META_CHANGED);
-            notHandledMetaChangedForCurrentTrack = false;
+            boolean prepared = false;
+
+            int status = playingQueue.setCurrentPosition(position);
+            if (status != StaticPlayingQueue.INVALID_POSITION) {
+                prepared = openCurrent();
+                if (prepared)
+                    prepareNextImpl();
+
+                if (status == StaticPlayingQueue.QUEUE_HAS_CHANGED)
+                    notifyChange(QUEUE_CHANGED);
+                else if (status == StaticPlayingQueue.VALID_POSITION)
+                    notifyChange(META_CHANGED);
+
+                notHandledMetaChangedForCurrentTrack = false;
+            }
             return prepared;
         }
     }
@@ -789,6 +788,50 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
     public List<? extends Song> getPlayingQueue() {
         synchronized (this) {
             return playingQueue.getPlayingQueue();
+        }
+    }
+
+    public DynamicElement getDynamicElement() {
+        if (playingQueue instanceof DynamicPlayingQueue)
+            return ((DynamicPlayingQueue)playingQueue).getDynamicElement(this);
+
+        return null;
+    }
+
+    public void setNextDynamicQueue(Bundle criteria, Context context) {
+        if (playingQueue instanceof DynamicPlayingQueue) {
+            ((DynamicPlayingQueue) playingQueue).setNextDynamicQueue(criteria, context);
+            notifyChange(QUEUE_CHANGED);
+        }
+    }
+
+    public boolean isDynamicQueueActivated() {
+        return queueIsDynamic;
+    }
+
+    public DynamicQueueItemAdapter getDynamicAdapter() {
+        if (playingQueue instanceof DynamicPlayingQueue) {
+            return ((DynamicPlayingQueue) playingQueue).getAdapter();
+        }
+
+        return null;
+    }
+
+    public synchronized void setQueueToStaticQueue() {
+        if (queueIsDynamic) {
+            playingQueue = new StaticPlayingQueue(playingQueue);
+            queueIsDynamic = false;
+            saveQueueType();
+            notifyChange(QUEUE_CHANGED);
+        }
+    }
+
+    public synchronized void setQueueToDynamicQueue() {
+        if (!queueIsDynamic) {
+            playingQueue = new DynamicPlayingQueue(playingQueue, new AlbumShufflingQueueLoader()); // For album shuffling V2: Will depend on what user select on bottom sheet dialog (album, song, genre, ...)
+            queueIsDynamic = true;
+            saveQueueType();
+            notifyChange(QUEUE_CHANGED);
         }
     }
 

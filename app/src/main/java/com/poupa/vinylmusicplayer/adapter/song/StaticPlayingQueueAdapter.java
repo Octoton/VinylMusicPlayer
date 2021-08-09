@@ -39,14 +39,15 @@ import com.poupa.vinylmusicplayer.util.ViewUtil;
 import java.util.List;
 
 /**
+ * Provide playing queue adapter (i.e. a list of song that is swipeable for removal and draggable for reordering ) for playing activity
  * @author Karim Abou Zeid (kabouzeid)
  */
-public class PlayingQueueAdapter extends SongAdapter
-        implements DraggableItemAdapter<PlayingQueueAdapter.ViewHolder>, SwipeableItemAdapter<PlayingQueueAdapter.ViewHolder> {
+public class StaticPlayingQueueAdapter extends SongAdapter
+        implements DraggableItemAdapter<StaticPlayingQueueAdapter.ViewHolder>, SwipeableItemAdapter<StaticPlayingQueueAdapter.ViewHolder> {
 
-    private static final int HISTORY = 0;
-    private static final int CURRENT = 1;
-    private static final int UP_NEXT = 2;
+    protected static final int HISTORY = 0;
+    protected static final int CURRENT = 1;
+    protected static final int UP_NEXT = 2;
 
     public IndexedSong songToRemove;
 
@@ -54,7 +55,7 @@ public class PlayingQueueAdapter extends SongAdapter
 
     private int current;
 
-    public PlayingQueueAdapter(@NonNull final AbsThemeActivity activity, List<? extends Song> dataSet, int current, boolean usePalette, @Nullable PaletteColorHolder palette) {
+    public StaticPlayingQueueAdapter(@NonNull final AbsThemeActivity activity, List<? extends Song> dataSet, int current, boolean usePalette, @Nullable PaletteColorHolder palette) {
         super(activity, dataSet, R.layout.item_list, usePalette, palette);
         this.showAlbumImage = false; // We don't want to load it in this adapter
         this.current = current;
@@ -229,7 +230,7 @@ public class PlayingQueueAdapter extends SongAdapter
         }
 
         @Override
-        protected int getSongMenuRes() {
+        protected int getSongMenuRes(int itemViewType) {
             return R.menu.menu_item_playing_queue_song;
         }
 
@@ -261,11 +262,11 @@ public class PlayingQueueAdapter extends SongAdapter
     }
 
     static class SwipedResultActionRemoveItem extends SwipeResultActionRemoveItem {
-        private final PlayingQueueAdapter adapter;
+        private final StaticPlayingQueueAdapter adapter;
         private final int position;
         private final AppCompatActivity activity;
 
-        public SwipedResultActionRemoveItem(PlayingQueueAdapter adapter, int position, AppCompatActivity activity) {
+        public SwipedResultActionRemoveItem(StaticPlayingQueueAdapter adapter, int position, AppCompatActivity activity) {
             this.adapter = adapter;
             this.position = position;
             this.activity = activity;
@@ -302,7 +303,7 @@ public class PlayingQueueAdapter extends SongAdapter
         }
     }
 
-    static void initializeSnackBar(final PlayingQueueAdapter adapter,final int position,
+    public static void initializeSnackBar(final StaticPlayingQueueAdapter adapter,final int position,
                                           final AppCompatActivity activity,
                                           final boolean isPlayingSongToRemove) {
 

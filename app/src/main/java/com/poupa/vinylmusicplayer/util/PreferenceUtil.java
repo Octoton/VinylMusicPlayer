@@ -131,6 +131,7 @@ public final class PreferenceUtil {
     public static final String LIBRARY_CATEGORIES = PrefKey.exportableKey("library_categories");
 
     public static final String REMEMBER_SHUFFLE = PrefKey.exportableKey("remember_shuffle");
+    public static final String REMEMBER_DYNAMIC_QUEUE = PrefKey.exportableKey("remember_dynamic_queue");
 
     public static final String RG_SOURCE_MODE_V2 = PrefKey.exportableKey("replaygain_source_mode");
     @NonNls
@@ -690,6 +691,10 @@ public final class PreferenceUtil {
 
     public boolean rememberShuffle() {
         return mPreferences.getBoolean(REMEMBER_SHUFFLE, true);
+    }
+
+    public boolean rememberDynamicQueue() {
+        return mPreferences.getBoolean(REMEMBER_DYNAMIC_QUEUE, true);
     }
 
     private String autoDownloadImagesPolicy() {

@@ -113,10 +113,10 @@
     <string name="add_playlist_title">"Add to playlist"</string>
     <string name="import_playlist_title">"Import from playlist"</string>
     <string name="select_all_title">Select all</string>
-    <string name="action_shuffle_all">Shuffle all</string>
-    <string name="action_shuffle_album">Shuffle album</string>
-    <string name="action_shuffle_artist">Shuffle artist</string>
-    <string name="action_shuffle_playlist">Shuffle playlist</string>
+    <string name="action_shuffle_all_songs">Shuffle all</string>
+    <string name="action_shuffle_album_songs">Shuffle album</string>
+    <string name="action_shuffle_artist_songs">Shuffle artist</string>
+    <string name="action_shuffle_playlist_songs">Shuffle playlist</string>
     <string name="action_go_to_start_directory">Go to start directory</string>
     <string name="action_show_lyrics">Show lyrics</string>
     <string name="light_theme_name">Light</string>
@@ -429,4 +429,19 @@
 
     <string name="write_permission">Always ask for write permission</string>
     <string name="pref_summary_write_permission">To revoke already granted permission, go to android settings for this app, then &quot;Storage &amp; cache&quot; and revoke external storage</string>
+
+    <!-- Dynamic element -->
+    <string name="start_dynamic_queue">Start new perpetual queue</string>
+    <string name="stop_dynamic_queue">Stop the perpetual queue</string>
+    <string name="pref_title_remember_dynamic_element">Remember perpetual queue</string>
+    <string name="pref_summary_remember_dynamic_element">Perpetual queue will stay on when selecting a new list of songs</string>
+    <!-- Album shuffling -->
+    <string name="action_shuffle_all_albums">Shuffle by album</string>
+    <string name="start_album_shuffling_queue">Start new perpetual album queue</string>
+    <string name="next_album">Next album:</string>
+    <string name="no_album_found">Nothing found</string>
+    <string name="no_other_album_found">Nothing else was found</string>
+    <string name="shuffle_album">Shuffle album</string>
+    <string name="shuffle_album_genre">Shuffle album with same genre</string>
+    <string name="shuffle_album_artist">Shuffle album with same artist</string>
 </resources>

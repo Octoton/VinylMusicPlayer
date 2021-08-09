@@ -20,7 +20,8 @@ public class MenuHelper {
         List<Integer> destructiveItems = List.of(
                 R.id.action_delete_playlist,
                 R.id.action_delete_from_device,
-                R.id.action_clear_playlist
+                R.id.action_clear_playlist,
+                R.id.action_delete_dynamic_element
         );
         for (int itemId : destructiveItems) {
             MenuItem liveItem = menu.findItem(itemId);

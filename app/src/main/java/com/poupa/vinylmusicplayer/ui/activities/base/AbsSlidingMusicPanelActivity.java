@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.poupa.vinylmusicplayer.R;
+import com.poupa.vinylmusicplayer.adapter.song.DynamicPlayingQueueAdapter;
 import com.poupa.vinylmusicplayer.databinding.SlidingMusicPanelLayoutBinding;
 import com.poupa.vinylmusicplayer.discog.Discography;
 import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
@@ -146,6 +147,13 @@ public abstract class AbsSlidingMusicPanelActivity extends AbsMusicServiceActivi
     @Override
     public void onQueueChanged() {
         super.onQueueChanged();
+
+        AbsPlayerFragment fragment = (AbsPlayerFragment) getSupportFragmentManager().findFragmentById(R.id.player_fragment_container);
+        if ((MusicPlayerRemote.isDynamicQueueActivated() && !(fragment.playingQueueAdapter instanceof DynamicPlayingQueueAdapter)) ||
+                (!MusicPlayerRemote.isDynamicQueueActivated() && (fragment.playingQueueAdapter instanceof DynamicPlayingQueueAdapter))) {
+            fragment.recreate();
+        }
+
         hideBottomBar(MusicPlayerRemote.getPlayingQueue().isEmpty());
     }
 
