@@ -388,14 +388,10 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     public synchronized void restoreQueuesAndPositionIfNecessary() {
         if (!queuesRestored && playingQueue.size()==0) {
-            ArrayList<IndexedSong> restoredQueue = MusicPlaybackQueueStore.getInstance(this).getSavedPlayingQueue();
-            ArrayList<IndexedSong> restoredOriginalQueue = MusicPlaybackQueueStore.getInstance(this).getSavedOriginalPlayingQueue();
             int restoredPosition = PreferenceManager.getDefaultSharedPreferences(this).getInt(SAVED_POSITION, -1);
             int restoredPositionInTrack = PreferenceManager.getDefaultSharedPreferences(this).getInt(SAVED_POSITION_IN_TRACK, -1);
 
-            if (restoredQueue.size() > 0 && restoredQueue.size() == restoredOriginalQueue.size() && restoredPosition != -1) {
-                playingQueue = new DynamicPlayingQueue(restoredQueue, restoredOriginalQueue, restoredPosition, playingQueue.getShuffleMode()); //StaticPlayingQueue
-
+            if (playingQueue.restoreQueue(this, restoredPosition)) {
                 openCurrent();
                 prepareNext();
 
@@ -681,7 +677,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     public DynamicElement getDynamicElement() {
         //if (playingQueue instanceof DynamicPlayingQueue)
-            return ((DynamicPlayingQueue)playingQueue).getDynamicElement();
+            return ((DynamicPlayingQueue)playingQueue).getDynamicElement(this);
 
         //return Song.EMPTY_SONG;
     }
