@@ -190,7 +190,7 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
         }
 
         // if shuffle pref is activated
-        ((DynamicPlayingQueueAdapter)playingQueueAdapter).swapDynamicElement(MusicPlayerRemote.getDynamicElement());
+        ((DynamicPlayingQueueAdapter)playingQueueAdapter).swapDynamicElement();
     }
 
     private void updateQueuePosition() {
