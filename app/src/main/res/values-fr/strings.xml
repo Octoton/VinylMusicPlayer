@@ -335,4 +335,10 @@
     <string name="rounded_theme_style_name">Arrondi</string>
     <string name="classic_theme_style_name">Classique</string>
     <string name="pref_title_theme_style">Thème style</string>
+
+    <string name="next_album">Album suivant :</string>
+    <string name="no_album_found">Rien n\'a été trouvé</string>
+    <string name="shuffle_album">Recharger album aléatoirement</string>
+    <string name="shuffle_album_genre">Recharger album dans le même genre</string>
+    <string name="shuffle_album_artist">Recharger album avec le même artist</string>
 </resources>
