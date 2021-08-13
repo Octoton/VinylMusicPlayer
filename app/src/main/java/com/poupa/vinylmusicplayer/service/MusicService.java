@@ -694,9 +694,9 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
         return DynamicElement.EMPTY_ELEMENT;
     }
 
-    public void setNextDynamicQueue(Bundle criteria) {
+    public void setNextDynamicQueue(Bundle criteria, Context context) {
         if (playingQueue instanceof DynamicPlayingQueue) {
-            ((DynamicPlayingQueue) playingQueue).setNextDynamicQueue(criteria);
+            ((DynamicPlayingQueue) playingQueue).setNextDynamicQueue(criteria, context);
             notifyChange(QUEUE_CHANGED);
         }
     }
