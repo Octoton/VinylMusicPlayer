@@ -253,7 +253,7 @@ public class MusicPlayerRemote {
         if (musicService != null) {
             return musicService.getDynamicElement();
         }
-        return DynamicElement.EMPTY_ELEMENT;
+        return null;
     }
 
     public static void setNextDynamicQueue(Bundle criteria) {
