@@ -188,7 +188,7 @@ public class FlatPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
         }
 
         if (playingQueueAdapter instanceof DynamicPlayingQueueAdapter) {
-            ((DynamicPlayingQueueAdapter) playingQueueAdapter).swapDynamicElement();
+            ((DynamicPlayingQueueAdapter) playingQueueAdapter).reloadDynamicElement();
         }
     }
 
