@@ -22,11 +22,10 @@
         android:title="@string/shuffle_album"
         app:showAsAction="never" />
 
-    <!-- For album shuffling V2: a way to change dynamic element type and criteria -->
-    <!--<item
+    <item
         android:id="@+id/pref"
-        android:title="PREFERENCE"
-        app:showAsAction="never" /> -->
+        android:title="Settings"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_delete_dynamic_element"

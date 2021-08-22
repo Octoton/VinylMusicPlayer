@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shuffling_type_prompt">Shuffling type</string>
+
+    <string-array name="shuffling_type_arrays">
+        <item>Album</item>
+        <item>Genre</item>
+        <item>Song</item>
+    </string-array>
+
+    <string-array name="album_shuffling_order">
+        <item>Artist</item>
+        <item>Genre</item>
+        <item>Random</item>
+    </string-array>
+
+</resources>
