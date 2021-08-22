@@ -65,6 +65,7 @@ import com.poupa.vinylmusicplayer.service.notification.PlayingNotification;
 import com.poupa.vinylmusicplayer.service.notification.PlayingNotificationImplApi19;
 import com.poupa.vinylmusicplayer.service.notification.PlayingNotificationImplApi24;
 import com.poupa.vinylmusicplayer.service.playback.Playback;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog.Type;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
 import com.poupa.vinylmusicplayer.util.OopsHandler;
 import com.poupa.vinylmusicplayer.util.PackageValidator;
@@ -471,7 +472,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
                 queueIsDynamic = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SAVED_QUEUE_TYPE, false);
                 if (queueIsDynamic) {
-                    playingQueue = new DynamicPlayingQueue(playingQueue, new AlbumShufflingQueueLoader()); // For album shuffling V2: Will depend on a saved preference to have the same than before
+                    playingQueue = new DynamicPlayingQueue(playingQueue, Type.getQueueLoader(Type.toType(PreferenceUtil.getInstance().getDynamicQueueStyle())));
                 }
 
                 if (playingQueue.restoreQueue(this, restoredPosition)) {
@@ -566,9 +567,10 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
                 if (prepared)
                     prepareNextImpl();
 
-                if (status == StaticPlayingQueue.QUEUE_HAS_CHANGED)
+                if (status == StaticPlayingQueue.QUEUE_HAS_CHANGED) {
                     notifyChange(QUEUE_CHANGED);
-                else if (status == StaticPlayingQueue.VALID_POSITION)
+                    notifyChange(META_CHANGED);
+                } else if (status == StaticPlayingQueue.VALID_POSITION)
                     notifyChange(META_CHANGED);
 
                 notHandledMetaChangedForCurrentTrack = false;
@@ -825,6 +827,9 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     public synchronized void setQueueToStaticQueue() {
         if (queueIsDynamic) {
+            if (playingQueue != null) {
+                playingQueue.stop();
+            }
             playingQueue = new StaticPlayingQueue(playingQueue);
             queueIsDynamic = false;
             saveQueueType();
@@ -832,9 +837,16 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
         }
     }
 
-    public synchronized void setQueueToDynamicQueue() {
-        if (!queueIsDynamic) {
-            playingQueue = new DynamicPlayingQueue(playingQueue, new AlbumShufflingQueueLoader()); // For album shuffling V2: Will depend on what user select on bottom sheet dialog (album, song, genre, ...)
+    public synchronized void setQueueToDynamicQueue(boolean force) {
+        if (!queueIsDynamic || force) {
+            if (playingQueue != null && !force) {
+                playingQueue.stop();
+            }
+            if (!queueIsDynamic)
+                playingQueue = new DynamicPlayingQueue(playingQueue, Type.getQueueLoader(Type.toType(PreferenceUtil.getInstance().getDynamicQueueStyle())));
+            else
+                playingQueue = new DynamicPlayingQueue((DynamicPlayingQueue) playingQueue, Type.getQueueLoader(Type.toType(PreferenceUtil.getInstance().getDynamicQueueStyle())));
+
             queueIsDynamic = true;
             saveQueueType();
             notifyChange(QUEUE_CHANGED);
@@ -989,9 +1001,10 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
         notifyChange(QUEUE_CHANGED);
     }
 
-    public void clearQueue() {
+    public void closeQueue() {
         synchronized (this) {
             playingQueue.clear();
+            playingQueue.stop();
             setPosition(-1);
         }
         notifyChange(QUEUE_CHANGED);

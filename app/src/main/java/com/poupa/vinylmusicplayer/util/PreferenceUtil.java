@@ -132,6 +132,8 @@ public final class PreferenceUtil {
 
     public static final String REMEMBER_SHUFFLE = PrefKey.exportableKey("remember_shuffle");
     public static final String REMEMBER_DYNAMIC_QUEUE = PrefKey.exportableKey("remember_dynamic_queue");
+    public static final String ALWAYS_SHOW_DYNAMIC_SETTINGS = PrefKey.exportableKey("always_show_dynamic_settings");
+    public static final String DYNAMIC_QUEUE_STYLE = PrefKey.exportableKey("dynamic_queue_style");
 
     public static final String RG_SOURCE_MODE_V2 = PrefKey.exportableKey("replaygain_source_mode");
     @NonNls
@@ -695,6 +697,18 @@ public final class PreferenceUtil {
 
     public boolean rememberDynamicQueue() {
         return mPreferences.getBoolean(REMEMBER_DYNAMIC_QUEUE, true);
+    }
+
+    public final boolean alwaysShowDynamicSettings() {
+        return mPreferences.getBoolean(ALWAYS_SHOW_DYNAMIC_SETTINGS, true);
+    }
+
+    public final int getDynamicQueueStyle() {
+        return mPreferences.getInt(DYNAMIC_QUEUE_STYLE, 0);
+    }
+
+    public final void setDynamicQueueStyle(int value) {
+        mPreferences.edit().putInt(DYNAMIC_QUEUE_STYLE, value).apply();
     }
 
     private String autoDownloadImagesPolicy() {

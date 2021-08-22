@@ -136,7 +136,7 @@ public class BrowsableMusicProvider {
         ArrayList<CategoryInfo> categories = PreferenceUtil.getInstance().getLibraryCategoryInfos();
         for (CategoryInfo categoryInfo : categories) {
             if (categoryInfo.visible) {
-                switch (categoryInfo.category) {
+                switch (categoryInfo.item) {
                     case ALBUMS:
                         boolean albumGrid = PreferenceUtil.getInstance().getAlbumGridSize(mContext) > 1;
                         mediaItems.add(BrowsableMediaItem.with(mContext)

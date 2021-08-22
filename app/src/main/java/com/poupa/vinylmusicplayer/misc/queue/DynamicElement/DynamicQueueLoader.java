@@ -1,14 +1,11 @@
 package com.poupa.vinylmusicplayer.misc.queue.DynamicElement;
 
-
 import java.util.ArrayList;
 
 import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElement;
-import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueItemAdapter;
 import com.poupa.vinylmusicplayer.model.Song;
 
 
@@ -41,4 +38,11 @@ public interface DynamicQueueLoader {
      * @param song last song used in setNextDynamicQueue
      */
     boolean restoreQueue(Context context, Song song);
+
+    /** Transfer dynamic element in-between loader, useful when user change dynamic element settings and we want to remember last element for better next search
+     * @param loader previously used loader which will be transferred
+     */
+    void transferDynamicElement(DynamicQueueLoader loader);
+
+    void stop();
 }

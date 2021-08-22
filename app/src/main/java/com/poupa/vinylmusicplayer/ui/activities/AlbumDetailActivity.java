@@ -10,6 +10,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -39,11 +40,13 @@ import com.poupa.vinylmusicplayer.lastfm.rest.model.LastFmAlbum;
 import com.poupa.vinylmusicplayer.loader.AlbumLoader;
 import com.poupa.vinylmusicplayer.misc.SimpleObservableScrollViewCallbacks;
 import com.poupa.vinylmusicplayer.misc.WrappedAsyncTaskLoader;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog.Type;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.ui.activities.base.AbsSlidingMusicPanelActivity;
 import com.poupa.vinylmusicplayer.ui.activities.tageditor.AbsTagEditorActivity;
 import com.poupa.vinylmusicplayer.ui.activities.tageditor.AlbumTagEditorActivity;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog;
 import com.poupa.vinylmusicplayer.util.ImageTheme.ThemeStyleUtil;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
 import com.poupa.vinylmusicplayer.util.NavigationUtil;
@@ -294,8 +297,21 @@ public class AlbumDetailActivity
             MusicPlayerRemote.enqueue(songs);
             return true;
         } else if (id == R.id.action_open_playing_queue_in_album_shuffling_mode) {
-            MusicPlayerRemote.openQueue(songs, 0, true);
-            MusicPlayerRemote.setQueueToDynamicQueue();
+            if (PreferenceUtil.getInstance().alwaysShowDynamicSettings()) {
+                DynamicElementBottomSheetDialog dynamicElementBottomSheetDialog = DynamicElementBottomSheetDialog.newInstance();
+
+                Bundle args = new Bundle();
+                args.putParcelableArrayList(DynamicElementBottomSheetDialog.NEW_QUEUE_SONGS, songs);
+                args.putBoolean(DynamicElementBottomSheetDialog.ALBUM_TYPE, true);
+                dynamicElementBottomSheetDialog.setArguments(args);
+
+                dynamicElementBottomSheetDialog.show(((AppCompatActivity) this).getSupportFragmentManager(),"dynamic_element_bottom_sheet");
+            } else {
+                MusicPlayerRemote.openQueue(songs, 0, true);
+                PreferenceUtil.getInstance().setDynamicQueueStyle(Type.ALBUM.id);
+                MusicPlayerRemote.setQueueToDynamicQueue(true);
+            }
+
             return true;
         } else if (id == R.id.action_add_to_playlist) {
             AddToPlaylistDialog.create(songs).show(getSupportFragmentManager(), "ADD_PLAYLIST");

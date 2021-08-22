@@ -7,12 +7,14 @@ import java.util.Random;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.discog.Discography;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AbstractShuffling.AbstractQueueLoader;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.Search.AutomaticSearch;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.Search.ManualSearch;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.Search.Search;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElement;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueItemAdapter;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueLoader;
@@ -26,17 +28,13 @@ import com.poupa.vinylmusicplayer.util.MusicUtil;
 public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
     public static final String SEARCH_TYPE = "search_type";
 
-    public static final int RANDOM_SEARCH = 1;
-    public static final int ARTIST_SEARCH = 2;
-    public static final int GENRE_SEARCH = 3;
-
     private final DB database;
     private Album nextAlbum;
 
     public AlbumShufflingQueueLoader() {
         super();
 
-        this.nextAlbum = new Album();
+        this.nextAlbum = null;
         this.database = new DB();
     }
 
@@ -44,71 +42,82 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
     public boolean restoreQueue(Context context, Song song) {
         this.nextAlbum = Discography.getInstance().getAlbum(database.fetchNextRandomAlbumId());
 
+        AlbumShufflingUtil.getInstance().restoreHistories();
         return super.restoreQueue(song);
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        AlbumShufflingUtil.getInstance().stopHistories();
+    }
+
+    @Override
+    public void transferDynamicElement(DynamicQueueLoader loader) {
+        if (loader != null && loader.getClass().equals(this.getClass())) {
+            this.nextAlbum = ((AlbumShufflingQueueLoader) loader).nextAlbum;
+        }
     }
 
     public DynamicQueueItemAdapter getAdapter() {
         return new AlbumShufflingQueueItemAdapter();
     }
 
-    // For album shuffling V2: use bottom sheet criteria for automatic search instead of the actual random manual search
     @Override
     public boolean setNextDynamicQueue(Context context, Song song, boolean force) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(AlbumShufflingQueueLoader.SEARCH_TYPE, AlbumShufflingQueueLoader.RANDOM_SEARCH);
+        if (!super.setNextDynamicQueue(null, context, song, force))
+            return false;
 
-        return setNextDynamicQueue(bundle, context, song, force);
+        Album album;
+        long currentAlbumId = -1;
+        if (nextAlbum != null) {
+            currentAlbumId = nextAlbum.getId();
+        }
+        AlbumShufflingUtil.getInstance().resetSearchHistory();
+        album = search(song, currentAlbumId, new AutomaticSearch(), context);
+
+        if (album != null) {
+            this.nextAlbum = album;
+            this.database.setNextRandomAlbumId(album.getId());
+        } else {
+            this.nextAlbum = null;
+            this.database.setNextRandomAlbumId(-1);
+        }
+
+        return true;
     }
 
     @Override
-    public boolean setNextDynamicQueue(Bundle criteria, Context context, Song song, boolean force) {
+    public boolean setNextDynamicQueue(Bundle criteria, @NonNull Context context, Song song, boolean force) {
         if (!super.setNextDynamicQueue(criteria, context, song, force))
             return false;
 
-        //Random search basic form, will be updated for v2
-        int searchType = criteria.getInt(SEARCH_TYPE);
+        Album album;
+        long currentAlbumId = -1;
+        if (nextAlbum != null) {
+            currentAlbumId = nextAlbum.getId();
+        }
+        album = search(song, currentAlbumId, new ManualSearch(criteria), context);
 
+        if (album != null) {
+            this.nextAlbum = album;
+            this.database.setNextRandomAlbumId(album.getId());
+        }
+
+        return true;
+    }
+
+    // Search for next album by using song as the currently played album
+    public Album search(Song song, long currentAlbumId, Search searchFunction, Context context) {
+
+        // Get all possible album to be play
         ArrayList<Album> albums;
         synchronized (Discography.getInstance()) {
             albums = new ArrayList<>(Discography.getInstance().getAllAlbums(AlbumSortOrder.BY_YEAR_DESC));
         }
 
-        ArrayList<Album> subList = new ArrayList<>();
-        boolean isAlbumInCriteria = false;
-        for (Album album : albums) {
-            if (song.albumId != album.getId() && (nextAlbum == null || nextAlbum.getId() != album.getId())) {
-                switch (searchType) {
-                    case RANDOM_SEARCH:
-                        isAlbumInCriteria = true;
-                        break;
-                    case ARTIST_SEARCH:
-                        isAlbumInCriteria = !Collections.disjoint(song.artistNames, album.getArtistNames());
-                        break;
-                    case GENRE_SEARCH:
-                        isAlbumInCriteria = !album.songs.isEmpty() && !Collections.disjoint(song.genres, album.songs.get(0).genres);
-                        break;
-                }
-
-                if (isAlbumInCriteria) {
-                    subList.add(album);
-                }
-            }
-        }
-
-        if (subList.size() > 0) {
-            Random rand = new Random();
-            this.nextAlbum = subList.get(rand.nextInt(subList.size()));
-            this.database.setNextRandomAlbumId(nextAlbum.getId());
-        } else {
-            if (context != null) {
-                Toast.makeText(context, context.getResources().getString(R.string.no_other_album_found), Toast.LENGTH_SHORT).show();
-            } else {
-                this.nextAlbum = null;
-                this.database.setNextRandomAlbumId(-1);
-            }
-        }
-
-        return true;
+        // Search
+        return searchFunction.foundNextAlbum(song, albums, currentAlbumId, AlbumShufflingUtil.getInstance().getListenHistory(), AlbumShufflingUtil.getInstance().getSearchHistory(), context);
     }
 
     public static ArrayList<Song> getNextRandomQueue() {
@@ -130,6 +139,11 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         if (isNextQueueEmpty())
             return null;
 
+        if (this.songUsedForSearching != null)
+            AlbumShufflingUtil.getInstance().commitHistories(this.songUsedForSearching.albumId); // commit ensure no duplication, this call help remember first album listen too
+
+        AlbumShufflingUtil.getInstance().commitHistories(nextAlbum.getId());
+
         return nextAlbum.songs;
     }
 
@@ -137,18 +151,20 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
     protected DynamicElement createEmptyDynamicElement(Context context) {
         return new DynamicElement(context.getResources().getString(R.string.next_album),
                 context.getResources().getString(R.string.no_album_found),
-                R.drawable.ic_shuffle_album_white_24dp); //"-");
+                R.drawable.ic_shuffle_album_white_24dp);
     }
 
     @Override
     protected DynamicElement createNewDynamicElement(Context context) {
         return new DynamicElement(context.getResources().getString(R.string.next_album),
                 MusicUtil.buildInfoString(this.nextAlbum.getArtistNames().get(0), this.nextAlbum.getTitle()),
-                R.drawable.ic_shuffle_album_white_24dp); //"-");
+                R.drawable.ic_shuffle_album_white_24dp);
     }
 
     @Override
     protected boolean isSongDifferentEnough(@NonNull Song song) {
-        return (song.albumId != songUsedForSearching.albumId);
+        if (this.songUsedForSearching == null)
+            return true;
+        return (song.albumId != this.songUsedForSearching.albumId);
     }
 }

@@ -114,7 +114,7 @@ public class DynamicPlayingQueueAdapter extends StaticPlayingQueueAdapter {
 
         @Override
         protected boolean onSongMenuItemClick(MenuItem item) {
-            if (dynamicQueueItemAdapter != null && dynamicQueueItemAdapter.onSongMenuItemClick(item))
+            if (dynamicQueueItemAdapter != null && dynamicQueueItemAdapter.onSongMenuItemClick(item, activity))
                 return true;
 
             return super.onSongMenuItemClick(item);

@@ -33,8 +33,15 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_dynamic_queue"
+        android:id="@+id/action_start_dynamic_queue"
         android:orderInCategory="99"
         android:title="@string/start_dynamic_queue"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_delete_dynamic_element"
+        android:orderInCategory="99"
+        android:title="@string/stop_dynamic_queue"
+        app:showAsAction="never"
+        android:visible="false" />
 </menu>

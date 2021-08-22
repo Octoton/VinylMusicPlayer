@@ -44,11 +44,10 @@ public class MusicLibraryPagerAdapter extends FragmentPagerAdapter {
 
         for (CategoryInfo categoryInfo : categoryInfos) {
             if (categoryInfo.visible) {
-                MusicFragments fragment = MusicFragments.valueOf(categoryInfo.category.toString());
+                MusicFragments fragment = MusicFragments.valueOf(categoryInfo.item.toString());
                 Holder holder = new Holder();
                 holder.mClassName = fragment.getFragmentClass().getName();
-                holder.title = mContext.getResources()
-                        .getString(categoryInfo.category.stringRes)
+                holder.title = categoryInfo.toString()
                         .toUpperCase(Locale.getDefault());
                 mHolderList.add(holder);
             }
