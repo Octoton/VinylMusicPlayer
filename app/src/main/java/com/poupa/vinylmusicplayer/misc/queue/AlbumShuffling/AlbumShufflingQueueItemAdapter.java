@@ -75,8 +75,7 @@ public class AlbumShufflingQueueItemAdapter extends AbstractQueueItemAdapter {
 
 
     private void showBottomSheetDialog(Context context) {
-        DraggableListFragment draggableListFragment =
-                DraggableListFragment.newInstance();
+        DraggableListFragment draggableListFragment = DraggableListFragment.newInstance();
 
         draggableListFragment.show( ((AppCompatActivity) context).getSupportFragmentManager(), "test");
     }
