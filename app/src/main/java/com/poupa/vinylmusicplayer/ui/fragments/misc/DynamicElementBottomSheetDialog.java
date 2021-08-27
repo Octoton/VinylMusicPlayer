@@ -1,6 +1,9 @@
 package com.poupa.vinylmusicplayer.ui.fragments.misc;
 
 
+import java.util.ArrayList;
+import java.util.EnumSet;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,11 +25,12 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.adapter.misc.DraggableListAdapter;
+import com.poupa.vinylmusicplayer.model.AlbumShufflingCriteria;
 
 
-public class DraggableListFragment extends BottomSheetDialogFragment {
-    public static DraggableListFragment newInstance() {
-        return new DraggableListFragment();
+public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
+    public static DynamicElementBottomSheetDialog newInstance() {
+        return new DynamicElementBottomSheetDialog();
     }
 
     private DraggableListAdapter adapter;
@@ -68,8 +72,19 @@ public class DraggableListFragment extends BottomSheetDialogFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.bottom_sheet_dynamic_element_preference, container, false);
 
-        String[] listItem = this.getResources().getStringArray(R.array.album_shuffling_order);
-        adapter = new DraggableListAdapter(listItem);
+        ArrayList<AlbumShufflingCriteria> criteria = new ArrayList<>();
+
+        ArrayList<AlbumShufflingCriteria.Criteria> objects = new ArrayList<>(EnumSet.allOf(AlbumShufflingCriteria.Criteria.class));
+        for (AlbumShufflingCriteria.Criteria object : objects) {
+            criteria.add(new AlbumShufflingCriteria(object, true));
+        }
+
+        /*if (savedInstanceState != null) {
+            criteria = savedInstanceState.getParcelableArrayList(PreferenceUtil.LIBRARY_CATEGORIES);
+        } else {
+            criteria = PreferenceUtil.getInstance().getLibraryCategoryInfos();
+        }*/
+        adapter = new DraggableListAdapter<>(criteria);
 
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
