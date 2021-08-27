@@ -1,10 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/option_1"
-        android:title="album" />
-    <item android:id="@+id/option_2"
-        android:title="song" />
-    <item android:id="@+id/option_3"
-        android:title="genre" />
-    <item android:id="@+id/option_3"
-        android:title="playlist" />
+    <item android:id="@+id/album"
+        android:title="@string/album" />
+    <item android:id="@+id/genre"
+        android:title="@string/song" />
+    <item android:id="@+id/song"
+        android:title="@string/genre" />
+    <item android:id="@+id/playlist"
+        android:title="@string/playlists" />
 </menu>
