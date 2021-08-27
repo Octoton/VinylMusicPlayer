@@ -2,29 +2,29 @@ package com.poupa.vinylmusicplayer.adapter.misc;
 
 import java.util.ArrayList;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.DraggableItemAdapter;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
-import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableSwipeableItemViewHolder;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.databinding.PreferenceDialogLibraryCategoriesListitemBinding;
-import com.poupa.vinylmusicplayer.util.ViewUtil;
+import com.poupa.vinylmusicplayer.util.SwipeAndDragHelper;
 
 
-public class DraggableListAdapter extends RecyclerView.Adapter<DraggableListAdapter.ViewHolder> implements
-        DraggableItemAdapter<DraggableListAdapter.ViewHolder> {
+public class DraggableListAdapter extends RecyclerView.Adapter<DraggableListAdapter.ViewHolder> implements SwipeAndDragHelper.ActionCompletionContract {
 
     private ArrayList<Item> listItem;
+    private final ItemTouchHelper touchHelper;
 
     // next step:
     // public DraggableListAdapter(@NonNull ArrayList<Item> objects) {
@@ -36,43 +36,16 @@ public class DraggableListAdapter extends RecyclerView.Adapter<DraggableListAdap
             listItem.add(new Item(object, true));
         }
 
-        setHasStableIds(true);
+        SwipeAndDragHelper swipeAndDragHelper = new SwipeAndDragHelper(this);
+        touchHelper = new ItemTouchHelper(swipeAndDragHelper);
     }
 
     @Override
-    public boolean onCheckCanStartDrag(DraggableListAdapter.ViewHolder holder, int position, int x, int y) {
-        return ViewUtil.hitTest(holder.dragView, x, y);
-    }
+    public void onViewMoved(int oldPosition, int newPosition) {
+        Item item = listItem.remove(oldPosition);
+        listItem.add(newPosition, item);
 
-    @Override
-    public ItemDraggableRange onGetItemDraggableRange(ViewHolder viewHolder, int i) {
-        return null;
-    }
-
-    @Override
-    public void onMoveItem(int fromPosition, int toPosition) {
-        Item item = listItem.remove(fromPosition);
-        listItem.add(toPosition, item);
-    }
-
-    @Override
-    public boolean onCheckCanDrop(int draggingPosition, int dropPosition) {
-        return true;
-    }
-
-    @Override
-    public void onItemDragStarted(int position) {
-        notifyDataSetChanged();
-    }
-
-    @Override
-    public void onItemDragFinished(int fromPosition, int toPosition, boolean result) {
-        notifyDataSetChanged();
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return listItem.get(position).hashCode();
+        notifyItemMoved(oldPosition, newPosition);
     }
 
     @Override
@@ -83,7 +56,6 @@ public class DraggableListAdapter extends RecyclerView.Adapter<DraggableListAdap
     @NonNull
     @Override
     public DraggableListAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // LayoutInflater inflater = LayoutInflater.from(activity);
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
 
@@ -101,6 +73,7 @@ public class DraggableListAdapter extends RecyclerView.Adapter<DraggableListAdap
         return true;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(@NonNull DraggableListAdapter.ViewHolder holder, int position) {
         Item o = listItem.get(position);
@@ -117,11 +90,22 @@ public class DraggableListAdapter extends RecyclerView.Adapter<DraggableListAdap
                 Toast.makeText(holder.itemView.getContext(), R.string.you_have_to_select_at_least_one_category, Toast.LENGTH_SHORT).show();
             }
         });
+
+        holder.dragView.setOnTouchListener((view, event) -> {
+                    if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                        touchHelper.startDrag(holder);
+                    }
+                    return false;
+                }
+        );
     }
 
-    public class ViewHolder extends AbstractDraggableSwipeableItemViewHolder implements View.OnClickListener, View.OnLongClickListener {
-        
-        public final com.poupa.vinylmusicplayer.views.IconImageView dragView;
+    public void attachToRecyclerView(RecyclerView recyclerView) {
+        touchHelper.attachToRecyclerView(recyclerView);
+    }
+
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        public final View dragView;
         public final com.kabouzeid.appthemehelper.common.views.ATECheckBox checkBox;
         public final TextView title;
 
@@ -132,23 +116,6 @@ public class DraggableListAdapter extends RecyclerView.Adapter<DraggableListAdap
             dragView = binding.dragView;
             checkBox = binding.checkbox;
 
-            final View itemView = binding.getRoot();
-            itemView.setOnClickListener(this);
-            itemView.setOnLongClickListener(this);
-        }
-
-        @Override
-        public View getSwipeableContainerView() {
-            return null;
-        }
-
-        @Override
-        public boolean onLongClick(View v) {
-            return false;
-        }
-
-        @Override
-        public void onClick(View v) {
         }
     }
 
