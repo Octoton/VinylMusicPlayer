@@ -385,5 +385,8 @@
     <string name="shuffle_album">Shuffle album</string>
     <string name="shuffle_album_genre">Shuffle album with same genre</string>
     <string name="shuffle_album_artist">Shuffle album with same artist</string>
+    <string name="you_have_to_select_at_least_one_criteria">You have to select at least one criteria.</string>
+    <string name="you_cannot_activate_criteria_after_random">You cannot activate criteria after random.</string>
+
 
 </resources>

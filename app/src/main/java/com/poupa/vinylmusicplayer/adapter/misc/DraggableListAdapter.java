@@ -11,14 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.CheckBox;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
-import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.databinding.PreferenceDialogLibraryCategoriesListitemBinding;
-import com.poupa.vinylmusicplayer.model.CategoryInfo;
 import com.poupa.vinylmusicplayer.util.SwipeAndDragHelper;
 
 
@@ -40,6 +37,11 @@ public class DraggableListAdapter<T extends SelectableItem<U>, U extends Seriali
         listItem.add(newPosition, item);
 
         notifyItemMoved(oldPosition, newPosition);
+    }
+
+    @Override
+    public void onViewActionEnded() {
+
     }
 
     @Override

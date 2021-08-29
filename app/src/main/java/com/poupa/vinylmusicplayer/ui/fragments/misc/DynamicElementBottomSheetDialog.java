@@ -24,16 +24,15 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.poupa.vinylmusicplayer.R;
-import com.poupa.vinylmusicplayer.adapter.misc.DraggableListAdapter;
+import com.poupa.vinylmusicplayer.adapter.DynamicElementAdapter;
 import com.poupa.vinylmusicplayer.model.AlbumShufflingCriteria;
+import com.poupa.vinylmusicplayer.util.DynamicElement.AlbumShufflingUtil;
 
 
 public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
-    public static DynamicElementBottomSheetDialog newInstance() {
-        return new DynamicElementBottomSheetDialog();
-    }
+    public static DynamicElementBottomSheetDialog newInstance() { return new DynamicElementBottomSheetDialog(); }
 
-    private DraggableListAdapter adapter;
+    private DynamicElementAdapter adapter;
 
     @NonNull @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -72,19 +71,13 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.bottom_sheet_dynamic_element_preference, container, false);
 
-        ArrayList<AlbumShufflingCriteria> criteria = new ArrayList<>();
-
-        ArrayList<AlbumShufflingCriteria.Criteria> objects = new ArrayList<>(EnumSet.allOf(AlbumShufflingCriteria.Criteria.class));
-        for (AlbumShufflingCriteria.Criteria object : objects) {
-            criteria.add(new AlbumShufflingCriteria(object, true));
-        }
-
-        /*if (savedInstanceState != null) {
-            criteria = savedInstanceState.getParcelableArrayList(PreferenceUtil.LIBRARY_CATEGORIES);
+        ArrayList<AlbumShufflingCriteria> criteria;
+        if (savedInstanceState != null) {
+            criteria = savedInstanceState.getParcelableArrayList(AlbumShufflingUtil.CRITERION);
         } else {
-            criteria = PreferenceUtil.getInstance().getLibraryCategoryInfos();
-        }*/
-        adapter = new DraggableListAdapter<>(criteria);
+            criteria = AlbumShufflingUtil.getInstance().getCriteria();
+        }
+        adapter = new DynamicElementAdapter(criteria);
 
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
@@ -98,6 +91,13 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
             showMenu(this.getContext(), v, R.menu.menu_dynamic_element_type);
         });
 
+        view.findViewById(R.id.reset).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateCriterion(AlbumShufflingUtil.getInstance().getDefaultCriteria());
+                dismiss();
+            }
+        });
 
         view.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,11 +109,22 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
         view.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                updateCriterion(adapter.getCriteria());
                 dismiss();
             }
         });
 
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(AlbumShufflingUtil.CRITERION, adapter.getCriteria());
+    }
+
+    private void updateCriterion(ArrayList<AlbumShufflingCriteria> criterion) {
+        AlbumShufflingUtil.getInstance().setCriteria(criterion);
     }
 
     private void showMenu(Context context, View view, int menuRes) {
