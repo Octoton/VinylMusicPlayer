@@ -22,8 +22,16 @@ public class SwipeAndDragHelper extends ItemTouchHelper.Callback {
 
     @Override
     public boolean onMove(@NonNull RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-        contract.onViewMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+        contract.onViewMoved(viewHolder.getBindingAdapterPosition(), target.getBindingAdapterPosition());
         return true;
+    }
+
+    @Override
+    public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+        super.clearView(recyclerView, viewHolder);
+
+        // Action finished
+        contract.onViewActionEnded();
     }
 
     @Override
@@ -52,6 +60,7 @@ public class SwipeAndDragHelper extends ItemTouchHelper.Callback {
 
     public interface ActionCompletionContract {
         void onViewMoved(int oldPosition, int newPosition);
+        void onViewActionEnded();
     }
 
 }

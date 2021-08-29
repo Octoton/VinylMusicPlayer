@@ -67,17 +67,6 @@ public class LibraryPreferenceDialog extends DialogFragment {
     }
 
     private void updateCategories(ArrayList<CategoryInfo> categories) {
-        if (getSelected(categories) == 0) return;
-
         PreferenceUtil.getInstance().setLibraryCategoryInfos(categories);
-    }
-
-    private int getSelected(ArrayList<CategoryInfo> categories) {
-        int selected = 0;
-        for (CategoryInfo categoryInfo : categories) {
-            if (categoryInfo.visible)
-                selected++;
-        }
-        return selected;
     }
 }
