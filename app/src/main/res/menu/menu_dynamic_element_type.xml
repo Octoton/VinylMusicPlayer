@@ -1,8 +1,0 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/album"
-        android:title="@string/album" />
-    <item android:id="@+id/genre"
-        android:title="@string/song" />
-    <item android:id="@+id/song"
-        android:title="@string/genre" />
-</menu>

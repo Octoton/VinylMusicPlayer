@@ -612,15 +612,12 @@ public final class PreferenceUtil {
         return mPreferences.getBoolean(REMEMBER_DYNAMIC_QUEUE, true);
     }
 
-    public static final String STYLE_ALBUM = "Album";
-    public static final String STYLE_SONG = "Titre";
-    public static final String STYLE_GENRE = "Genre";
-    public final String getDynamicQueueStyle() {
-        return mPreferences.getString(DYNAMIC_QUEUE_STYLE, "Album");
+    public final int getDynamicQueueStyle() {
+        return mPreferences.getInt(DYNAMIC_QUEUE_STYLE, 0);
     }
 
-    public final void setDynamicQueueStyle(String value) {
-        mPreferences.edit().putString(DYNAMIC_QUEUE_STYLE, value).apply();
+    public final void setDynamicQueueStyle(int value) {
+        mPreferences.edit().putInt(DYNAMIC_QUEUE_STYLE, value).apply();
     }
 
     public final String autoDownloadImagesPolicy() {
