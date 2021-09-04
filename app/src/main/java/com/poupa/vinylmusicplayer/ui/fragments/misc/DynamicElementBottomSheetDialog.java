@@ -2,7 +2,6 @@ package com.poupa.vinylmusicplayer.ui.fragments.misc;
 
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -74,6 +73,12 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.bottom_sheet_dynamic_element_preference, container, false);
 
+        AlbumShufflingPreferenceFragment myfragment = new AlbumShufflingPreferenceFragment();
+
+        getChildFragmentManager().beginTransaction()
+                .add(R.id.testFragment, myfragment)
+                .commit();
+
         /* to move to new album preference fragment */
         ArrayList<AlbumShufflingCriteria> criteria;
         if (savedInstanceState != null) {
@@ -101,6 +106,10 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
         view.findViewById(R.id.reset).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //getChildFragmentManager().beginTransaction().remove(myfragment).commit();
+                //AlbumShufflingPreferenceFragment toto = new AlbumShufflingPreferenceFragment();
+                //getChildFragmentManager().beginTransaction().replace(R.id.testFragment, toto).commit();
+
                 updateCriterion(AlbumShufflingUtil.getInstance().getDefaultCriteria());
                 adapter.setCriteria(AlbumShufflingUtil.getInstance().getDefaultCriteria());
 
