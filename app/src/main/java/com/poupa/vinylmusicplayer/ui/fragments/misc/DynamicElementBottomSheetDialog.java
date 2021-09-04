@@ -4,7 +4,6 @@ package com.poupa.vinylmusicplayer.ui.fragments.misc;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -16,22 +15,18 @@ import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.StyleRes;
-import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.poupa.vinylmusicplayer.App;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
-import com.poupa.vinylmusicplayer.util.VinylMusicPlayerColorUtil;
 
 
 public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
     public static DynamicElementBottomSheetDialog newInstance() { return new DynamicElementBottomSheetDialog(); }
 
     private DynamicElementPreferenceFragment preferenceFragment;
-    private String style;
+    private Type searchType;
 
     @NonNull @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -70,14 +65,14 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.bottom_sheet_dynamic_element_preference, container, false);
 
-        style = PreferenceUtil.getInstance().getDynamicQueueStyle();
-        Button button = view.findViewById(R.id.btnShow);
-        button.setText(style);
+        searchType = Type.toType(PreferenceUtil.getInstance().getDynamicQueueStyle());
+        Button button = view.findViewById(R.id.searchType);
+        button.setText(getText(Type.getStringRes(searchType)));
         button.setOnClickListener(v -> {
-            showMenu(this.getContext(), v, R.menu.menu_dynamic_element_type);
+            showMenu(this.getContext(), v);
         });
 
-        preferenceFragment = getFragmentFromValue(style);
+        preferenceFragment = Type.getFragmentFromValue(searchType);
         if (preferenceFragment != null) {
             getChildFragmentManager().beginTransaction()
                     .add(R.id.testFragment, preferenceFragment)
@@ -106,7 +101,7 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
                 if (preferenceFragment != null)
                     preferenceFragment.ok();
 
-                PreferenceUtil.getInstance().setDynamicQueueStyle(style);
+                PreferenceUtil.getInstance().setDynamicQueueStyle(searchType.id);
 
                 dismiss();
             }
@@ -123,21 +118,25 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
             preferenceFragment.onSaveInstanceState(outState);
     }
 
-    private void showMenu(Context context, View view, int menuRes) {
+    public static final int STYLE_MENU = 0;
+    private void showMenu(Context context, View view) {
         PopupMenu popupMenu = new PopupMenu(context, view);
 
-        popupMenu.inflate(menuRes);
+        popupMenu.getMenu().add(STYLE_MENU, Type.ALBUM.id, Type.ALBUM.id, getText(Type.getStringRes(Type.ALBUM)));
+        popupMenu.getMenu().add(STYLE_MENU, Type.SONG.id, Type.SONG.id, getText(Type.getStringRes(Type.SONG)));
+        popupMenu.getMenu().add(STYLE_MENU, Type.GENRE.id, Type.GENRE.id, getText(Type.getStringRes(Type.GENRE)));
+
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                Button button = view.findViewById(R.id.btnShow);
+                Button button = view.findViewById(R.id.searchType);
 
-                String title = menuItem.getTitle().toString();
+                Type newSearchType = Type.toType(menuItem.getItemId());
                 button.setText(menuItem.getTitle());
 
-                if (!style.equals(title)) {
-                    style = title;
-                    updateFragment(getFragmentFromValue(style));
+                if (searchType != newSearchType) {
+                    searchType = newSearchType;
+                    updateFragment(Type.getFragmentFromValue(searchType));
                 }
 
                 return true;
@@ -157,15 +156,48 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
         }
     }
 
-    public static DynamicElementPreferenceFragment getFragmentFromValue(String style) {
-        switch (style) {
-            case PreferenceUtil.STYLE_SONG:
-                return null;
-            case PreferenceUtil.STYLE_GENRE:
-                return new TestFragment();
-            case PreferenceUtil.STYLE_ALBUM:
-            default:
-                return new AlbumShufflingPreferenceFragment();
+    private final static Type[] typeValues = Type.values();
+    public enum Type {
+        ALBUM(0),
+        SONG(1),
+        GENRE(2);
+
+        /** as the id is saved in shared preference to remember user chose, existing value should not changed or swapped **/
+        private final int id;
+
+        Type(int id) { this.id = id; }
+
+        public static int getStringRes (Type e) {
+            switch (e) {
+                case SONG:
+                    return R.string.song;
+                case GENRE:
+                    return R.string.genre;
+                case ALBUM:
+                default:
+                    return R.string.album;
+            }
+        }
+
+        public static DynamicElementPreferenceFragment getFragmentFromValue(Type e) {
+            switch (e) {
+                case SONG:
+                    return null;
+                case GENRE:
+                    return new TestFragment();
+                case ALBUM:
+                default:
+                    return new AlbumShufflingPreferenceFragment();
+            }
+        }
+
+        public static Type toType (int id) {
+            for (Type type : typeValues) {
+                if (type.id == id) {
+                    return type;
+                }
+            }
+            return ALBUM;
         }
     }
 }
