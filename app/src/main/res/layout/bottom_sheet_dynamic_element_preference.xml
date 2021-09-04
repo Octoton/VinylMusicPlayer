@@ -55,7 +55,7 @@
         android:scrollbars="none" />
 
     <EditText
-        android:id="@+id/plain_text_input"
+        android:id="@+id/history_size"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:hint="History size (0-9): "
