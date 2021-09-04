@@ -5,6 +5,4 @@
         android:title="@string/song" />
     <item android:id="@+id/song"
         android:title="@string/genre" />
-    <item android:id="@+id/playlist"
-        android:title="@string/playlists" />
 </menu>
