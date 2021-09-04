@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.PopupMenu;
 
@@ -27,6 +28,8 @@ import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.adapter.DynamicElementAdapter;
 import com.poupa.vinylmusicplayer.model.AlbumShufflingCriteria;
 import com.poupa.vinylmusicplayer.util.DynamicElement.AlbumShufflingUtil;
+
+import static java.lang.Integer.parseInt;
 
 
 public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
@@ -71,6 +74,7 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.bottom_sheet_dynamic_element_preference, container, false);
 
+        /* to move to new album preference fragment */
         ArrayList<AlbumShufflingCriteria> criteria;
         if (savedInstanceState != null) {
             criteria = savedInstanceState.getParcelableArrayList(AlbumShufflingUtil.CRITERION);
@@ -85,6 +89,9 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
 
         adapter.attachToRecyclerView(recyclerView);
 
+        EditText history = (EditText)view.findViewById(R.id.history_size);
+        history.setText(String.valueOf(AlbumShufflingUtil.getInstance().getHistorySize()));
+
         Button button = view.findViewById(R.id.btnShow);
         button.setText("Album");
         button.setOnClickListener(v -> {
@@ -95,7 +102,12 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
             @Override
             public void onClick(View v) {
                 updateCriterion(AlbumShufflingUtil.getInstance().getDefaultCriteria());
-                dismiss();
+                adapter.setCriteria(AlbumShufflingUtil.getInstance().getDefaultCriteria());
+
+                EditText history = (EditText)view.findViewById(R.id.history_size);
+                AlbumShufflingUtil.getInstance().resetHistorySize();
+                history.setText(String.valueOf(AlbumShufflingUtil.getInstance().getHistorySize()));
+
             }
         });
 
@@ -110,6 +122,11 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
             @Override
             public void onClick(View v) {
                 updateCriterion(adapter.getCriteria());
+
+                EditText history = (EditText)view.findViewById(R.id.history_size);
+                int history_size = parseInt(history.getText().toString());
+                AlbumShufflingUtil.getInstance().updateHistorySize(history_size);
+
                 dismiss();
             }
         });
