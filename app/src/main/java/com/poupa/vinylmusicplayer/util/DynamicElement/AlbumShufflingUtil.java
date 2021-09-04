@@ -17,6 +17,7 @@ public final class AlbumShufflingUtil {
 
     public static final String PREFERENCE_KEY = "album_shuffling_preference";
     public static final String CRITERION = "criterion";
+    public static final String HISTORY_SIZE = "history_size";
 
     private static AlbumShufflingUtil sInstance;
     private final SharedPreferences mPreferences;
@@ -30,6 +31,22 @@ public final class AlbumShufflingUtil {
             sInstance = new AlbumShufflingUtil();
         }
         return sInstance;
+    }
+
+    public int getDefaultHistorySize() {
+        return 5;
+    }
+
+    public void resetHistorySize() {
+        mPreferences.edit().putInt(HISTORY_SIZE, getDefaultHistorySize()).apply();
+    }
+
+    public void updateHistorySize(int history_size) {
+        mPreferences.edit().putInt(HISTORY_SIZE, history_size).apply();
+    }
+
+    public final int getHistorySize() {
+        return mPreferences.getInt(HISTORY_SIZE, getDefaultHistorySize()); // should be shared with empty case and reset
     }
 
     public void setCriteria(ArrayList<AlbumShufflingCriteria> criterion) {
