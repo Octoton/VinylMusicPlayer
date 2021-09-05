@@ -35,6 +35,7 @@ import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.ui.activities.tageditor.AbsTagEditorActivity;
 import com.poupa.vinylmusicplayer.ui.activities.tageditor.SongTagEditorActivity;
 import com.poupa.vinylmusicplayer.ui.fragments.AbsMusicServiceFragment;
+import com.poupa.vinylmusicplayer.ui.fragments.misc.DynamicElementBottomSheetDialog;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
 import com.poupa.vinylmusicplayer.util.NavigationUtil;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -150,7 +151,11 @@ public abstract class AbsPlayerFragment extends AbsMusicServiceFragment implemen
             MusicPlayerRemote.clearQueue();
             return true;
         } else if (itemId == R.id.action_dynamic_queue) {
-            MusicPlayerRemote.setQueueToDynamicQueue();
+            DynamicElementBottomSheetDialog dynamicElementBottomSheetDialog = DynamicElementBottomSheetDialog
+                    .newInstance();
+
+            dynamicElementBottomSheetDialog
+                    .show( ((AppCompatActivity) getContext()).getSupportFragmentManager(), "dynamic_element_bottom_sheet");
             return true;
         } else if (itemId == R.id.action_save_playing_queue) {
             CreatePlaylistDialog.create(MusicPlayerRemote.getPlayingQueue()).show(getActivity().getSupportFragmentManager(), "ADD_TO_PLAYLIST");

@@ -1,6 +1,8 @@
 package com.poupa.vinylmusicplayer.ui.fragments.misc;
 
 
+import java.util.ArrayList;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,17 +21,29 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.poupa.vinylmusicplayer.R;
+import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
+import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 
 
 public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
     public static DynamicElementBottomSheetDialog newInstance() { return new DynamicElementBottomSheetDialog(); }
 
+    public final static String NEW_QUEUE_SONGS = "newQueueSongs";
+    private ArrayList<Song> songs;
+
     private DynamicElementPreferenceFragment preferenceFragment;
     private Type searchType;
 
     @NonNull @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+        Bundle bundle = this.getArguments();
+        if (bundle != null) {
+            songs = bundle.getParcelableArrayList(NEW_QUEUE_SONGS);
+        } else {
+            songs = null;
+        }
 
         BottomSheetDialog dialog = new BottomSheetDialog(getActivity());
 
@@ -90,6 +104,7 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
         view.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 dismiss();
             }
         });
@@ -102,6 +117,11 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
                     preferenceFragment.ok();
 
                 PreferenceUtil.getInstance().setDynamicQueueStyle(searchType.id);
+
+                if (songs != null && !songs.isEmpty())
+                    MusicPlayerRemote.openQueue(songs, 0, true);
+
+                MusicPlayerRemote.setQueueToDynamicQueue(true);
 
                 dismiss();
             }

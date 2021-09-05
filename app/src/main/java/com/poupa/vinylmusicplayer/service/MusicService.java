@@ -727,8 +727,8 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
         }
     }
 
-    public synchronized void setQueueToDynamicQueue() {
-        if (!queueIsDynamic) {
+    public synchronized void setQueueToDynamicQueue(boolean force) {
+        if (!queueIsDynamic || force) {
             playingQueue = new DynamicPlayingQueue(playingQueue, new AlbumShufflingQueueLoader()); // For album shuffling V2: Will depend on what user select on bottom sheet dialog (album, song, genre, ...)
             queueIsDynamic = true;
             saveQueueType();
