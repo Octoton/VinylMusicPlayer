@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
@@ -49,6 +50,7 @@ import com.poupa.vinylmusicplayer.ui.fragments.mainactivity.library.pager.Albums
 import com.poupa.vinylmusicplayer.ui.fragments.mainactivity.library.pager.ArtistsFragment;
 import com.poupa.vinylmusicplayer.ui.fragments.mainactivity.library.pager.PlaylistsFragment;
 import com.poupa.vinylmusicplayer.ui.fragments.mainactivity.library.pager.SongsFragment;
+import com.poupa.vinylmusicplayer.ui.fragments.misc.DynamicElementBottomSheetDialog;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 import com.poupa.vinylmusicplayer.util.Util;
 
@@ -248,8 +250,15 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
         final int id = item.getItemId();
         if (id == R.id.action_shuffle_all) {
             if (currentFragment instanceof AlbumsFragment) {
-                MusicPlayerRemote.openQueue(AlbumShufflingQueueLoader.getNextRandomQueue(), 0, true);
-                MusicPlayerRemote.setQueueToDynamicQueue();
+                DynamicElementBottomSheetDialog dynamicElementBottomSheetDialog = DynamicElementBottomSheetDialog
+                        .newInstance();
+
+                Bundle args = new Bundle();
+                args.putParcelableArrayList(DynamicElementBottomSheetDialog.NEW_QUEUE_SONGS, AlbumShufflingQueueLoader.getNextRandomQueue());
+                dynamicElementBottomSheetDialog.setArguments(args);
+
+                dynamicElementBottomSheetDialog
+                        .show( ((AppCompatActivity)getContext()).getSupportFragmentManager(), "dynamic_element_bottom_sheet");
             } else {
                 MusicPlayerRemote.openAndShuffleQueue(Discography.getInstance().getAllSongs(), true);
             }

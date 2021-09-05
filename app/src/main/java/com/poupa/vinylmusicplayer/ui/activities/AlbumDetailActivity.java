@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
@@ -52,6 +53,7 @@ import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.ui.activities.base.AbsSlidingMusicPanelActivity;
 import com.poupa.vinylmusicplayer.ui.activities.tageditor.AbsTagEditorActivity;
 import com.poupa.vinylmusicplayer.ui.activities.tageditor.AlbumTagEditorActivity;
+import com.poupa.vinylmusicplayer.ui.fragments.misc.DynamicElementBottomSheetDialog;
 import com.poupa.vinylmusicplayer.util.ImageTheme.ThemeStyleUtil;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
 import com.poupa.vinylmusicplayer.util.NavigationUtil;
@@ -336,8 +338,16 @@ public class AlbumDetailActivity extends AbsSlidingMusicPanelActivity implements
             MusicPlayerRemote.enqueue(songs);
             return true;
         } else if (id == R.id.action_open_playing_queue_in_album_shuffling_mode) {
-            MusicPlayerRemote.openQueue(songs, 0, true);
-            MusicPlayerRemote.setQueueToDynamicQueue();
+            DynamicElementBottomSheetDialog dynamicElementBottomSheetDialog = DynamicElementBottomSheetDialog
+                    .newInstance();
+
+            Bundle args = new Bundle();
+            args.putParcelableArrayList(DynamicElementBottomSheetDialog.NEW_QUEUE_SONGS, songs);
+            dynamicElementBottomSheetDialog.setArguments(args);
+
+            dynamicElementBottomSheetDialog
+                    .show( ((AppCompatActivity)this).getSupportFragmentManager(), "dynamic_element_bottom_sheet");
+
             return true;
         } else if (id == R.id.action_add_to_playlist) {
             AddToPlaylistDialog.create(songs).show(getSupportFragmentManager(), "ADD_PLAYLIST");
