@@ -152,7 +152,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
     private Playback playback;
 
     private StaticPlayingQueue playingQueue = new StaticPlayingQueue();
-    /** is {@link MusicService#playingQueue} instance of {@link com.poupa.vinylmusicplayer.model.Song.DynamicPlayingQueue} or not  */
+    /** is {@link MusicService#playingQueue} instance of {@link com.poupa.vinylmusicplayer.misc.queue.DynamicPlayingQueue} or not  */
     private boolean queueIsDynamic = false;
 
     private boolean queuesRestored;
@@ -725,8 +725,8 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
         }
     }
 
-    public synchronized void setQueueToDynamicQueue() {
-        if (!queueIsDynamic) {
+    public synchronized void setQueueToDynamicQueue(boolean force) {
+        if (!queueIsDynamic || force) {
             playingQueue = new DynamicPlayingQueue(playingQueue, new AlbumShufflingQueueLoader()); // For album shuffling V2: Will depend on what user select on bottom sheet dialog (album, song, genre, ...)
             queueIsDynamic = true;
             saveQueueType();
