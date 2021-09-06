@@ -256,6 +256,7 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
 
                 Bundle args = new Bundle();
                 args.putParcelableArrayList(DynamicElementBottomSheetDialog.NEW_QUEUE_SONGS, AlbumShufflingQueueLoader.getNextRandomQueue());
+                args.putBoolean(DynamicElementBottomSheetDialog.ALBUM_TYPE, true);
                 dynamicElementBottomSheetDialog.setArguments(args);
 
                 dynamicElementBottomSheetDialog
