@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AbstractShuffling.AbstractQueueItemAdapter;
-import com.poupa.vinylmusicplayer.ui.fragments.misc.DynamicElementBottomSheetDialog;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog;
 
 
 /** Album shuffling implementation of {@link DynamicQueueItemAdapter} */

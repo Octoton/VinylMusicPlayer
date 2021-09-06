@@ -1,4 +1,4 @@
-package com.poupa.vinylmusicplayer.ui.fragments.misc;
+package com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling;
 
 import java.util.ArrayList;
 
@@ -13,8 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.adapter.DynamicElementAdapter;
-import com.poupa.vinylmusicplayer.model.AlbumShufflingCriteria;
-import com.poupa.vinylmusicplayer.util.DynamicElement.AlbumShufflingUtil;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementPreferenceFragment;
 
 import static java.lang.Integer.parseInt;
 
