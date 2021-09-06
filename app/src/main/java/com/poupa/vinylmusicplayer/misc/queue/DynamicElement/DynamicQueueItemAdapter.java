@@ -7,8 +7,6 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.poupa.vinylmusicplayer.adapter.song.SongAdapter;
-import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElement;
-
 
 /** Provide all methods needed by DynamicPlayingQueueAdapter to show the {@link DynamicElement} at the end of the playing queue with the correct menu */
 public interface DynamicQueueItemAdapter {

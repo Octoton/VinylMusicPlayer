@@ -53,7 +53,7 @@ import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.ui.activities.base.AbsSlidingMusicPanelActivity;
 import com.poupa.vinylmusicplayer.ui.activities.tageditor.AbsTagEditorActivity;
 import com.poupa.vinylmusicplayer.ui.activities.tageditor.AlbumTagEditorActivity;
-import com.poupa.vinylmusicplayer.ui.fragments.misc.DynamicElementBottomSheetDialog;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog;
 import com.poupa.vinylmusicplayer.util.ImageTheme.ThemeStyleUtil;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
 import com.poupa.vinylmusicplayer.util.NavigationUtil;

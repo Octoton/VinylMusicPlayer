@@ -1,17 +1,15 @@
 package com.poupa.vinylmusicplayer.adapter;
 
 import java.util.ArrayList;
-import android.os.Handler;
 
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.adapter.misc.DraggableListAdapter;
-import com.poupa.vinylmusicplayer.model.AlbumShufflingCriteria;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingCriteria;
 
-import static com.poupa.vinylmusicplayer.model.AlbumShufflingCriteria.Criteria.RANDOM;
+import static com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingCriteria.Criteria.RANDOM;
 
 
 public class DynamicElementAdapter extends DraggableListAdapter<AlbumShufflingCriteria, AlbumShufflingCriteria.Criteria> {
