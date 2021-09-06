@@ -19,7 +19,7 @@ public class DB extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "shuffling_album.db";
     private static final int VERSION = 1;
 
-    DB() {
+    public DB() {
         super(App.getInstance().getApplicationContext(), DATABASE_NAME, null, VERSION);
     }
 
@@ -108,7 +108,7 @@ public class DB extends SQLiteOpenHelper {
     }
     */
 
-    synchronized void setNextRandomAlbumId(long albumId) {
+    synchronized public void setNextRandomAlbumId(long albumId) {
         try (final SQLiteDatabase db = getWritableDatabase()) {
             //replace current album id
             final ContentValues values = new ContentValues();
@@ -121,7 +121,7 @@ public class DB extends SQLiteOpenHelper {
     }
 
     @NonNull
-    synchronized Long fetchNextRandomAlbumId() {
+    synchronized public Long fetchNextRandomAlbumId() {
         Long nextRandomAlbums = (long)0;
         final SQLiteDatabase database = getReadableDatabase();
         try (final Cursor cursor = database.query(NextRandomAlbumIdColumns.NAME,

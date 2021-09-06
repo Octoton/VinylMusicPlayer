@@ -1,4 +1,4 @@
-package com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling;
+package com.poupa.vinylmusicplayer.misc.queue.DynamicElement.TestShuffling;
 
 
 import java.util.ArrayList;
@@ -12,6 +12,9 @@ import androidx.annotation.NonNull;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.discog.Discography;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AbstractShuffling.AbstractQueueLoader;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingQueueItemAdapter;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingQueueLoader;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.DB;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElement;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueItemAdapter;
 import com.poupa.vinylmusicplayer.model.Album;
@@ -19,8 +22,7 @@ import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
 
 
-/** Album shuffling implementation of {@link DynamicQueueLoader} */
-public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
+public class TestQueueLoader extends AbstractQueueLoader {
     public static final String SEARCH_TYPE = "search_type";
 
     public static final int RANDOM_SEARCH = 1;
@@ -30,7 +32,7 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
     private final DB database;
     private Album nextAlbum;
 
-    public AlbumShufflingQueueLoader() {
+    public TestQueueLoader() {
         super();
 
         this.nextAlbum = new Album();
@@ -62,7 +64,6 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         if (!super.setNextDynamicQueue(criteria, context, song, force))
             return false;
 
-        //Random search basic form, will be updated for v2
         int searchType = criteria.getInt(SEARCH_TYPE);
 
         ArrayList<Album> albums;
@@ -73,7 +74,7 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         ArrayList<Album> subList = new ArrayList<>();
         boolean isAlbumInCriteria = false;
         for (Album album : albums) {
-            if (song.albumId != album.getId() && (nextAlbum == null || nextAlbum.getId() != album.getId())) {
+            if (song.albumId != album.getId() && nextAlbum.getId() != album.getId()) {
                 switch (searchType) {
                     case RANDOM_SEARCH:
                         isAlbumInCriteria = true;
@@ -135,14 +136,14 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
     protected DynamicElement createEmptyDynamicElement(Context context) {
         return new DynamicElement(context.getResources().getString(R.string.next_album),
                 context.getResources().getString(R.string.no_album_found),
-                R.drawable.ic_shuffle_album_white_24dp); //"-");
+                "-");
     }
 
     @Override
     protected DynamicElement createNewDynamicElement(Context context) {
         return new DynamicElement(context.getResources().getString(R.string.next_album),
                 MusicUtil.buildInfoString(this.nextAlbum.getArtistName(), this.nextAlbum.getTitle()),
-                R.drawable.ic_shuffle_album_white_24dp); //"-");
+                "-");
     }
 
     @Override
