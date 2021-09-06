@@ -343,6 +343,7 @@ public class AlbumDetailActivity extends AbsSlidingMusicPanelActivity implements
 
             Bundle args = new Bundle();
             args.putParcelableArrayList(DynamicElementBottomSheetDialog.NEW_QUEUE_SONGS, songs);
+            args.putBoolean(DynamicElementBottomSheetDialog.ALBUM_TYPE, true);
             dynamicElementBottomSheetDialog.setArguments(args);
 
             dynamicElementBottomSheetDialog

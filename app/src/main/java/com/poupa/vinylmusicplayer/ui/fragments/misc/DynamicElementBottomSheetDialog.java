@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.kabouzeid.appthemehelper.ThemeStore;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
 import com.poupa.vinylmusicplayer.model.Song;
@@ -30,7 +31,9 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
     public static DynamicElementBottomSheetDialog newInstance() { return new DynamicElementBottomSheetDialog(); }
 
     public final static String NEW_QUEUE_SONGS = "newQueueSongs";
+    public final static String ALBUM_TYPE = "albumType";
     private ArrayList<Song> songs;
+    private boolean isAlbumType;
 
     private DynamicElementPreferenceFragment preferenceFragment;
     private Type searchType;
@@ -41,6 +44,7 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
         Bundle bundle = this.getArguments();
         if (bundle != null) {
             songs = bundle.getParcelableArrayList(NEW_QUEUE_SONGS);
+            isAlbumType = bundle.getBoolean(ALBUM_TYPE, false);
         } else {
             songs = null;
         }
@@ -79,7 +83,12 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.bottom_sheet_dynamic_element_preference, container, false);
 
-        searchType = Type.toType(PreferenceUtil.getInstance().getDynamicQueueStyle());
+        if (isAlbumType) {
+            searchType = Type.ALBUM;
+        } else {
+            searchType = Type.toType(PreferenceUtil.getInstance().getDynamicQueueStyle());
+        }
+
         Button button = view.findViewById(R.id.searchType);
         button.setText(getText(Type.getStringRes(searchType)));
         button.setOnClickListener(v -> {
@@ -93,7 +102,11 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
                     .commit();
         }
 
-        view.findViewById(R.id.reset).setOnClickListener(new View.OnClickListener() {
+        int accentColor = ThemeStore.accentColor(getContext());
+
+        Button reset = view.findViewById(R.id.reset);
+        reset.setTextColor(accentColor);
+        reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (preferenceFragment != null)
@@ -101,7 +114,9 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
             }
         });
 
-        view.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
+        Button cancel = view.findViewById(R.id.cancel);
+        cancel.setTextColor(accentColor);
+        cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -109,7 +124,9 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
             }
         });
 
-        view.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
+        Button ok = view.findViewById(R.id.ok);
+        ok.setTextColor(accentColor);
+        ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
