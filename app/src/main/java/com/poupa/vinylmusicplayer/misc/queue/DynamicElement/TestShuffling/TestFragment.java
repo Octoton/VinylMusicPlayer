@@ -1,17 +1,12 @@
-package com.poupa.vinylmusicplayer.ui.fragments.misc;
+package com.poupa.vinylmusicplayer.misc.queue.DynamicElement.TestShuffling;
 
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-
-import androidx.fragment.app.Fragment;
 import com.poupa.vinylmusicplayer.R;
-import com.poupa.vinylmusicplayer.util.DynamicElement.AlbumShufflingUtil;
-
-import static java.lang.Integer.parseInt;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementPreferenceFragment;
 
 
 public class TestFragment extends DynamicElementPreferenceFragment {

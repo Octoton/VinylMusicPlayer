@@ -1,11 +1,11 @@
-package com.poupa.vinylmusicplayer.model;
+package com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling;
 
 import java.io.Serializable;
 
 import com.poupa.vinylmusicplayer.App;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.adapter.misc.SelectableItem;
-import com.poupa.vinylmusicplayer.model.AlbumShufflingCriteria.Criteria;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingCriteria.Criteria;
 
 public class AlbumShufflingCriteria extends SelectableItem<Criteria> implements Serializable {
 

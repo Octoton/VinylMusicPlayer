@@ -1,4 +1,4 @@
-package com.poupa.vinylmusicplayer.misc.queue;
+package com.poupa.vinylmusicplayer.misc.queue.DynamicElement;
 
 
 import android.content.Context;
@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.poupa.vinylmusicplayer.adapter.song.SongAdapter;
 
-/** Provide all methods needed by DynamicPlayingQueueAdapter to show the {@link com.poupa.vinylmusicplayer.misc.queue.DynamicElement} at the end of the playing queue with the correct menu */
+/** Provide all methods needed by DynamicPlayingQueueAdapter to show the {@link DynamicElement} at the end of the playing queue with the correct menu */
 public interface DynamicQueueItemAdapter {
     int getSongMenuRes(int itemViewType);
     boolean onSongMenuItemClick(MenuItem item, Context context);

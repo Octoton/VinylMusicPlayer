@@ -1,4 +1,4 @@
-package com.poupa.vinylmusicplayer.misc.queue;
+package com.poupa.vinylmusicplayer.misc.queue.DynamicElement;
 
 
 import java.util.ArrayList;
