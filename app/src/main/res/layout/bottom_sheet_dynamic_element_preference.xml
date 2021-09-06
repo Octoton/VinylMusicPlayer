@@ -37,7 +37,7 @@
         android:paddingTop="5dp"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
-        android:paddingBottom="10dp">
+        android:paddingBottom="4dp">
 
         <TextView
             android:layout_width="0dp"
@@ -62,8 +62,14 @@
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/testFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@drawable/inner_shadow">
     </androidx.fragment.app.FragmentContainerView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?attr/dividerColor"/>
 
     <RelativeLayout
         android:layout_width="fill_parent"
