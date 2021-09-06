@@ -49,10 +49,9 @@ import com.poupa.vinylmusicplayer.glide.GlideApp;
 import com.poupa.vinylmusicplayer.glide.GlideRequest;
 import com.poupa.vinylmusicplayer.glide.VinylGlideExtension;
 import com.poupa.vinylmusicplayer.glide.VinylSimpleTarget;
-import com.poupa.vinylmusicplayer.misc.queue.AlbumShuffling.AlbumShufflingQueueLoader;
-import com.poupa.vinylmusicplayer.misc.queue.DynamicElement;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElement;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueItemAdapter;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicPlayingQueue;
-import com.poupa.vinylmusicplayer.misc.queue.DynamicQueueItemAdapter;
 import com.poupa.vinylmusicplayer.misc.queue.IndexedSong;
 import com.poupa.vinylmusicplayer.misc.queue.StaticPlayingQueue;
 import com.poupa.vinylmusicplayer.model.Playlist;
@@ -63,6 +62,7 @@ import com.poupa.vinylmusicplayer.service.notification.PlayingNotification;
 import com.poupa.vinylmusicplayer.service.notification.PlayingNotificationImpl;
 import com.poupa.vinylmusicplayer.service.notification.PlayingNotificationImpl24;
 import com.poupa.vinylmusicplayer.service.playback.Playback;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog.Type;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
 import com.poupa.vinylmusicplayer.util.PackageValidator;
 import com.poupa.vinylmusicplayer.util.PlaylistsUtil;
@@ -403,7 +403,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
             queueIsDynamic = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SAVED_QUEUE_TYPE, false);
             if (queueIsDynamic) {
-                playingQueue = new DynamicPlayingQueue(new AlbumShufflingQueueLoader()); // For album shuffling V2: Will depend on a saved preference to have the same than before
+                playingQueue = new DynamicPlayingQueue(Type.getQueueLoader(Type.toType(PreferenceUtil.getInstance().getDynamicQueueStyle())));
             }
 
             if (playingQueue.restoreQueue(this, restoredPosition)) {
@@ -727,7 +727,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     public synchronized void setQueueToDynamicQueue(boolean force) {
         if (!queueIsDynamic || force) {
-            playingQueue = new DynamicPlayingQueue(playingQueue, new AlbumShufflingQueueLoader()); // For album shuffling V2: Will depend on what user select on bottom sheet dialog (album, song, genre, ...)
+            playingQueue = new DynamicPlayingQueue(playingQueue, Type.getQueueLoader(Type.toType(PreferenceUtil.getInstance().getDynamicQueueStyle())));
             queueIsDynamic = true;
             saveQueueType();
             notifyChange(QUEUE_CHANGED);
