@@ -1,4 +1,4 @@
-package com.poupa.vinylmusicplayer.ui.fragments.misc;
+package com.poupa.vinylmusicplayer.misc.queue.DynamicElement;
 
 
 import java.util.ArrayList;
@@ -23,7 +23,12 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AbstractShuffling.AbstractQueueLoader;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingPreferenceFragment;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingQueueLoader;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.TestShuffling.TestQueueLoader;
 import com.poupa.vinylmusicplayer.model.Song;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.TestShuffling.TestFragment;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 
 
@@ -225,6 +230,17 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
                 case ALBUM:
                 default:
                     return new AlbumShufflingPreferenceFragment();
+            }
+        }
+
+        public static AbstractQueueLoader getQueueLoader(Type e) {
+            switch (e) {
+                case SONG:
+                    return new TestQueueLoader();
+                case GENRE:
+                case ALBUM:
+                default:
+                    return new AlbumShufflingQueueLoader();
             }
         }
 
