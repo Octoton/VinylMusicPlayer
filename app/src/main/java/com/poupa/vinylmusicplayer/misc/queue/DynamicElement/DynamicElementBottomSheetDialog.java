@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -108,6 +109,9 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
         }
 
         int accentColor = ThemeStore.accentColor(getContext());
+
+        TextView title = view.findViewById(R.id.setting_title);
+        title.setTextColor(accentColor);
 
         Button reset = view.findViewById(R.id.reset);
         reset.setTextColor(accentColor);
