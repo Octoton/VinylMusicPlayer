@@ -54,7 +54,7 @@ public class TestQueueLoader extends AbstractQueueLoader {
     @Override
     public boolean setNextDynamicQueue(Context context, Song song, boolean force) {
         Bundle bundle = new Bundle();
-        bundle.putInt(AlbumShufflingQueueLoader.SEARCH_TYPE, AlbumShufflingQueueLoader.RANDOM_SEARCH);
+        bundle.putInt(AlbumShufflingQueueLoader.SEARCH_TYPE, RANDOM_SEARCH);
 
         return setNextDynamicQueue(bundle, context, song, force);
     }
