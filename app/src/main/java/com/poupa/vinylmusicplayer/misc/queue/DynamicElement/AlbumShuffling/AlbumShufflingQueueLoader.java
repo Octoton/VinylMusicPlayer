@@ -51,18 +51,72 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
     // For album shuffling V2: use bottom sheet criteria for automatic search instead of the actual random manual search
     @Override
     public boolean setNextDynamicQueue(Context context, Song song, boolean force) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(AlbumShufflingQueueLoader.SEARCH_TYPE, AlbumShufflingQueueLoader.RANDOM_SEARCH);
+        if (!super.setNextDynamicQueue(null, context, song, force))
+            return false;
 
-        return setNextDynamicQueue(bundle, context, song, force);
+        ArrayList<AlbumShufflingCriteria> searchCriteria = AlbumShufflingUtil.getInstance().getCriteria();
+        Album album = null;
+        boolean foundSomething = false;
+
+        int i = 0;
+
+        do {
+            int search_type;
+            AlbumShufflingCriteria criteria = searchCriteria.get(i);
+
+            if (criteria.visible) {
+                switch (criteria.item) {
+                    case ARTIST:
+                        search_type = ARTIST_SEARCH;
+                        break;
+                    case GENRE:
+                        search_type = GENRE_SEARCH;
+                        break;
+                    case RANDOM:
+                    default:
+                        search_type = RANDOM_SEARCH;
+                        break;
+                }
+                Bundle bundle = new Bundle();
+                bundle.putInt(AlbumShufflingQueueLoader.SEARCH_TYPE, search_type);
+
+                album = search(bundle, song);
+                if (album != null) {
+                    foundSomething = true;
+                }
+            }
+            i++;
+        } while (!foundSomething && i < searchCriteria.size());
+
+        if (album != null) {
+            this.nextAlbum = album;
+            this.database.setNextRandomAlbumId(album.getId());
+        } else {
+            this.nextAlbum = null;
+            this.database.setNextRandomAlbumId(-1);
+        }
+
+        return true;
     }
 
     @Override
-    public boolean setNextDynamicQueue(Bundle criteria, Context context, Song song, boolean force) {
+    public boolean setNextDynamicQueue(Bundle criteria, @NonNull Context context, Song song, boolean force) {
         if (!super.setNextDynamicQueue(criteria, context, song, force))
             return false;
 
-        //Random search basic form, will be updated for v2
+        Album album = search(criteria, song);
+
+        if (album != null) {
+            this.nextAlbum = album;
+            this.database.setNextRandomAlbumId(album.getId());
+        } else {
+            Toast.makeText(context, context.getResources().getString(R.string.no_other_album_found), Toast.LENGTH_SHORT).show();
+        }
+
+        return true;
+    }
+
+    private Album search(Bundle criteria, Song song) {
         int searchType = criteria.getInt(SEARCH_TYPE);
 
         ArrayList<Album> albums;
@@ -73,7 +127,7 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         ArrayList<Album> subList = new ArrayList<>();
         boolean isAlbumInCriteria = false;
         for (Album album : albums) {
-            if (song.albumId != album.getId() && (nextAlbum == null || nextAlbum.getId() != album.getId())) {
+            if (song.albumId != album.getId() && (this.nextAlbum == null || this.nextAlbum.getId() != album.getId())) {
                 switch (searchType) {
                     case RANDOM_SEARCH:
                         isAlbumInCriteria = true;
@@ -93,20 +147,13 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
             }
         }
 
+        Album album = null;
         if (subList.size() > 0) {
             Random rand = new Random();
-            this.nextAlbum = subList.get(rand.nextInt(subList.size()));
-            this.database.setNextRandomAlbumId(nextAlbum.getId());
-        } else {
-            if (context != null) {
-                Toast.makeText(context, context.getResources().getString(R.string.no_other_album_found), Toast.LENGTH_SHORT).show();
-            } else {
-                this.nextAlbum = null;
-                this.database.setNextRandomAlbumId(-1);
-            }
+            album = subList.get(rand.nextInt(subList.size()));
         }
 
-        return true;
+        return album;
     }
 
     public static ArrayList<Song> getNextRandomQueue() {
