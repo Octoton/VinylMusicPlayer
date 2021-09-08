@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.discog.Discography;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AbstractShuffling.AbstractQueueLoader;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingCriteria.Criteria;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElement;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueItemAdapter;
 import com.poupa.vinylmusicplayer.model.Album;
@@ -22,10 +23,6 @@ import com.poupa.vinylmusicplayer.util.MusicUtil;
 /** Album shuffling implementation of {@link DynamicQueueLoader} */
 public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
     public static final String SEARCH_TYPE = "search_type";
-
-    public static final int RANDOM_SEARCH = 1;
-    public static final int ARTIST_SEARCH = 2;
-    public static final int GENRE_SEARCH = 3;
 
     private final DB database;
     private Album nextAlbum;
@@ -48,7 +45,7 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         return new AlbumShufflingQueueItemAdapter();
     }
 
-    // For album shuffling V2: use bottom sheet criteria for automatic search instead of the actual random manual search
+    // /!\ in full auto, nextAlbum is null when calling this function even when changing settings which is a shame
     @Override
     public boolean setNextDynamicQueue(Context context, Song song, boolean force) {
         if (!super.setNextDynamicQueue(null, context, song, force))
@@ -61,24 +58,11 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         int i = 0;
 
         do {
-            int search_type;
             AlbumShufflingCriteria criteria = searchCriteria.get(i);
 
             if (criteria.visible) {
-                switch (criteria.item) {
-                    case ARTIST:
-                        search_type = ARTIST_SEARCH;
-                        break;
-                    case GENRE:
-                        search_type = GENRE_SEARCH;
-                        break;
-                    case RANDOM:
-                    default:
-                        search_type = RANDOM_SEARCH;
-                        break;
-                }
                 Bundle bundle = new Bundle();
-                bundle.putInt(AlbumShufflingQueueLoader.SEARCH_TYPE, search_type);
+                bundle.putInt(AlbumShufflingQueueLoader.SEARCH_TYPE, criteria.item.id);
 
                 album = search(bundle, song);
                 if (album != null) {
@@ -128,17 +112,13 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         boolean isAlbumInCriteria = false;
         for (Album album : albums) {
             if (song.albumId != album.getId() && (this.nextAlbum == null || this.nextAlbum.getId() != album.getId())) {
-                switch (searchType) {
-                    case RANDOM_SEARCH:
-                        isAlbumInCriteria = true;
-                        break;
-                    case ARTIST_SEARCH:
-                        isAlbumInCriteria = album.getArtistId() == song.artistId;
-                        break;
-                    case GENRE_SEARCH:
-                        isAlbumInCriteria = album.songs != null && album.songs.size() > 0 &&
+                if (searchType == Criteria.RANDOM.id) {
+                    isAlbumInCriteria = true;
+                } else if (searchType == Criteria.ARTIST.id) {
+                    isAlbumInCriteria = album.getArtistId() == song.artistId;
+                } else if (searchType == Criteria.GENRE.id) {
+                    isAlbumInCriteria = album.songs != null && album.songs.size() > 0 &&
                                 song.genre.equals(album.songs.get(0).genre);
-                        break;
                 }
 
                 if (isAlbumInCriteria) {
