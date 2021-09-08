@@ -6,6 +6,8 @@ import com.poupa.vinylmusicplayer.App;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.adapter.misc.SelectableItem;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingCriteria.Criteria;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog.Type;
+
 
 public class AlbumShufflingCriteria extends SelectableItem<Criteria> implements Serializable {
 
@@ -15,18 +17,31 @@ public class AlbumShufflingCriteria extends SelectableItem<Criteria> implements 
 
     @Override
     public String toString() {
-        return App.getStaticContext().getResources().getString(item.stringRes);
+        return App.getStaticContext().getResources().getString(Criteria.getStringRes(item));
     }
 
     public enum Criteria {
-        ARTIST(R.string.artists),
-        GENRE(R.string.genres),
-        RANDOM(R.string.random);
+        ARTIST(0),
+        GENRE(1),
+        RANDOM(2);
 
-        public final int stringRes;
+        /** as the id is saved in shared preference to remember user chose, existing value should not changed or swapped **/
+        public final int id;
 
-        Criteria(int stringRes) {
-            this.stringRes = stringRes;
+        Criteria(int id) {
+            this.id = id;
+        }
+
+        public static int getStringRes (Criteria e) {
+            switch (e) {
+                case ARTIST:
+                    return R.string.artists;
+                case GENRE:
+                    return R.string.genres;
+                case RANDOM:
+                default:
+                    return R.string.random;
+            }
         }
     }
 }
