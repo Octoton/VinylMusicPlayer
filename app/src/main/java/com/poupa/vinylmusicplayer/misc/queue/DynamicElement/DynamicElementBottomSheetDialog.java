@@ -209,7 +209,7 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
         GENRE(2);
 
         /** as the id is saved in shared preference to remember user chose, existing value should not changed or swapped **/
-        private final int id;
+        public final int id;
 
         Type(int id) { this.id = id; }
 
