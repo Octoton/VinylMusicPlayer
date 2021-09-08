@@ -48,6 +48,7 @@ import com.poupa.vinylmusicplayer.lastfm.rest.model.LastFmAlbum;
 import com.poupa.vinylmusicplayer.loader.AlbumLoader;
 import com.poupa.vinylmusicplayer.misc.SimpleObservableScrollViewCallbacks;
 import com.poupa.vinylmusicplayer.misc.WrappedAsyncTaskLoader;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog.Type;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.ui.activities.base.AbsSlidingMusicPanelActivity;
@@ -339,16 +340,20 @@ public class AlbumDetailActivity extends AbsSlidingMusicPanelActivity implements
             MusicPlayerRemote.enqueue(songs);
             return true;
         } else if (id == R.id.action_open_playing_queue_in_album_shuffling_mode) {
-            DynamicElementBottomSheetDialog dynamicElementBottomSheetDialog = DynamicElementBottomSheetDialog
-                    .newInstance();
+            if (PreferenceUtil.getInstance().alwaysShowDynamicSettings()) {
+                DynamicElementBottomSheetDialog dynamicElementBottomSheetDialog = DynamicElementBottomSheetDialog.newInstance();
 
-            Bundle args = new Bundle();
-            args.putParcelableArrayList(DynamicElementBottomSheetDialog.NEW_QUEUE_SONGS, songs);
-            args.putBoolean(DynamicElementBottomSheetDialog.ALBUM_TYPE, true);
-            dynamicElementBottomSheetDialog.setArguments(args);
+                Bundle args = new Bundle();
+                args.putParcelableArrayList(DynamicElementBottomSheetDialog.NEW_QUEUE_SONGS, songs);
+                args.putBoolean(DynamicElementBottomSheetDialog.ALBUM_TYPE, true);
+                dynamicElementBottomSheetDialog.setArguments(args);
 
-            dynamicElementBottomSheetDialog
-                    .show( ((AppCompatActivity)this).getSupportFragmentManager(), "dynamic_element_bottom_sheet");
+                dynamicElementBottomSheetDialog.show(((AppCompatActivity) this).getSupportFragmentManager(),"dynamic_element_bottom_sheet");
+            } else {
+                MusicPlayerRemote.openQueue(songs, 0, true);
+                PreferenceUtil.getInstance().setDynamicQueueStyle(Type.ALBUM.id);
+                MusicPlayerRemote.setQueueToDynamicQueue(true);
+            }
 
             return true;
         } else if (id == R.id.action_add_to_playlist) {

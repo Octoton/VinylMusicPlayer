@@ -342,6 +342,9 @@
     <string name="stop_dynamic_queue">Arrêter la file de lecture perpétuelle</string>
     <string name="pref_title_remember_dynamic_element">Se souvenir de la file de lecture perpétuelle</string>
     <string name="pref_summary_remember_dynamic_element">La file de lecture perpétuelle restera activé lors de la sélection d\'une nouvelle liste de titre</string>
+    <string name="pref_title_always_show_dynamic_element_settings">Toujours afficher les paramètres de la file de lecture perpétuelle</string>
+    <string name="pref_summary_always_show_dynamic_element_settings">Pour ouvrir une nouvelle file de lecture perpétuelle les paramètres seront toujours afficher</string>
+
     <string name="pref_dynamic_element">Paramètres de la lecture perpétuelle</string>
     <string name="pref_dynamic_element_info">A la fin de la liste de lecture, un nouveau lot de titre vont être chargés aléatoirement, vous pouvez choisir son type</string>
     <string name="pref_dynamic_element_type_of_search">Type de recherche: </string>

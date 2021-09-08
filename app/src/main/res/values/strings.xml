@@ -376,6 +376,8 @@
     <string name="stop_dynamic_queue">Stop the perpetual queue</string>
     <string name="pref_title_remember_dynamic_element">Remember perpetual queue</string>
     <string name="pref_summary_remember_dynamic_element">Perpetual queue will stay on when selecting a new list of songs</string>
+    <string name="pref_title_always_show_dynamic_element_settings">Always show dynamic element settings</string>
+    <string name="pref_summary_always_show_dynamic_element_settings">To open a new queue with a dynamic element, the settings interface will be shown first</string>
     <string name="pref_dynamic_element">Dynamic element settings</string>
     <string name="pref_dynamic_element_info">At the end of the playing queue, a new set of songs is loaded randomly, you can customized which type</string>
     <string name="pref_dynamic_element_type_of_search">Type of search: </string>
