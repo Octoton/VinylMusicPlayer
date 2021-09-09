@@ -30,10 +30,11 @@ public class DynamicPlayingQueue extends StaticPlayingQueue {
         this.queueLoader = queueLoader;
     }
 
-    public DynamicPlayingQueue(DynamicPlayingQueue queue) {
+    public DynamicPlayingQueue(DynamicPlayingQueue queue, DynamicQueueLoader queueLoader) {
         super(queue);
 
-        queueLoader = queue.queueLoader;
+        this.queueLoader = queueLoader;
+        this.queueLoader.transferDynamicElement(queue.queueLoader);
     }
 
     @Override

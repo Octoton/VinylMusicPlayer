@@ -39,4 +39,9 @@ public interface DynamicQueueLoader {
      * @param song last song used in setNextDynamicQueue
      */
     boolean restoreQueue(Context context, Song song);
+
+    /** Transfer dynamic element in-between loader, useful when user change dynamic element settings and we want to remember last element for better next search
+     * @param loader previously used loader which will be transferred
+     */
+    void transferDynamicElement(DynamicQueueLoader loader);
 }

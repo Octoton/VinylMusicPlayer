@@ -15,6 +15,7 @@ import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AbstractShuffling.Ab
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingCriteria.Criteria;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElement;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueItemAdapter;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueLoader;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
@@ -39,6 +40,13 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         this.nextAlbum = Discography.getInstance().getAlbum(database.fetchNextRandomAlbumId());
 
         return super.restoreQueue(song);
+    }
+
+    @Override
+    public void transferDynamicElement(DynamicQueueLoader loader) {
+        if (loader != null && loader.getClass().equals(this.getClass())) {
+            this.nextAlbum = ((AlbumShufflingQueueLoader) loader).nextAlbum;
+        }
     }
 
     public DynamicQueueItemAdapter getAdapter() {
@@ -111,7 +119,7 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         ArrayList<Album> subList = new ArrayList<>();
         boolean isAlbumInCriteria = false;
         for (Album album : albums) {
-            if (song.albumId != album.getId() && this.nextAlbum.getId() != album.getId()) {
+            if (song.albumId != album.getId() && (this.nextAlbum == null || this.nextAlbum.getId() != album.getId())) {
                 if (searchType == Criteria.RANDOM.id) {
                     isAlbumInCriteria = true;
                 } else if (searchType == Criteria.ARTIST.id) {
