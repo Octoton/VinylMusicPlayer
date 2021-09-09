@@ -17,6 +17,7 @@ import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.Album
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.DB;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElement;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueItemAdapter;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueLoader;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
@@ -44,6 +45,13 @@ public class TestQueueLoader extends AbstractQueueLoader {
         this.nextAlbum = Discography.getInstance().getAlbum(database.fetchNextRandomAlbumId());
 
         return super.restoreQueue(song);
+    }
+
+    @Override
+    public void transferDynamicElement(DynamicQueueLoader loader) {
+        if (loader.getClass().equals(this.getClass())) {
+            this.nextAlbum = ((TestQueueLoader) loader).nextAlbum;
+        }
     }
 
     public DynamicQueueItemAdapter getAdapter() {
