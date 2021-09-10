@@ -1,5 +1,8 @@
 package com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,7 +20,7 @@ import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElement;
  * needed to ensure reopening of the app after a deep sleep will not result in a different playing queue state  */
 public class DB extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "dynqueue_shuffling_album.db";
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
     DB() {
         super(App.getInstance().getApplicationContext(), DATABASE_NAME, null, VERSION);
@@ -25,11 +28,11 @@ public class DB extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(@NonNull final SQLiteDatabase db) {
-        /*db.execSQL("CREATE TABLE IF NOT EXISTS " + ListenHistoryColumns.NAME + " ("
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + ListenHistoryColumns.NAME + " ("
                 + ListenHistoryColumns._ID + " INTEGER PRIMARY KEY,"
                 + ListenHistoryColumns.ALBUM_ID + " LONG NOT NULL"
                 + ");"
-        ); */
+        );
         db.execSQL("CREATE TABLE IF NOT EXISTS " + NextRandomAlbumIdColumns.NAME + " ("
                 + NextRandomAlbumIdColumns._ID + " INTEGER PRIMARY KEY,"
                 + NextRandomAlbumIdColumns.ALBUM_ID + " LONG NOT NULL"
@@ -38,28 +41,27 @@ public class DB extends SQLiteOpenHelper {
     }
     @Override
     public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, int newVersion) {
-        //db.execSQL("DROP TABLE IF EXISTS " + ListenHistoryColumns.NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + ListenHistoryColumns.NAME);
         db.execSQL("DROP TABLE IF EXISTS " + NextRandomAlbumIdColumns.NAME);
         onCreate(db);
     }
 
     @Override
     public void onDowngrade(@NonNull SQLiteDatabase db, int oldVersion, int newVersion) {
-        //db.execSQL("DROP TABLE IF EXISTS " + ListenHistoryColumns.NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + ListenHistoryColumns.NAME);
         db.execSQL("DROP TABLE IF EXISTS " + NextRandomAlbumIdColumns.NAME);
         onCreate(db);
     }
 
     synchronized void clear() {
         try (final SQLiteDatabase db = getWritableDatabase()) {
-            //db.delete(ListenHistoryColumns.NAME, null, null);
+            db.delete(ListenHistoryColumns.NAME, null, null);
             db.delete(NextRandomAlbumIdColumns.NAME, null, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    /*
     synchronized void removeFirstAlbumOfHistory() {
         try (final SQLiteDatabase db = getWritableDatabase()) {
             String DELETE_FIRST_ELEMENT = "DELETE FROM " + ListenHistoryColumns.NAME + " WHERE " + ListenHistoryColumns._ID + " IN " +
@@ -106,7 +108,6 @@ public class DB extends SQLiteOpenHelper {
             return listenHistory;
         }
     }
-    */
 
     synchronized public void setNextRandomAlbumId(long albumId) {
         try (final SQLiteDatabase db = getWritableDatabase()) {
@@ -146,10 +147,10 @@ public class DB extends SQLiteOpenHelper {
         }
     }
 
-    /* public static class ListenHistoryColumns implements BaseColumns {
+    public static class ListenHistoryColumns implements BaseColumns {
         public static final String NAME = "listenHistory";
         public static final String ALBUM_ID = "album_id";
-    } */
+    }
 
     public static class NextRandomAlbumIdColumns implements BaseColumns {
         public static final String NAME = "nextRandomAlbumId";

@@ -46,4 +46,6 @@ public interface DynamicQueueLoader {
      * @param loader previously used loader which will be transferred
      */
     void transferDynamicElement(DynamicQueueLoader loader);
+
+    void stop();
 }

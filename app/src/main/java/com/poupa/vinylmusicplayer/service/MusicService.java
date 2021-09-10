@@ -721,6 +721,9 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     public synchronized void setQueueToStaticQueue() {
         if (queueIsDynamic) {
+            if (playingQueue != null) {
+                playingQueue.stop();
+            }
             playingQueue = new StaticPlayingQueue(playingQueue);
             queueIsDynamic = false;
             saveQueueType();
@@ -730,6 +733,9 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     public synchronized void setQueueToDynamicQueue(boolean force) {
         if (!queueIsDynamic || force) {
+            if (playingQueue != null && !force) {
+                playingQueue.stop();
+            }
             if (!queueIsDynamic)
                 playingQueue = new DynamicPlayingQueue(playingQueue, Type.getQueueLoader(Type.toType(PreferenceUtil.getInstance().getDynamicQueueStyle())));
             else
