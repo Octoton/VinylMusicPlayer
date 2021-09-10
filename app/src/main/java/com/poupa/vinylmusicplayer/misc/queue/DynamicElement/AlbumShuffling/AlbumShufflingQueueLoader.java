@@ -13,6 +13,9 @@ import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.discog.Discography;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AbstractShuffling.AbstractQueueLoader;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingCriteria.Criteria;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.Search.AutomaticSearch;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.Search.ManualSearch;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.Search.Search;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElement;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueItemAdapter;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueLoader;
@@ -39,7 +42,14 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
     public boolean restoreQueue(Context context, Song song) {
         this.nextAlbum = Discography.getInstance().getAlbum(database.fetchNextRandomAlbumId());
 
+        AlbumShufflingUtil.getInstance().restoreHistories();
         return super.restoreQueue(song);
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        AlbumShufflingUtil.getInstance().stopHistories();
     }
 
     @Override
@@ -59,26 +69,13 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         if (!super.setNextDynamicQueue(null, context, song, force))
             return false;
 
-        ArrayList<AlbumShufflingCriteria> searchCriteria = AlbumShufflingUtil.getInstance().getCriteria();
-        Album album = null;
-        boolean foundSomething = false;
-
-        int i = 0;
-
-        do {
-            AlbumShufflingCriteria criteria = searchCriteria.get(i);
-
-            if (criteria.visible) {
-                Bundle bundle = new Bundle();
-                bundle.putInt(AlbumShufflingQueueLoader.SEARCH_TYPE, criteria.item.id);
-
-                album = search(bundle, song);
-                if (album != null) {
-                    foundSomething = true;
-                }
-            }
-            i++;
-        } while (!foundSomething && i < searchCriteria.size());
+        Album album;
+        long currentAlbumId = -1;
+        if (nextAlbum != null) {
+            currentAlbumId = nextAlbum.getId();
+        }
+        AlbumShufflingUtil.getInstance().resetSearchHistory();
+        album = search(song, currentAlbumId, new AutomaticSearch(), context);
 
         if (album != null) {
             this.nextAlbum = album;
@@ -96,19 +93,35 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         if (!super.setNextDynamicQueue(criteria, context, song, force))
             return false;
 
-        Album album = search(criteria, song);
+        Album album;
+        long currentAlbumId = -1;
+        if (nextAlbum != null) {
+            currentAlbumId = nextAlbum.getId();
+        }
+        album = search(song, currentAlbumId, new ManualSearch(criteria), context);
 
         if (album != null) {
             this.nextAlbum = album;
             this.database.setNextRandomAlbumId(album.getId());
-        } else {
-            Toast.makeText(context, context.getResources().getString(R.string.no_other_album_found), Toast.LENGTH_SHORT).show();
         }
 
         return true;
     }
 
-    private Album search(Bundle criteria, Song song) {
+    // Search for next album by using song as the currently played album
+    public Album search(Song song, long currentAlbumId, Search searchFunction, Context context) {
+
+        // Get all possible album to be play
+        ArrayList<Album> albums;
+        synchronized (Discography.getInstance()) {
+            albums = new ArrayList<>(Discography.getInstance().getAllAlbums());
+        }
+
+        // Search
+        return searchFunction.foundNextAlbum(song, albums, currentAlbumId, AlbumShufflingUtil.getInstance().getListenHistory(), AlbumShufflingUtil.getInstance().getSearchHistory(), context);
+    }
+
+    /*private Album search(Bundle criteria, Song song) {
         int searchType = criteria.getInt(SEARCH_TYPE);
 
         ArrayList<Album> albums;
@@ -142,7 +155,7 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         }
 
         return album;
-    }
+    } */
 
     public static ArrayList<Song> getNextRandomQueue() {
         ArrayList<Album> albums;
@@ -162,6 +175,9 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
     public ArrayList<Song> getNextQueue() {
         if (isNextQueueEmpty())
             return null;
+
+        AlbumShufflingUtil.getInstance().commitHistories(this.songUsedForSearching.albumId); // commit ensure no duplication, this call help remember first album listen too
+        AlbumShufflingUtil.getInstance().commitHistories(nextAlbum.getId());
 
         return nextAlbum.songs;
     }

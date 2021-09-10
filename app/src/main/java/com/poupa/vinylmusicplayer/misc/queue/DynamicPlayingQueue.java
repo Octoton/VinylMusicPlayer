@@ -42,6 +42,10 @@ public class DynamicPlayingQueue extends StaticPlayingQueue {
         return super.restoreQueue(context, restoredPosition) && queueLoader.restoreQueue(context, lastSong());
     }
 
+    public void stop() {
+        queueLoader.stop();
+    }
+
     private void loadNextQueue() {
         clear();
         addAll(queueLoader.getNextQueue());
