@@ -119,6 +119,10 @@ public class StaticPlayingQueue {
         MusicPlaybackQueueStore.getInstance(context).saveQueues(this.queue, this.originalQueue);
     }
 
+    public void stop() {
+
+    }
+
     /* -------------------- queue modification (add, remove, move, ...) -------------------- */
 
     /**

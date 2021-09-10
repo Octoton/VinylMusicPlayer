@@ -48,6 +48,10 @@ public abstract class AbstractQueueLoader implements DynamicQueueLoader {
         return createNewDynamicElement(context);
     }
 
+    public void stop() {
+        songUsedForSearching = null;
+    }
+
     /** @return an DynamicElement that show to the user that nothing was found and no next queue will be loaded */
     protected abstract DynamicElement createEmptyDynamicElement(Context context);
 

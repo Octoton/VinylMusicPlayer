@@ -20,6 +20,7 @@ public class AlbumShufflingCriteria extends SelectableItem<Criteria> implements 
         return App.getStaticContext().getResources().getString(Criteria.getStringRes(item));
     }
 
+    private final static Criteria[] criteriaValues = Criteria.values();
     public enum Criteria {
         ARTIST(0),
         GENRE(1),
@@ -42,6 +43,15 @@ public class AlbumShufflingCriteria extends SelectableItem<Criteria> implements 
                 default:
                     return R.string.random;
             }
+        }
+
+        public static Criteria toCriteria (int id) {
+            for (Criteria type : criteriaValues) {
+                if (type.id == id) {
+                    return type;
+                }
+            }
+            return null;
         }
     }
 }
