@@ -6,7 +6,6 @@ import com.poupa.vinylmusicplayer.App;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.adapter.misc.SelectableItem;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingCriteria.Criteria;
-import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog.Type;
 
 
 public class AlbumShufflingCriteria extends SelectableItem<Criteria> implements Serializable {

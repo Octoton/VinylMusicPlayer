@@ -1,6 +1,5 @@
 package com.poupa.vinylmusicplayer.misc.queue.DynamicElement.TestShuffling;
 
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
