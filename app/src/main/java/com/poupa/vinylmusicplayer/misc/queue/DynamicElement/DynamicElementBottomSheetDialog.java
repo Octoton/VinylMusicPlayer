@@ -26,9 +26,7 @@ import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AbstractShuffling.AbstractQueueLoader;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingPreferenceFragment;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingQueueLoader;
-import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.TestShuffling.TestQueueLoader;
 import com.poupa.vinylmusicplayer.model.Song;
-import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.TestShuffling.TestFragment;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 
 
@@ -168,8 +166,6 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
         PopupMenu popupMenu = new PopupMenu(context, view);
 
         popupMenu.getMenu().add(STYLE_MENU, Type.ALBUM.id, Type.ALBUM.id, getText(Type.getStringRes(Type.ALBUM)));
-        popupMenu.getMenu().add(STYLE_MENU, Type.SONG.id, Type.SONG.id, getText(Type.getStringRes(Type.SONG)));
-        popupMenu.getMenu().add(STYLE_MENU, Type.GENRE.id, Type.GENRE.id, getText(Type.getStringRes(Type.GENRE)));
 
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -203,9 +199,7 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
 
     private final static Type[] typeValues = Type.values();
     public enum Type {
-        ALBUM(0),
-        SONG(1),
-        GENRE(2);
+        ALBUM(0);
 
         /** as the id is saved in shared preference to remember user chose, existing value should not changed or swapped **/
         public final int id;
@@ -214,10 +208,6 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
 
         public static int getStringRes (Type e) {
             switch (e) {
-                case SONG:
-                    return R.string.song;
-                case GENRE:
-                    return R.string.genre;
                 case ALBUM:
                 default:
                     return R.string.album;
@@ -226,10 +216,6 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
 
         public static DynamicElementPreferenceFragment getFragmentFromValue(Type e) {
             switch (e) {
-                case SONG:
-                    return null;
-                case GENRE:
-                    return new TestFragment();
                 case ALBUM:
                 default:
                     return new AlbumShufflingPreferenceFragment();
@@ -238,9 +224,6 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
 
         public static AbstractQueueLoader getQueueLoader(Type e) {
             switch (e) {
-                case SONG:
-                    return new TestQueueLoader();
-                case GENRE:
                 case ALBUM:
                 default:
                     return new AlbumShufflingQueueLoader();
