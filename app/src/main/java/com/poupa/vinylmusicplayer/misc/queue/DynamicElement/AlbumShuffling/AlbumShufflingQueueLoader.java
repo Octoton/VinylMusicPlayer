@@ -6,13 +6,11 @@ import java.util.Random;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.discog.Discography;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AbstractShuffling.AbstractQueueLoader;
-import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingCriteria.Criteria;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.Search.AutomaticSearch;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.Search.ManualSearch;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.Search.Search;

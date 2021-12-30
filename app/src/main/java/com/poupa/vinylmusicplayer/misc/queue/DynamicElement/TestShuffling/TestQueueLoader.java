@@ -1,6 +1,5 @@
 package com.poupa.vinylmusicplayer.misc.queue.DynamicElement.TestShuffling;
 
-
 import java.util.ArrayList;
 import java.util.Random;
 

@@ -1,6 +1,5 @@
 package com.poupa.vinylmusicplayer.misc.queue;
 
-
 import java.util.ArrayList;
 import java.util.List;
 

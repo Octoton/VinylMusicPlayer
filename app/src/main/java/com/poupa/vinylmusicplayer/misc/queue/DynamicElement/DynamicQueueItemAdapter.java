@@ -1,6 +1,5 @@
 package com.poupa.vinylmusicplayer.misc.queue.DynamicElement;
 
-
 import android.content.Context;
 import android.view.MenuItem;
 
