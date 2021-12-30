@@ -140,13 +140,11 @@ public class StaticPlayingQueueAdapter extends SongAdapter
     }
 
     public void onItemDragStarted(int position) {
-        //same
         notifyDataSetChanged();
     }
 
     @Override
     public void onItemDragFinished(int fromPosition, int toPosition, boolean result) {
-        //try better function if possible
         notifyDataSetChanged();
     }
 
@@ -210,12 +208,6 @@ public class StaticPlayingQueueAdapter extends SongAdapter
     }
 
     public class ViewHolder extends SongAdapter.ViewHolder {
-        /*
-        // could be remove
-        @DraggableItemStateFlags
-        private int mDragStateFlags;
-        */
-
         public ViewHolder(@NonNull ItemListBinding binding) {
             super(binding);
         }
@@ -239,19 +231,6 @@ public class StaticPlayingQueueAdapter extends SongAdapter
             }
             return super.onSongMenuItemClick(item);
         }
-
-        /*
-        // could be remove
-        @Override
-        public void setDragStateFlags(int flags) {
-            mDragStateFlags = flags;
-        }
-
-        // could be remove
-        @Override
-        public int getDragStateFlags() {
-            return mDragStateFlags;
-        } */
 
         @Override
         public View getSwipeableContainerView() {
