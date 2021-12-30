@@ -1,6 +1,5 @@
 package com.poupa.vinylmusicplayer.adapter.misc;
 
-
 import java.io.Serializable;
 
 import android.os.Parcel;

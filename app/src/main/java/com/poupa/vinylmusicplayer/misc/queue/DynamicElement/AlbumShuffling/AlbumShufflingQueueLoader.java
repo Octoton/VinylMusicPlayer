@@ -119,42 +119,6 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         return searchFunction.foundNextAlbum(song, albums, currentAlbumId, AlbumShufflingUtil.getInstance().getListenHistory(), AlbumShufflingUtil.getInstance().getSearchHistory(), context);
     }
 
-    /*private Album search(Bundle criteria, Song song) {
-        int searchType = criteria.getInt(SEARCH_TYPE);
-
-        ArrayList<Album> albums;
-        synchronized (Discography.getInstance()) {
-            albums = new ArrayList<>(Discography.getInstance().getAllAlbums());
-        }
-
-        ArrayList<Album> subList = new ArrayList<>();
-        boolean isAlbumInCriteria = false;
-        for (Album album : albums) {
-            if (song.albumId != album.getId() && (this.nextAlbum == null || this.nextAlbum.getId() != album.getId())) {
-                if (searchType == Criteria.RANDOM.id) {
-                    isAlbumInCriteria = true;
-                } else if (searchType == Criteria.ARTIST.id) {
-                    isAlbumInCriteria = album.getArtistId() == song.artistId;
-                } else if (searchType == Criteria.GENRE.id) {
-                    isAlbumInCriteria = album.songs != null && album.songs.size() > 0 &&
-                                song.genre.equals(album.songs.get(0).genre);
-                }
-
-                if (isAlbumInCriteria) {
-                    subList.add(album);
-                }
-            }
-        }
-
-        Album album = null;
-        if (subList.size() > 0) {
-            Random rand = new Random();
-            album = subList.get(rand.nextInt(subList.size()));
-        }
-
-        return album;
-    } */
-
     public static ArrayList<Song> getNextRandomQueue() {
         ArrayList<Album> albums;
         synchronized (Discography.getInstance()) {
