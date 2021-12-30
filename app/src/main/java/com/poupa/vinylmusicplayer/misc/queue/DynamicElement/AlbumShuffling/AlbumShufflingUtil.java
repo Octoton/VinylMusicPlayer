@@ -85,7 +85,7 @@ public final class AlbumShufflingUtil {
         listenHistory.fetchHistory();
     }
 
-    // next random album is been loaded into queue, thus old one as been listen too
+    // next random album is been loaded into queue, thus old one has been listen to
     public void commitHistories(long albumId) {
         // add id to listen history, this should be the old album not the wanted one
         listenHistory.addIdToHistory(albumId, true);
