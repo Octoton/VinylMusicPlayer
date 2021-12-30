@@ -1,13 +1,11 @@
 package com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.Search;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
 import android.content.Context;
 
-import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingCriteria;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingCriteria.Criteria;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Song;

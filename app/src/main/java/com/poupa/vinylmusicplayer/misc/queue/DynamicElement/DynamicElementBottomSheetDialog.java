@@ -1,6 +1,5 @@
 package com.poupa.vinylmusicplayer.misc.queue.DynamicElement;
 
-
 import java.util.ArrayList;
 
 import android.app.Dialog;

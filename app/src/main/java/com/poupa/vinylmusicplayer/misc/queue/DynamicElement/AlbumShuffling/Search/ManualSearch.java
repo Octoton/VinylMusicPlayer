@@ -1,6 +1,5 @@
 package com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.Search;
 
-
 import java.util.ArrayList;
 
 import android.content.Context;
