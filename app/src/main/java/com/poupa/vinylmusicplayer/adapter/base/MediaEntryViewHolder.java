@@ -27,6 +27,9 @@ public class MediaEntryViewHolder extends AbstractDraggableSwipeableItemViewHold
     public final FrameLayout dummyContainer;
 
     @Nullable
+    public final FrameLayout imageContainer;
+
+    @Nullable
     public com.google.android.material.card.MaterialCardView imageBorderTheme;
 
     @Nullable
@@ -63,6 +66,7 @@ public class MediaEntryViewHolder extends AbstractDraggableSwipeableItemViewHold
         super(binding.getRoot());
 
         dummyContainer = binding.touchInterceptFramelayout;
+        imageContainer = binding.imageContainer;
         imageBorderTheme = binding.imageBorderTheme;
         image = binding.image;
         imageText = binding.imageText;
@@ -84,6 +88,7 @@ public class MediaEntryViewHolder extends AbstractDraggableSwipeableItemViewHold
         super(binding.getRoot());
 
         dummyContainer = binding.touchInterceptFramelayout;
+        imageContainer = binding.imageContainer;
         imageBorderTheme = binding.imageBorderTheme;
         image = binding.image;
         imageText = null;
@@ -105,6 +110,7 @@ public class MediaEntryViewHolder extends AbstractDraggableSwipeableItemViewHold
         super(binding.getRoot());
 
         dummyContainer = binding.touchInterceptFramelayout;
+        imageContainer = null;
         imageBorderTheme = binding.imageBorderTheme;
         image = binding.image;
         imageText = null;
@@ -126,6 +132,7 @@ public class MediaEntryViewHolder extends AbstractDraggableSwipeableItemViewHold
         super(binding.getRoot());
 
         dummyContainer = null;
+        imageContainer = null;
         imageBorderTheme = null;
         image = null;
         imageText = null;
@@ -147,6 +154,7 @@ public class MediaEntryViewHolder extends AbstractDraggableSwipeableItemViewHold
         super(binding.getRoot());
 
         dummyContainer = null;
+        imageContainer = null;
         image = null;
         imageText = null;
         title = binding.title;
@@ -167,6 +175,7 @@ public class MediaEntryViewHolder extends AbstractDraggableSwipeableItemViewHold
         super(binding.getRoot());
 
         dummyContainer = binding.touchInterceptFramelayout;
+        imageContainer = binding.imageContainer;
         imageBorderTheme = binding.imageBorderTheme;
         image = binding.image;
         imageText = binding.imageText;
@@ -188,6 +197,7 @@ public class MediaEntryViewHolder extends AbstractDraggableSwipeableItemViewHold
         super(binding.getRoot());
 
         dummyContainer = binding.touchInterceptFramelayout;
+        imageContainer = null;
         imageBorderTheme = null;
         image = null;
         imageText = null;

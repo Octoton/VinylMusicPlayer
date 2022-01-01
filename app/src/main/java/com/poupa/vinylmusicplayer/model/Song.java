@@ -38,6 +38,8 @@ public class Song implements Parcelable {
     public int trackNumber;
     public int year;
 
+    public boolean isBlackListedFromPerpetualQueue;
+
     public Song(long id, String title, int trackNumber, int year, long duration, String data, long dateAdded, long dateModified, long albumId, String albumName, long artistId, @NonNull List<String> artistNames) {
         this.id = id;
         this.albumName = albumName;
@@ -51,6 +53,7 @@ public class Song implements Parcelable {
         this.title = title;
         this.trackNumber = trackNumber;
         this.year = year;
+        this.isBlackListedFromPerpetualQueue = false;
         // Note: Skip following fields since they are not supported by MediaStore:
         // discNumber, genre, albumArtistNames, replayGainTrack, replayGainAlbum
     }
@@ -73,6 +76,7 @@ public class Song implements Parcelable {
         this.title = song.title;
         this.trackNumber = song.trackNumber;
         this.year = song.year;
+        this.isBlackListedFromPerpetualQueue = song.isBlackListedFromPerpetualQueue;
     }
 
     public boolean isQuickEqual(Song song) {
@@ -177,6 +181,7 @@ public class Song implements Parcelable {
         dest.writeString(this.title);
         dest.writeInt(this.trackNumber);
         dest.writeInt(this.year);
+        dest.writeInt(this.isBlackListedFromPerpetualQueue ? 1:0);
     }
 
     protected Song(Parcel in) {
@@ -195,6 +200,7 @@ public class Song implements Parcelable {
         this.title = in.readString();
         this.trackNumber = in.readInt();
         this.year = in.readInt();
+        this.isBlackListedFromPerpetualQueue = (in.readInt() == 1);
     }
 
     public static final Creator<Song> CREATOR = new Creator<Song>() {

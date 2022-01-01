@@ -7,6 +7,7 @@ import java.util.Random;
 import android.content.Context;
 
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingCriteria.Criteria;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingUtil;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Song;
 
@@ -48,7 +49,7 @@ abstract public class Search {
         currentlyShownNextRandomAlbum = null;
 
         for (Album album : albums) {
-            if (searchTypeIsTrue(song, album)) { // condition depend on current search type
+            if (searchTypeIsTrue(song, album) && (!AlbumShufflingUtil.getInstance().getBlackListUse() || !album.getIsBlackListedFromAlbumSearch())) { // condition depend on current search type
                 if (album.getId() == song.albumId) { // album is same as current song album
                     currentSongPosition = i;
                 } else if (album.getId() == currentlyShownNextRandomAlbumId) {
