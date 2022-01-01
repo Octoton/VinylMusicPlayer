@@ -206,9 +206,12 @@ public class AlbumAdapter extends AbsMultiSelectAdapter<AlbumAdapter.ViewHolder,
     protected void onMultipleItemAction(@NonNull MenuItem menuItem, @NonNull ArrayList<Album> selection) {
         if (menuItem.getItemId() == R.id.action_toggle_black_list) {
             for (Album album : selection) {
-                boolean newIsBlackListedFromPerpetualQueue = !album.getIsBlackListedFromAlbumSearch();
+                boolean newBlackListedAlbumFlag = !album.getIsBlackListedFromAlbumSearch();
                 for (Song song : album.songs) {
-                    song.isBlackListedFromPerpetualQueue = newIsBlackListedFromPerpetualQueue;
+                    if (newBlackListedAlbumFlag)
+                        song.addBlackListedFlag(Song.BLACKLISTED_FROM_ALBUM_PERPETUAL_QUEUE);
+                    else
+                        song.removeBlackListedFlag(Song.BLACKLISTED_FROM_ALBUM_PERPETUAL_QUEUE);
                     Discography.getInstance().updateSong(song);
                 }
             }

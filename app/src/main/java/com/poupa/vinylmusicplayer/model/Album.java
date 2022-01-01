@@ -43,7 +43,7 @@ public class Album implements Parcelable {
 
     public boolean getIsBlackListedFromAlbumSearch() {
         for (Song song : songs) {
-            if (song.isBlackListedFromPerpetualQueue)
+            if (song.isBlackListedFlagActivated(Song.BLACKLISTED_FROM_ALBUM_PERPETUAL_QUEUE))
                 return true;
         }
         return false;

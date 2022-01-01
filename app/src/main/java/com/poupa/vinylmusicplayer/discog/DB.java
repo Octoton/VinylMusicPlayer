@@ -84,7 +84,7 @@ class DB extends SQLiteOpenHelper {
             values.put(SongColumns.TRACK_NUMBER, song.trackNumber);
             values.put(SongColumns.TRACK_TITLE, song.title);
             values.put(SongColumns.YEAR, song.year);
-            values.put(SongColumns.BLACKLISTED_FROM_PERPETUAL_QUEUE, (song.isBlackListedFromPerpetualQueue?1:0));
+            values.put(SongColumns.BLACKLISTED_FROM_PERPETUAL_QUEUE, song.getIsBlackListedFromPerpetualQueue());
 
             db.insert(SongColumns.NAME, null, values);
         } catch (Exception e) {
@@ -133,7 +133,7 @@ class DB extends SQLiteOpenHelper {
             values.put(SongColumns.TRACK_NUMBER, song.trackNumber);
             values.put(SongColumns.TRACK_TITLE, song.title);
             values.put(SongColumns.YEAR, song.year);
-            values.put(SongColumns.BLACKLISTED_FROM_PERPETUAL_QUEUE, (song.isBlackListedFromPerpetualQueue?1:0));
+            values.put(SongColumns.BLACKLISTED_FROM_PERPETUAL_QUEUE, song.getIsBlackListedFromPerpetualQueue());
 
             db.update(SongColumns.NAME,
                     values,
@@ -201,7 +201,7 @@ class DB extends SQLiteOpenHelper {
                 final int trackNumber = cursor.getInt(++columnIndex);
                 final String trackTitle = cursor.getString(++columnIndex);
                 final int year = cursor.getInt(++columnIndex);
-                final boolean isBlackListedFromPerpetualQueue = (cursor.getInt(++columnIndex) == 1);
+                final int isBlackListedFromPerpetualQueue = cursor.getInt(++columnIndex);
 
                 Song song = new Song(
                         id,
@@ -215,8 +215,8 @@ class DB extends SQLiteOpenHelper {
                         albumId,
                         albumName,
                         artistId,
-                        MultiValuesTagUtil.split(artistNames));
-                song.isBlackListedFromPerpetualQueue = isBlackListedFromPerpetualQueue;
+                        MultiValuesTagUtil.split(artistNames),
+                        isBlackListedFromPerpetualQueue);
                 song.discNumber = discNumber;
                 song.albumArtistNames = MultiValuesTagUtil.split(albumArtistNames);
                 song.genre = genre;
