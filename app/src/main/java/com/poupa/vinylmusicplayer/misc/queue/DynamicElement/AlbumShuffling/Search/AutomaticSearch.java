@@ -41,8 +41,7 @@ public class AutomaticSearch extends Search {
 
         if (albumPosition >= 0) {
             album = albumArrayList.get(albumPosition);
-        } else if (setNextSearchType()) { // will be use when fallback is Implemented
-            //listenHistory.revertHistory(); really ??? only if error_history is taken into account (doesn't seems to be useful for auto)
+        } else if (setNextSearchType()) {
             //set new search type via global variable + exit condition with null album
             return foundNextAlbum(song, albums, previousNextRandomAlbumId, listenHistory, searchHistory, context);
         }
@@ -55,7 +54,7 @@ public class AutomaticSearch extends Search {
 
         ArrayList<AlbumShufflingCriteria> searchCriteria = AlbumShufflingUtil.getInstance().getCriteria();
         AlbumShufflingCriteria criteria;
-        do {
+        while (!hasNext && fallbackLevel < searchCriteria.size()) {
             criteria = searchCriteria.get(fallbackLevel);
             if (criteria.visible) {
                 searchType = criteria.item;
@@ -63,7 +62,7 @@ public class AutomaticSearch extends Search {
             }
 
             fallbackLevel++;
-        } while (!hasNext && fallbackLevel < searchCriteria.size());
+        }
 
         return hasNext;
     }
