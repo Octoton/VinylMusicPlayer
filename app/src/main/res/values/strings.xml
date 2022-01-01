@@ -397,5 +397,5 @@
     <string name="you_have_to_select_at_least_one_criteria">You have to select at least one criteria.</string>
     <string name="you_cannot_activate_criteria_after_random">You cannot activate criteria after random.</string>
 
-
+    <string name="toggle_blacklist_state">Toggle perpetual blacklist state</string>
 </resources>
