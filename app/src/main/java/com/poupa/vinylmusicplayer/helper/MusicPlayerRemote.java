@@ -420,9 +420,9 @@ public class MusicPlayerRemote {
         }
     }
 
-    public static void clearQueue() {
+    public static void closeQueue() {
         if (musicService != null) {
-            musicService.clearQueue();
+            musicService.closeQueue();
         }
     }
 

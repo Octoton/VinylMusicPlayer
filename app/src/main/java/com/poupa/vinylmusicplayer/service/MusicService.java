@@ -870,8 +870,9 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
         notifyChange(QUEUE_CHANGED);
     }
 
-    public void clearQueue() {
+    public void closeQueue() {
         playingQueue.clear();
+        playingQueue.stop();
 
         setPosition(-1);
         notifyChange(QUEUE_CHANGED);
