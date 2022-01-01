@@ -42,6 +42,7 @@ abstract public class Search {
     // init global variable to ensure foundNextAlbum can easily find something
     protected void constructPositionAlbum(Song song, ArrayList<Album> albums, long currentlyShownNextRandomAlbumId, History searchHistory, History listenHistory) {
         int i = 0;
+        boolean foundAnAlbum;
 
         currentSongPosition = INVALID_POSITION;
         currentlyShownNextRandomAlbumPosition = INVALID_POSITION;
@@ -51,12 +52,17 @@ abstract public class Search {
         currentlyShownNextRandomAlbum = null;
 
         for (Album album : albums) {
-            if (searchTypeIsTrue(song, album) && (!AlbumShufflingUtil.getInstance().getBlackListUse() || !album.getIsBlackListedFromAlbumSearch())) { // condition depend on current search type
+            if (searchTypeIsTrue(song, album)) { // condition depend on current search type
+                foundAnAlbum = false;
+
                 if (album.getId() == song.albumId) { // album is same as current song album
+                    foundAnAlbum = true;
                     currentSongPosition = i;
                 } else if (album.getId() == currentlyShownNextRandomAlbumId) {
+                    foundAnAlbum = true;
                     currentlyShownNextRandomAlbumPosition = i;
-                } else {
+                } else if ((!AlbumShufflingUtil.getInstance().getBlackListUse() || !album.getIsBlackListedFromAlbumSearch())) {
+                    foundAnAlbum = true;
                     if (isManual()) { // Manual search only look at searchHistory
                         if (History.isIdForbidden(album.getId(), searchHistory.getHistory())) {
                             forbiddenPosition.add(i);
@@ -70,8 +76,10 @@ abstract public class Search {
                     }
                 }
 
-                albumArrayList.add(album);
-                i++;
+                if (foundAnAlbum) {
+                    albumArrayList.add(album);
+                    i++;
+                }
             }
 
             if (album.getId() == currentlyShownNextRandomAlbumId) {
