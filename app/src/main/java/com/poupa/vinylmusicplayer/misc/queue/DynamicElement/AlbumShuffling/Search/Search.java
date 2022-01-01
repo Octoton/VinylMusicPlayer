@@ -28,6 +28,8 @@ abstract public class Search {
 
     protected Criteria searchType;
 
+    protected final int INVALID_POSITION = -1;
+
     public boolean isManual() {
         return false;
     }
@@ -41,8 +43,8 @@ abstract public class Search {
     protected void constructPositionAlbum(Song song, ArrayList<Album> albums, long currentlyShownNextRandomAlbumId, History searchHistory, History listenHistory) {
         int i = 0;
 
-        currentSongPosition = -1;
-        currentlyShownNextRandomAlbumPosition = -1;
+        currentSongPosition = INVALID_POSITION;
+        currentlyShownNextRandomAlbumPosition = INVALID_POSITION;
         forbiddenPosition = new ArrayList<>();
         forbiddenId = new ArrayList<>();
         albumArrayList = new ArrayList<>();
@@ -112,7 +114,7 @@ abstract public class Search {
         Collections.sort(forbiddenInteger); // sorting is needed to simplify randomize exclusion iteration
 
         int reduceBound = bound - forbiddenInteger.size();
-        if (reduceBound >= 0) {
+        if (reduceBound > 0) {
             // get a random position in reduce interval
             int random = new Random().nextInt(reduceBound);
 
@@ -127,6 +129,8 @@ abstract public class Search {
                 previousForbiddenNumber = forbiddenNumber;
             }
             return random;
+        } else if (reduceBound == 0) {
+            return 0;
         }
         return -1;
     }
@@ -154,14 +158,12 @@ abstract public class Search {
         int randomAlbumPosition;
 
         if (albumSize > 0) {
-            int authorizeAlbumNumber;
-            if (currentlyShownNextRandomAlbumPosition != -1) {
-                authorizeAlbumNumber = albumSize - forbiddenPositionOfArray.size() - 2; // -2 is to take into account currentSongPosition and currentlyShownNextRandomAlbumPosition
-            } else {
-                authorizeAlbumNumber = albumSize - forbiddenPositionOfArray.size() - 1; // -1 is to take into account currentSongPosition
-            }
+            int removeCurrentSongPosition = (currentSongPosition != INVALID_POSITION) ? 1:0;
+            int removeCurrentlyShownNextRandomAlbumPosition = (currentlyShownNextRandomAlbumPosition != INVALID_POSITION) ? 1:0;
 
-            if (albumSize == 1) {
+            int authorizeAlbumNumber = albumSize - forbiddenPositionOfArray.size() - removeCurrentlyShownNextRandomAlbumPosition - removeCurrentSongPosition;
+
+            if (albumSize == 1 && currentSongPosition != INVALID_POSITION) {
                 randomAlbumPosition = ERROR_ARRAY_SIZE_IS_1; // nothing other than current song album can be found
             } else if (authorizeAlbumNumber >  0) {
                 // Align authorizeAlbumNumber and forbiddenPositionOfArray

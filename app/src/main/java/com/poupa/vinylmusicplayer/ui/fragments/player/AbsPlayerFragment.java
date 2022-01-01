@@ -148,7 +148,7 @@ public abstract class AbsPlayerFragment extends AbsMusicServiceFragment implemen
             AddToPlaylistDialog.create(song).show(getParentFragmentManager(), "ADD_PLAYLIST");
             return true;
         } else if (itemId == R.id.action_clear_playing_queue) {
-            MusicPlayerRemote.clearQueue();
+            MusicPlayerRemote.closeQueue();
             return true;
         } else if (itemId == R.id.action_dynamic_queue) {
             DynamicElementBottomSheetDialog dynamicElementBottomSheetDialog = DynamicElementBottomSheetDialog

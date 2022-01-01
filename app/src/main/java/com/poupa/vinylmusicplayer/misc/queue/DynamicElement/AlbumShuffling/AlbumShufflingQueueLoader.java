@@ -135,7 +135,7 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
     }
 
     public ArrayList<Song> getNextQueue() {
-        if (isNextQueueEmpty())
+        if (isNextQueueEmpty() || this.songUsedForSearching == null)
             return null;
 
         AlbumShufflingUtil.getInstance().commitHistories(this.songUsedForSearching.albumId); // commit ensure no duplication, this call help remember first album listen too
@@ -160,6 +160,8 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
 
     @Override
     protected boolean isSongDifferentEnough(@NonNull Song song) {
-        return (song.albumId != songUsedForSearching.albumId);
+        if (this.songUsedForSearching == null)
+            return false;
+        return (song.albumId != this.songUsedForSearching.albumId);
     }
 }
