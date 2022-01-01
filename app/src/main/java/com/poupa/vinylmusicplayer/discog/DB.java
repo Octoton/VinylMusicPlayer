@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 
 class DB extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "discography.db";
-    private static final int VERSION = 7;
+    private static final int VERSION = 8;
 
     DB() {
         super(App.getInstance().getApplicationContext(), DATABASE_NAME, null, VERSION);
@@ -50,7 +50,8 @@ class DB extends SQLiteOpenHelper {
                         + SongColumns.TRACK_DURATION + " LONG, "
                         + SongColumns.TRACK_NUMBER + " LONG, "
                         + SongColumns.TRACK_TITLE + " TEXT, "
-                        + SongColumns.YEAR + " LONG"
+                        + SongColumns.YEAR + " LONG, "
+                        + SongColumns.BLACKLISTED_FROM_PERPETUAL_QUEUE + " INTEGER"
                         + ");"
         );
     }
@@ -120,6 +121,7 @@ class DB extends SQLiteOpenHelper {
             values.put(SongColumns.TRACK_NUMBER, song.trackNumber);
             values.put(SongColumns.TRACK_TITLE, song.title);
             values.put(SongColumns.YEAR, song.year);
+            values.put(SongColumns.BLACKLISTED_FROM_PERPETUAL_QUEUE, song.getIsBlackListedFromPerpetualQueue());
 
             db.insert(SongColumns.NAME, null, values);
         } catch (Exception e) {
@@ -141,6 +143,38 @@ class DB extends SQLiteOpenHelper {
                     SongColumns.NAME,
                     SongColumns.ID + " = " + songId,
                     null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    synchronized void updateSong(Song song) {
+        try (final SQLiteDatabase db = getWritableDatabase()) {
+            ContentValues values = new ContentValues();
+            values.put(SongColumns.ID, song.id);
+            values.put(SongColumns.ALBUM_ID, song.albumId);
+            values.put(SongColumns.ALBUM_ARTIST_NAME, MultiValuesTagUtil.merge(song.albumArtistNames));
+            values.put(SongColumns.ALBUM_NAME, song.albumName);
+            values.put(SongColumns.ARTIST_NAME, MultiValuesTagUtil.merge(song.artistNames));
+            values.put(SongColumns.DATA_PATH, song.data);
+            values.put(SongColumns.DATE_ADDED, song.dateAdded);
+            values.put(SongColumns.DATE_MODIFIED, song.dateModified);
+            values.put(SongColumns.DISC_NUMBER, song.discNumber);
+            values.put(SongColumns.GENRE, song.genre);
+            values.put(SongColumns.REPLAYGAIN_ALBUM, song.replayGainAlbum);
+            values.put(SongColumns.REPLAYGAIN_TRACK, song.replayGainTrack);
+            values.put(SongColumns.TRACK_DURATION, song.duration);
+            values.put(SongColumns.TRACK_NUMBER, song.trackNumber);
+            values.put(SongColumns.TRACK_TITLE, song.title);
+            values.put(SongColumns.YEAR, song.year);
+            values.put(SongColumns.BLACKLISTED_FROM_PERPETUAL_QUEUE, song.getIsBlackListedFromPerpetualQueue());
+
+            db.update(SongColumns.NAME,
+                    values,
+                    SongColumns.ID + " = ?",
+                    new String[]{
+                            String.valueOf(song.id)
+                    });
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -170,7 +204,8 @@ class DB extends SQLiteOpenHelper {
                         SongColumns.TRACK_DURATION,
                         SongColumns.TRACK_NUMBER,
                         SongColumns.TRACK_TITLE,
-                        SongColumns.YEAR
+                        SongColumns.YEAR,
+                        SongColumns.BLACKLISTED_FROM_PERPETUAL_QUEUE
                 },
                 null,
                 null,
@@ -202,6 +237,7 @@ class DB extends SQLiteOpenHelper {
                 final int trackNumber = cursor.getInt(++columnIndex);
                 final String trackTitle = cursor.getString(++columnIndex);
                 final int year = cursor.getInt(++columnIndex);
+                final int isBlackListedFromPerpetualQueue = cursor.getInt(++columnIndex);
 
                 final Song song = new Song(
                         id,
@@ -214,7 +250,8 @@ class DB extends SQLiteOpenHelper {
                         dateModified,
                         albumId,
                         albumName,
-                        MultiValuesTagUtil.split(artistNames));
+                        MultiValuesTagUtil.split(artistNames),
+                        isBlackListedFromPerpetualQueue);
                 song.discNumber = discNumber;
                 song.albumArtistNames = MultiValuesTagUtil.split(albumArtistNames);
                 song.genres = MultiValuesTagUtil.split(genres);
@@ -251,5 +288,6 @@ class DB extends SQLiteOpenHelper {
         String TRACK_TITLE = "track_title";
         String TRACK_NUMBER = "track_number";
         String YEAR = "year";
+        String BLACKLISTED_FROM_PERPETUAL_QUEUE = "blacklisted_from_perpetual_queue";
     }
 }

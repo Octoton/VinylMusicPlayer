@@ -224,7 +224,7 @@ public class SongAdapter
             super(binding);
 
             View itemView = binding.getRoot();
-            ThemeStyleUtil.getInstance().setHeightListItem(itemView, activity.getResources().getDisplayMetrics().density);
+            ThemeStyleUtil.getInstance().setHeightListItem(itemView, activity);
             imageBorderTheme.setRadius(ThemeStyleUtil.getInstance().getAlbumRadiusImage(activity));
 
             setImageTransitionName(activity.getString(R.string.transition_album_art));

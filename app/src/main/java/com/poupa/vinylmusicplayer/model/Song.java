@@ -21,8 +21,11 @@ import java.util.function.Function;
  */
 public class Song implements Parcelable {
     public static String UNTITLED_DISPLAY_NAME = "Untitled";
+    public static final int NOT_BLACKLISTED_FROM_PERPETUAL_QUEUE = 0b0;
+    public static final int BLACKLISTED_FROM_ALBUM_PERPETUAL_QUEUE = 0b1;
+    private int isBlackListedFromPerpetualQueue;
 
-    public static final Song EMPTY_SONG = new Song(-1L, "", -1, -1, -1L, "", -1L, -1L, -1L, "", new ArrayList<>(0));
+    public static final Song EMPTY_SONG = new Song(-1L, "", -1, -1, -1L, "", -1L, -1L, -1L, "", new ArrayList<>(0), NOT_BLACKLISTED_FROM_PERPETUAL_QUEUE);
 
     public final long id;
     @NonNull
@@ -50,7 +53,7 @@ public class Song implements Parcelable {
     public int trackNumber;
     public int year;
 
-    public Song(long id, String title, int trackNumber, int year, long duration, String data, long dateAdded, long dateModified, long albumId, String albumName, @NonNull List<String> artistNames) {
+    public Song(long id, String title, int trackNumber, int year, long duration, String data, long dateAdded, long dateModified, long albumId, String albumName, @NonNull List<String> artistNames, int isBlackListedFromPerpetualQueue) {
         this.id = id;
         this.albumName = albumName;
         this.albumId = albumId;
@@ -62,6 +65,7 @@ public class Song implements Parcelable {
         this.title = title;
         this.trackNumber = trackNumber;
         this.year = year;
+        this.isBlackListedFromPerpetualQueue = isBlackListedFromPerpetualQueue;
         // Note: Skip following fields since they are not supported by MediaStore:
         // discNumber, genre, albumArtistNames, replayGainTrack, replayGainAlbum
     }
@@ -85,6 +89,24 @@ public class Song implements Parcelable {
         title = song.title;
         trackNumber = song.trackNumber;
         year = song.year;
+        this.isBlackListedFromPerpetualQueue = song.isBlackListedFromPerpetualQueue;
+    }
+
+    public int getIsBlackListedFromPerpetualQueue() {
+        return this.isBlackListedFromPerpetualQueue;
+    }
+
+    public void addBlackListedFlag(int flag) {
+        this.isBlackListedFromPerpetualQueue = this.isBlackListedFromPerpetualQueue | flag;
+    }
+
+    public boolean isBlackListedFlagActivated(int flag) {
+        return ((this.isBlackListedFromPerpetualQueue & flag) == flag);
+    }
+
+    public void removeBlackListedFlag(int flag) {
+        if (isBlackListedFlagActivated(flag))
+            this.isBlackListedFromPerpetualQueue = this.isBlackListedFromPerpetualQueue - flag;
     }
 
     @NonNull
@@ -202,6 +224,7 @@ public class Song implements Parcelable {
         parcel.writeString(title);
         parcel.writeInt(trackNumber);
         parcel.writeInt(year);
+        parcel.writeInt(this.isBlackListedFromPerpetualQueue);
     }
 
     Song(@NonNull final Parcel in) {
@@ -221,6 +244,7 @@ public class Song implements Parcelable {
         title = nonNullify.apply(in.readString());
         trackNumber = in.readInt();
         year = in.readInt();
+        isBlackListedFromPerpetualQueue = in.readInt();
     }
 
     public static final Creator<Song> CREATOR = new Creator<>() {

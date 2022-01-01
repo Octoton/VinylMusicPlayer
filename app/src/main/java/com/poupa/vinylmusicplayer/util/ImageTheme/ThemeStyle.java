@@ -17,7 +17,7 @@ public interface ThemeStyle {
 
     float getAlbumRadiusImage(Activity activity);
     float getArtistRadiusImage(Activity activity);
-    void setHeightListItem(View itemView, float density);
+    void setHeightListItem(View itemView, Activity activity);
     void setHeaderPadding(RecyclerView recyclerView, float density);
     void setHeaderText(ViewHolder holder, AppCompatActivity activity, String title);
     void setSearchCardItemStyle(View itemView, AppCompatActivity activity);

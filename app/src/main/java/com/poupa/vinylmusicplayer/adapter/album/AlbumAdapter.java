@@ -1,7 +1,9 @@
 package com.poupa.vinylmusicplayer.adapter.album;
 
+import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Pair;
 
+import com.afollestad.materialcab.MaterialCab;
 import com.kabouzeid.appthemehelper.util.ColorUtil;
 import com.kabouzeid.appthemehelper.util.MaterialValueHelper;
 import com.poupa.vinylmusicplayer.R;
@@ -21,6 +24,7 @@ import com.poupa.vinylmusicplayer.adapter.base.MediaEntryViewHolder;
 import com.poupa.vinylmusicplayer.databinding.ItemGridBinding;
 import com.poupa.vinylmusicplayer.databinding.ItemGridCardHorizontalBinding;
 import com.poupa.vinylmusicplayer.databinding.ItemListBinding;
+import com.poupa.vinylmusicplayer.discog.Discography;
 import com.poupa.vinylmusicplayer.discog.tagging.MultiValuesTagUtil;
 import com.poupa.vinylmusicplayer.glide.GlideApp;
 import com.poupa.vinylmusicplayer.glide.VinylColoredTarget;
@@ -169,8 +173,21 @@ public class AlbumAdapter extends AbsMultiSelectAdapter<AlbumAdapter.ViewHolder,
         }
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     protected void loadAlbumCover(Album album, final ViewHolder holder) {
         if (holder.image == null) return;
+
+        if (holder.imageContainer != null) {
+            if (album.getIsBlackListedFromAlbumSearch()) {
+                if (itemLayoutRes == R.layout.item_grid) {
+                    holder.imageContainer.setForeground(activity.getResources().getDrawable(R.drawable.ic_shift_grid_album_crossed_white_24dp));
+                } else {
+                    holder.imageContainer.setForeground(activity.getResources().getDrawable(R.drawable.ic_shift_list_album_crossed_white_24dp));
+                }
+            } else {
+                holder.imageContainer.setForeground(null);
+            }
+        }
 
         GlideApp.with(activity)
                 .asBitmapPalette()
@@ -211,7 +228,30 @@ public class AlbumAdapter extends AbsMultiSelectAdapter<AlbumAdapter.ViewHolder,
 
     @Override
     protected void onMultipleItemAction(@NonNull final MenuItem menuItem, @NonNull final Map<Integer, Album> selection) {
-        SongsMenuHelper.handleMenuClick(activity, getSongList(selection.values().iterator()), menuItem.getItemId());
+       if (menuItem.getItemId() == R.id.action_toggle_black_list) {
+            for (Album album : selection.values().iterator()) {
+                boolean newBlackListedAlbumFlag = !album.getIsBlackListedFromAlbumSearch();
+                for (Song song : album.songs) {
+                    if (newBlackListedAlbumFlag)
+                        song.addBlackListedFlag(Song.BLACKLISTED_FROM_ALBUM_PERPETUAL_QUEUE);
+                    else
+                        song.removeBlackListedFlag(Song.BLACKLISTED_FROM_ALBUM_PERPETUAL_QUEUE);
+                    Discography.getInstance().updateSong(song);
+                }
+            }
+        } else {
+            SongsMenuHelper.handleMenuClick(activity, getSongList(selection.values().iterator()), menuItem.getItemId());
+        }
+    }
+
+    @Override
+    public boolean onCabCreated(MaterialCab materialCab, Menu menu) {
+        boolean returnValue = super.onCabCreated(materialCab, menu);
+
+        menu.findItem(R.id.action_toggle_black_list).setVisible(true);
+
+        return returnValue;
+    }
     }
 
     @NonNull
@@ -233,7 +273,7 @@ public class AlbumAdapter extends AbsMultiSelectAdapter<AlbumAdapter.ViewHolder,
             super(binding);
 
             View itemView = binding.getRoot();
-            ThemeStyleUtil.getInstance().setHeightListItem(itemView, activity.getResources().getDisplayMetrics().density);
+            ThemeStyleUtil.getInstance().setHeightListItem(itemView, activity);
             imageBorderTheme.setRadius(ThemeStyleUtil.getInstance().getAlbumRadiusImage(activity));
 
             setImageTransitionName(activity.getString(R.string.transition_album_art));

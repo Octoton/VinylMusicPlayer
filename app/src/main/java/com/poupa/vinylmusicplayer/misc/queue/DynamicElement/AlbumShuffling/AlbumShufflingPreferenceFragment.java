@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -21,6 +22,7 @@ import static java.lang.Integer.parseInt;
 public class AlbumShufflingPreferenceFragment extends DynamicElementPreferenceFragment {
 
     private DynamicElementAdapter adapter;
+    private boolean blackListStatus;
     private View view;
 
     public void reset() {
@@ -30,6 +32,10 @@ public class AlbumShufflingPreferenceFragment extends DynamicElementPreferenceFr
         EditText history = (EditText)view.findViewById(R.id.history_size);
         AlbumShufflingUtil.getInstance().resetHistorySize();
         history.setText(String.valueOf(AlbumShufflingUtil.getInstance().getHistorySize()));
+
+        blackListStatus = AlbumShufflingUtil.getInstance().getDefaultBlackListUse();
+        AlbumShufflingUtil.getInstance().updateBlackListUse(blackListStatus);
+        updateBlackListStatus();
     }
 
     public void ok() {
@@ -38,6 +44,8 @@ public class AlbumShufflingPreferenceFragment extends DynamicElementPreferenceFr
         EditText history = (EditText)view.findViewById(R.id.history_size);
         int history_size = parseInt(history.getText().toString());
         AlbumShufflingUtil.getInstance().updateHistorySize(history_size);
+
+        AlbumShufflingUtil.getInstance().updateBlackListUse(blackListStatus);
     }
 
     private void updateCriterion(ArrayList<AlbumShufflingCriteria> criterion) {
@@ -73,8 +81,20 @@ public class AlbumShufflingPreferenceFragment extends DynamicElementPreferenceFr
         EditText history = (EditText)view.findViewById(R.id.history_size);
         history.setText(String.valueOf(AlbumShufflingUtil.getInstance().getHistorySize()));
 
+        CheckBox blackList = (CheckBox)view.findViewById(R.id.use_black_list);
+        blackListStatus = AlbumShufflingUtil.getInstance().getBlackListUse();
+        updateBlackListStatus();
+        blackList.setOnClickListener(v -> {
+            blackListStatus = !blackListStatus;
+            updateBlackListStatus();
+        });
 
         return view;
+    }
+
+    private void updateBlackListStatus() {
+        CheckBox blackList = (CheckBox)view.findViewById(R.id.use_black_list);
+        blackList.setChecked(blackListStatus);
     }
 
 }

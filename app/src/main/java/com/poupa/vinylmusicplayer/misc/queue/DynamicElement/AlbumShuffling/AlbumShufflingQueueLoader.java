@@ -125,10 +125,24 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         synchronized (Discography.getInstance()) {
             albums = new ArrayList<>(Discography.getInstance().getAllAlbums(AlbumSortOrder.BY_YEAR_DESC));
         }
-        Random rand = new Random();
-        Album album = albums.get(rand.nextInt(albums.size()));
+        ArrayList<Integer> forbiddenPosition = new ArrayList<>();
+        int i = 0;
+        if (AlbumShufflingUtil.getInstance().getBlackListUse()) {
+            for (Album album : albums) {
+                if (album.getIsBlackListedFromAlbumSearch()) {
+                    forbiddenPosition.add(i);
+                }
+                i++;
+            }
+        }
 
-        return album.songs;
+        int randomAlbumPosition = Search.randomIntInBoundWithForbiddenNumber(albums.size(), forbiddenPosition);
+        if (randomAlbumPosition > 0) {
+            Album album = albums.get(randomAlbumPosition);
+            return album.songs;
+        }
+
+        return null;
     }
 
     public boolean isNextQueueEmpty() {

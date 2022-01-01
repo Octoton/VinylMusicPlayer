@@ -294,6 +294,10 @@ public class Discography implements MusicServiceEventListener {
         }
     }
 
+    public void updateSong(Song song) {
+        database.updateSong(song);
+    }
+
     public float getMaxReplayGain() {
         return cache.getMaxReplayGain();
     }

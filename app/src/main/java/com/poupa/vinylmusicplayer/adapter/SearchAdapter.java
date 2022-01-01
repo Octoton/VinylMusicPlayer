@@ -139,7 +139,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
             View itemView = binding.getRoot();
             itemView.setOnLongClickListener(null);
 
-            ThemeStyleUtil.getInstance().setHeightListItem(itemView, activity.getResources().getDisplayMetrics().density);
+            ThemeStyleUtil.getInstance().setHeightListItem(itemView, activity);
             ThemeStyleUtil.getInstance().setSearchCardItemStyle(itemView, activity);
 
             if (shortSeparator != null) {

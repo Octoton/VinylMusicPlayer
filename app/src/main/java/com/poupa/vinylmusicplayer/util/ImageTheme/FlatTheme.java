@@ -31,7 +31,7 @@ class FlatTheme implements ThemeStyle {
         return 0;
     }
 
-    public void setHeightListItem(View itemView, float density) {
+    public void setHeightListItem(View itemView, Activity activity) {
         //do nothing
     }
 

@@ -197,7 +197,7 @@ public class ArtistAdapter extends AbsMultiSelectAdapter<ArtistAdapter.ViewHolde
             super(binding);
 
             View itemView = binding.getRoot();
-            ThemeStyleUtil.getInstance().setHeightListItem(itemView, activity.getResources().getDisplayMetrics().density);
+            ThemeStyleUtil.getInstance().setHeightListItem(itemView, activity);
 
             setImageTransitionName(activity.getString(R.string.transition_artist_image));
             imageBorderTheme.setRadius(ThemeStyleUtil.getInstance().getArtistRadiusImage(activity));
