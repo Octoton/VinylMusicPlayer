@@ -41,6 +41,14 @@ public class Album implements Parcelable {
         return name;
     }
 
+    public boolean getIsBlackListedFromAlbumSearch() {
+        for (Song song : songs) {
+            if (song.isBlackListedFromPerpetualQueue)
+                return true;
+        }
+        return false;
+    }
+
     public long getArtistId() {
         return getArtist().id;
     }

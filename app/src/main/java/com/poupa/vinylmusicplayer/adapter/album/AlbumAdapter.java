@@ -148,11 +148,15 @@ public class AlbumAdapter extends AbsMultiSelectAdapter<AlbumAdapter.ViewHolder,
     protected void loadAlbumCover(Album album, final ViewHolder holder) {
         if (holder.image == null) return;
 
-        if (holder.imageContainer != null && album.getIsBlackListedFromAlbumSearch()) {
-            if (itemLayoutRes == R.layout.item_grid) {
-                holder.imageContainer.setForeground(activity.getResources().getDrawable(R.drawable.ic_shift_grid_album_crossed_white_24dp));
+        if (holder.imageContainer != null) {
+            if (album.getIsBlackListedFromAlbumSearch()) {
+                if (itemLayoutRes == R.layout.item_grid) {
+                    holder.imageContainer.setForeground(activity.getResources().getDrawable(R.drawable.ic_shift_grid_album_crossed_white_24dp));
+                } else {
+                    holder.imageContainer.setForeground(activity.getResources().getDrawable(R.drawable.ic_shift_list_album_crossed_white_24dp));
+                }
             } else {
-                holder.imageContainer.setForeground(activity.getResources().getDrawable(R.drawable.ic_shift_list_album_crossed_white_24dp));
+                holder.imageContainer.setForeground(null);
             }
         }
 
@@ -200,7 +204,17 @@ public class AlbumAdapter extends AbsMultiSelectAdapter<AlbumAdapter.ViewHolder,
 
     @Override
     protected void onMultipleItemAction(@NonNull MenuItem menuItem, @NonNull ArrayList<Album> selection) {
-        SongsMenuHelper.handleMenuClick(activity, getSongList(selection), menuItem.getItemId());
+        if (menuItem.getItemId() == R.id.action_toggle_black_list) {
+            for (Album album : selection) {
+                boolean newIsBlackListedFromPerpetualQueue = !album.getIsBlackListedFromAlbumSearch();
+                for (Song song : album.songs) {
+                    song.isBlackListedFromPerpetualQueue = newIsBlackListedFromPerpetualQueue;
+                    Discography.getInstance().updateSong(song);
+                }
+            }
+        } else {
+            SongsMenuHelper.handleMenuClick(activity, getSongList(selection), menuItem.getItemId());
+        }
     }
 
     @Override

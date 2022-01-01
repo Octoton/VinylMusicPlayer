@@ -251,6 +251,10 @@ public class Discography implements MusicServiceEventListener {
         }
     }
 
+    public void updateSong(Song song) {
+        database.updateSong(song);
+    }
+
     private void addSong(@NonNull Song song, boolean cacheOnly) {
         synchronized (cache) {
             // Race condition check: If the song has been added -> skip
