@@ -171,7 +171,7 @@ public class SongFileAdapter extends AbsMultiSelectAdapter<SongFileAdapter.ViewH
             super(binding);
 
             View itemView = binding.getRoot();
-            ThemeStyleUtil.getInstance().setHeightListItem(itemView, activity.getResources().getDisplayMetrics().density);
+            ThemeStyleUtil.getInstance().setHeightListItem(itemView, activity);
             imageBorderTheme.setRadius(ThemeStyleUtil.getInstance().getAlbumRadiusImage(activity));
 
             if (menu != null && callbacks != null) {
