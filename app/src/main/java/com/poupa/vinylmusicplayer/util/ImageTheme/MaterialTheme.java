@@ -5,6 +5,7 @@ import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout.LayoutParams;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,8 +35,18 @@ class MaterialTheme implements ThemeStyle {
 
     public void setHeightListItem(View itemView, float density) {
         int padding_in_dp = 64;  // 64 dps
-
         itemView.getLayoutParams().height = (int) (padding_in_dp * density + 0.5f);
+
+        int margin_left_in_dp = 16;
+        int margin_left_in_px = (int) (margin_left_in_dp * density + 0.5f);
+        int margin_ratio = (int) ((padding_in_dp - 40)/2);
+        int margin_in_px = (int) (margin_ratio * density + 0.5f);
+        LayoutParams params = new LayoutParams(
+                LayoutParams.WRAP_CONTENT,
+                LayoutParams.MATCH_PARENT
+        );
+        params.setMargins(margin_left_in_px, margin_in_px, 0, margin_in_px);
+        itemView.findViewById(R.id.image_container).setLayoutParams(params);
     }
 
     public void setHeaderPadding(RecyclerView recyclerView, float density) {
