@@ -37,17 +37,17 @@
                 android:id="@+id/image_container"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginStart="16dp"
+                android:layout_marginTop="@dimen/default_item_margin"
+                android:layout_marginBottom="@dimen/default_item_margin"
+                android:layout_marginLeft="@dimen/default_item_margin"
+                android:layout_marginStart="@dimen/default_item_margin"
                 android:layout_marginRight="0dp"
                 android:layout_marginEnd="0dp">
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/imageBorderTheme"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="@dimen/list_view_image_size"
+                    android:layout_height="@dimen/list_view_image_size"
                     android:layout_gravity="center"
                     app:cardCornerRadius="0dp"
                     app:cardElevation="0dp"
@@ -64,7 +64,7 @@
 
                 <TextView
                     android:id="@+id/image_text"
-                    android:layout_width="40dp"
+                    android:layout_width="@dimen/list_view_image_size"
                     android:layout_height="match_parent"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
@@ -83,9 +83,9 @@
                 android:descendantFocusability="blocksDescendants"
                 android:orientation="vertical"
                 android:paddingEnd="0dp"
-                android:paddingLeft="16dp"
+                android:paddingLeft="@dimen/default_item_margin"
                 android:paddingRight="0dp"
-                android:paddingStart="16dp">
+                android:paddingStart="@dimen/default_item_margin">
 
                 <com.poupa.vinylmusicplayer.views.TouchInterceptHorizontalScrollView
                     android:id="@+id/title_scrollview"

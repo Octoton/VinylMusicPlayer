@@ -33,25 +33,28 @@ class MaterialTheme implements ThemeStyle {
         return activity.getResources().getDimension(R.dimen.artist_corner_radius);
     }
 
-    public void setHeightListItem(View itemView, float density) {
-        int padding_in_dp = 64;  // 64 dps
-        itemView.getLayoutParams().height = (int) (padding_in_dp * density + 0.5f);
+    private int px_to_dp(int px, float density) {
+        return (int) (px * density + 0.5f);
+    }
 
-        int margin_left_in_dp = 16;
-        int margin_left_in_px = (int) (margin_left_in_dp * density + 0.5f);
-        int margin_ratio = (int) ((padding_in_dp - 40)/2);
-        int margin_in_px = (int) (margin_ratio * density + 0.5f);
+    public void setHeightListItem(View itemView, Activity activity) {
+        int padding_in_dp = 64;  // 64 dps
+        float density = activity.getResources().getDisplayMetrics().density;
+        itemView.getLayoutParams().height = px_to_dp(padding_in_dp, density);
+
+        int margin_left_in_px = activity.getResources().getDimensionPixelSize(R.dimen.default_item_margin);
+        int new_margin_in_px = (int) ((px_to_dp(padding_in_dp, density) - activity.getResources().getDimensionPixelSize(R.dimen.list_view_image_size)) / 2);
         LayoutParams params = new LayoutParams(
                 LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT
         );
-        params.setMargins(margin_left_in_px, margin_in_px, 0, margin_in_px);
+        params.setMargins(margin_left_in_px, new_margin_in_px, 0, new_margin_in_px);
         itemView.findViewById(R.id.image_container).setLayoutParams(params);
     }
 
     public void setHeaderPadding(RecyclerView recyclerView, float density) {
         int padding_in_dp = 12;  // 12 dps
-        int padding_in_px = (int) (padding_in_dp * density + 0.5f);
+        int padding_in_px = px_to_dp(padding_in_dp, density);
         recyclerView.setPadding(0, padding_in_px, 0, 0);
     }
 
