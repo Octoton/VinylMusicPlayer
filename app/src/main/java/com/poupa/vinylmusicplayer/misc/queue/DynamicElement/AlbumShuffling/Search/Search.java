@@ -118,7 +118,7 @@ abstract public class Search {
     }
 
     // Found a random int in [0, bound] that is not in forbiddenInteger
-    public int randomIntInBoundWithForbiddenNumber(int bound, ArrayList<Integer> forbiddenInteger) {
+    public static int randomIntInBoundWithForbiddenNumber(int bound, ArrayList<Integer> forbiddenInteger) {
         Collections.sort(forbiddenInteger); // sorting is needed to simplify randomize exclusion iteration
 
         int reduceBound = bound - forbiddenInteger.size();
