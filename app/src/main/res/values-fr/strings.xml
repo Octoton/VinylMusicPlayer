@@ -348,6 +348,7 @@
     <!-- Album shuffling -->
     <string name="pref_summary_album_shuffling_criteria">La recherche s\'effectue en fonction du theme et de l\'ordre des criteres que vous avez retenus</string>
     <string name="pref_summary_album_shuffling_history">Pour éviter les repetitions, un historique locale d\'écoute est utilisé (0–9 albums)</string>
+    <string name="pref_summary_album_shuffling_blacklist">Exclure les albums black-listés de la file perpétuelle</string>
 
     <string name="action_shuffle_all_albums">Lire les albums en aléatoire</string>
     <string name="start_album_shuffling_queue">Ouvrir une file d\'album perpétuelle</string>
@@ -359,6 +360,8 @@
     <string name="shuffle_album_artist">Recharger album avec le même artist</string>
     <string name="you_have_to_select_at_least_one_criteria">Il faut au moins sélectionner un critère.</string>
     <string name="you_cannot_activate_criteria_after_random">Les critères après aléatoire ne peuvent être activé.</string>
+
+    <string name="toggle_blacklist_state">Modifier la liste noire perpétuelle</string>
     <!-- SAF -->
     <string name="saf_error_uri">Impossible d\'obtenir SAF URI</string>
     <string name="saf_write_failed">Échec d\'écriture : %s</string>

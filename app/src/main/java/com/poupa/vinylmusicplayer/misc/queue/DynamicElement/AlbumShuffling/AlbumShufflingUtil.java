@@ -19,6 +19,7 @@ public final class AlbumShufflingUtil {
     public static final String PREFERENCE_KEY = "album_shuffling_preference";
     public static final String CRITERION = "criterion";
     public static final String HISTORY_SIZE = "history_size";
+    public static final String BLACKLIST_USE = "blacklist_use";
 
     private static AlbumShufflingUtil sInstance;
     private final SharedPreferences mPreferences;
@@ -26,12 +27,16 @@ public final class AlbumShufflingUtil {
     private final History listenHistory; // already listen album
     private final History searchHistory; // manually searched album (with 3-dot menu) on this playlist (before going to next random album)
 
+    private boolean blackListUse;
+
     private AlbumShufflingUtil() {
         mPreferences = App.getStaticContext().getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE);
 
         int historySize = getHistorySize();
         searchHistory = new History(historySize, false);
         listenHistory = new History(historySize, true);
+
+        blackListUse = mPreferences.getBoolean(BLACKLIST_USE, getDefaultBlackListUse());
     }
 
     public static AlbumShufflingUtil getInstance() {
@@ -39,6 +44,18 @@ public final class AlbumShufflingUtil {
             sInstance = new AlbumShufflingUtil();
         }
         return sInstance;
+    }
+
+    public boolean getDefaultBlackListUse() { return true; }
+
+    public void updateBlackListUse(boolean blackListUse) {
+        mPreferences.edit().putBoolean(BLACKLIST_USE, blackListUse).apply();
+
+        this.blackListUse = blackListUse;
+    }
+
+    public final boolean getBlackListUse() {
+        return blackListUse;
     }
 
     public int getDefaultHistorySize() {

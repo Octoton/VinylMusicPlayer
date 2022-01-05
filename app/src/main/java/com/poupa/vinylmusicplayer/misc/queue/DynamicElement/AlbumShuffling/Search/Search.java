@@ -7,6 +7,7 @@ import java.util.Random;
 import android.content.Context;
 
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingCriteria.Criteria;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingUtil;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Song;
 
@@ -41,6 +42,7 @@ abstract public class Search {
     // init global variable to ensure foundNextAlbum can easily find something
     protected void constructPositionAlbum(Song song, ArrayList<Album> albums, long currentlyShownNextRandomAlbumId, History searchHistory, History listenHistory) {
         int i = 0;
+        boolean foundAnAlbum;
 
         currentSongPosition = INVALID_POSITION;
         currentlyShownNextRandomAlbumPosition = INVALID_POSITION;
@@ -51,11 +53,16 @@ abstract public class Search {
 
         for (Album album : albums) {
             if (searchTypeIsTrue(song, album)) { // condition depend on current search type
+                foundAnAlbum = false;
+
                 if (album.getId() == song.albumId) { // album is same as current song album
+                    foundAnAlbum = true;
                     currentSongPosition = i;
                 } else if (album.getId() == currentlyShownNextRandomAlbumId) {
+                    foundAnAlbum = true;
                     currentlyShownNextRandomAlbumPosition = i;
-                } else {
+                } else if ((!AlbumShufflingUtil.getInstance().getBlackListUse() || !album.getIsBlackListedFromAlbumSearch())) {
+                    foundAnAlbum = true;
                     if (isManual()) { // Manual search only look at searchHistory
                         if (History.isIdForbidden(album.getId(), searchHistory.getHistory())) {
                             forbiddenPosition.add(i);
@@ -69,8 +76,10 @@ abstract public class Search {
                     }
                 }
 
-                albumArrayList.add(album);
-                i++;
+                if (foundAnAlbum) {
+                    albumArrayList.add(album);
+                    i++;
+                }
             }
 
             if (album.getId() == currentlyShownNextRandomAlbumId) {
@@ -109,7 +118,7 @@ abstract public class Search {
     }
 
     // Found a random int in [0, bound] that is not in forbiddenInteger
-    public int randomIntInBoundWithForbiddenNumber(int bound, ArrayList<Integer> forbiddenInteger) {
+    public static int randomIntInBoundWithForbiddenNumber(int bound, ArrayList<Integer> forbiddenInteger) {
         Collections.sort(forbiddenInteger); // sorting is needed to simplify randomize exclusion iteration
 
         int reduceBound = bound - forbiddenInteger.size();

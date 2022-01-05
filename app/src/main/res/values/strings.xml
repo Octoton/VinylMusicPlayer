@@ -385,6 +385,7 @@
     <!-- Album shuffling -->
     <string name="pref_summary_album_shuffling_criteria">The search is done following theme and order of the different criteria that you have selected</string>
     <string name="pref_summary_album_shuffling_history">To avoid repeating, a local listening history is used (0–9 albums)</string>
+    <string name="pref_summary_album_shuffling_blacklist">Exclude blacklisted album from perpetual queue</string>
 
     <string name="action_shuffle_all_albums">Shuffle by album</string>
     <string name="start_album_shuffling_queue">Start new perpetual album queue</string>
@@ -397,5 +398,5 @@
     <string name="you_have_to_select_at_least_one_criteria">You have to select at least one criteria.</string>
     <string name="you_cannot_activate_criteria_after_random">You cannot activate criteria after random.</string>
 
-
+    <string name="toggle_blacklist_state">Toggle perpetual blacklist state</string>
 </resources>

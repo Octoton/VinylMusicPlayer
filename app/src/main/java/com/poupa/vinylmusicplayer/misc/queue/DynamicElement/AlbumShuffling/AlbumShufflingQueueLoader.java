@@ -2,7 +2,6 @@ package com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling;
 
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -124,10 +123,25 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         synchronized (Discography.getInstance()) {
             albums = new ArrayList<>(Discography.getInstance().getAllAlbums());
         }
-        Random rand = new Random();
-        Album album = albums.get(rand.nextInt(albums.size()));
 
-        return album.songs;
+        ArrayList<Integer> forbiddenPosition = new ArrayList<>();
+        int i = 0;
+        if (AlbumShufflingUtil.getInstance().getBlackListUse()) {
+            for (Album album : albums) {
+                if (album.getIsBlackListedFromAlbumSearch()) {
+                    forbiddenPosition.add(i);
+                }
+                i++;
+            }
+        }
+
+        int randomAlbumPosition = Search.randomIntInBoundWithForbiddenNumber(albums.size(), forbiddenPosition);
+        if (randomAlbumPosition > 0) {
+            Album album = albums.get(randomAlbumPosition);
+            return album.songs;
+        }
+
+        return null;
     }
 
     public boolean isNextQueueEmpty() {
