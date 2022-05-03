@@ -21,7 +21,7 @@ public class DB extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "dynqueue_shuffling_album.db";
     private static final int VERSION = 2;
 
-    DB() {
+    public DB() {
         super(App.getInstance().getApplicationContext(), DATABASE_NAME, null, VERSION);
     }
 
@@ -52,7 +52,7 @@ public class DB extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    synchronized void clear() {
+    synchronized public void clear() {
         try (final SQLiteDatabase db = getWritableDatabase()) {
             db.delete(ListenHistoryColumns.NAME, null, null);
             db.delete(NextRandomAlbumIdColumns.NAME, null, null);
@@ -61,7 +61,7 @@ public class DB extends SQLiteOpenHelper {
         }
     }
 
-    synchronized void removeFirstAlbumOfHistory() {
+    synchronized public void removeFirstAlbumOfHistory() {
         try (final SQLiteDatabase db = getWritableDatabase()) {
             String DELETE_FIRST_ELEMENT = "DELETE FROM " + ListenHistoryColumns.NAME + " WHERE " + ListenHistoryColumns._ID + " IN " +
                     "(SELECT " + ListenHistoryColumns._ID + " FROM " + ListenHistoryColumns.NAME + " ORDER BY " + ListenHistoryColumns._ID + " LIMIT 1)";
@@ -71,7 +71,7 @@ public class DB extends SQLiteOpenHelper {
         }
     }
 
-    synchronized void addIdToHistory(@NonNull Long albumId) {
+    synchronized public void addIdToHistory(@NonNull Long albumId) {
         try (final SQLiteDatabase db = getWritableDatabase()) {
             final ContentValues values = new ContentValues();
             values.put(ListenHistoryColumns.ALBUM_ID, albumId);
@@ -82,7 +82,7 @@ public class DB extends SQLiteOpenHelper {
     }
 
     @NonNull
-    synchronized List<Long> fetchAllListenHistory() {
+    synchronized public List<Long> fetchAllListenHistory() {
         ArrayList<Long> listenHistory = new ArrayList<>();
         final SQLiteDatabase database = getReadableDatabase();
         try (final Cursor cursor = database.query(ListenHistoryColumns.NAME,
@@ -121,7 +121,7 @@ public class DB extends SQLiteOpenHelper {
     }
 
     @NonNull
-    synchronized Long fetchNextRandomAlbumId() {
+    synchronized public Long fetchNextRandomAlbumId() {
         Long nextRandomAlbums = (long)0;
         final SQLiteDatabase database = getReadableDatabase();
         try (final Cursor cursor = database.query(NextRandomAlbumIdColumns.NAME,
