@@ -12,7 +12,7 @@ import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.Album
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog;
 
 
-/** Album shuffling implementation of {@link DynamicQueueItemAdapter} */
+/** Album shuffling implementation of {@link com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueItemAdapter} */
 public class AlbumShufflingQueueItemAdapter extends AbstractQueueItemAdapter {
 
     public AlbumShufflingQueueItemAdapter() {
@@ -47,7 +47,7 @@ public class AlbumShufflingQueueItemAdapter extends AbstractQueueItemAdapter {
             return true;
         } else if (item.getItemId() == R.id.action_delete_dynamic_element) {
             MusicPlayerRemote.setQueueToStaticQueue();
-        } else if (item.getItemId() == R.id.pref) {
+        } else if (item.getItemId() == R.id.action_change_dynamic_element) {
             showBottomSheetDialog(context);
         }
         return false;

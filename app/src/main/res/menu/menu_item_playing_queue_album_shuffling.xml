@@ -23,8 +23,8 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/pref"
-        android:title="@string/action_settings"
+        android:id="@+id/action_change_dynamic_element"
+        android:title="@string/change_dynamic_queue"
         app:showAsAction="never" />
 
     <item
