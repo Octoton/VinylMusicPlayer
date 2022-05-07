@@ -483,9 +483,10 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
                 if (prepared)
                     prepareNextImpl();
 
-                if (status == StaticPlayingQueue.QUEUE_HAS_CHANGED)
+                if (status == StaticPlayingQueue.QUEUE_HAS_CHANGED) {
                     notifyChange(QUEUE_CHANGED);
-                else if (status == StaticPlayingQueue.VALID_POSITION)
+                    notifyChange(META_CHANGED);
+                } else if (status == StaticPlayingQueue.VALID_POSITION)
                     notifyChange(META_CHANGED);
 
                 notHandledMetaChangedForCurrentTrack = false;
