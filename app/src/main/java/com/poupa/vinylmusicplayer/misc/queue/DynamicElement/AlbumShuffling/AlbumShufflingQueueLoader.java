@@ -32,7 +32,7 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
     public AlbumShufflingQueueLoader() {
         super();
 
-        this.nextAlbum = new Album();
+        this.nextAlbum = null;
         this.database = new DB();
     }
 
@@ -61,7 +61,6 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
         return new AlbumShufflingQueueItemAdapter();
     }
 
-    // /!\ in full auto, nextAlbum is null when calling this function even when changing settings which is a shame
     @Override
     public boolean setNextDynamicQueue(Context context, Song song, boolean force) {
         if (!super.setNextDynamicQueue(null, context, song, force))
@@ -135,10 +134,12 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
     }
 
     public ArrayList<Song> getNextQueue() {
-        if (isNextQueueEmpty() || this.songUsedForSearching == null)
+        if (isNextQueueEmpty())
             return null;
 
-        AlbumShufflingUtil.getInstance().commitHistories(this.songUsedForSearching.albumId); // commit ensure no duplication, this call help remember first album listen too
+        if (this.songUsedForSearching != null)
+            AlbumShufflingUtil.getInstance().commitHistories(this.songUsedForSearching.albumId); // commit ensure no duplication, this call help remember first album listen too
+
         AlbumShufflingUtil.getInstance().commitHistories(nextAlbum.getId());
 
         return nextAlbum.songs;
@@ -148,20 +149,20 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
     protected DynamicElement createEmptyDynamicElement(Context context) {
         return new DynamicElement(context.getResources().getString(R.string.next_album),
                 context.getResources().getString(R.string.no_album_found),
-                R.drawable.ic_shuffle_album_white_24dp); //"-");
+                R.drawable.ic_shuffle_album_white_24dp);
     }
 
     @Override
     protected DynamicElement createNewDynamicElement(Context context) {
         return new DynamicElement(context.getResources().getString(R.string.next_album),
                 MusicUtil.buildInfoString(this.nextAlbum.getArtistName(), this.nextAlbum.getTitle()),
-                R.drawable.ic_shuffle_album_white_24dp); //"-");
+                R.drawable.ic_shuffle_album_white_24dp);
     }
 
     @Override
     protected boolean isSongDifferentEnough(@NonNull Song song) {
         if (this.songUsedForSearching == null)
-            return false;
+            return true;
         return (song.albumId != this.songUsedForSearching.albumId);
     }
 }

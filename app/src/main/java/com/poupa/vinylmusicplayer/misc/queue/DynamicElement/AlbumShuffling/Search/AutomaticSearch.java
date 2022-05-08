@@ -33,37 +33,33 @@ public class AutomaticSearch extends Search {
 
     @Override
     public Album foundNextAlbum(Song song, ArrayList<Album> albums, long previousNextRandomAlbumId, History listenHistory, History searchHistory, Context context) {
-        Album album = null;
-
         constructPositionAlbum(song, albums, previousNextRandomAlbumId, searchHistory, listenHistory);
 
         int albumPosition = getRandomAlbumPosition(albumArrayList.size(), currentSongPosition, currentlyShownNextRandomAlbumPosition, forbiddenPosition);
 
-        if (albumPosition >= 0) {
-            album = albumArrayList.get(albumPosition);
-        } else if (setNextSearchType()) {
-            //set new search type via global variable + exit condition with null album
+        if (albumPosition >= 0)
+            return albumArrayList.get(albumPosition);
+        else if (setNextSearchType()) // set new search type via global variable or exit with null album
             return foundNextAlbum(song, albums, previousNextRandomAlbumId, listenHistory, searchHistory, context);
-        }
 
-        return album;
+        return null;
     }
 
     private boolean setNextSearchType() {
-        boolean hasNext = false;
+        boolean nextCriteriaFound = false;
 
         ArrayList<AlbumShufflingCriteria> searchCriteria = AlbumShufflingUtil.getInstance().getCriteria();
         AlbumShufflingCriteria criteria;
-        while (!hasNext && fallbackLevel < searchCriteria.size()) {
+        while (!nextCriteriaFound && fallbackLevel < searchCriteria.size()) {
             criteria = searchCriteria.get(fallbackLevel);
             if (criteria.visible) {
                 searchType = criteria.item;
-                hasNext = true;
+                nextCriteriaFound = true;
             }
 
             fallbackLevel++;
         }
 
-        return hasNext;
+        return nextCriteriaFound;
     }
 }
