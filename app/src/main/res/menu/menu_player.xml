@@ -2,6 +2,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_upnp_device"
+        android:icon="@drawable/ic_baseline_wifi_tethering_24"
+        android:orderInCategory="1"
+        android:title="Connect to upnp devices"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_toggle_favorite"
         android:icon="@drawable/ic_favorite_border_white_24dp"
         android:orderInCategory="1"
