@@ -47,6 +47,7 @@ import com.poupa.vinylmusicplayer.ui.activities.base.AbsThemeActivity;
 import com.poupa.vinylmusicplayer.ui.activities.tageditor.AbsTagEditorActivity;
 import com.poupa.vinylmusicplayer.ui.activities.tageditor.SongTagEditorActivity;
 import com.poupa.vinylmusicplayer.ui.fragments.AbsMusicServiceFragment;
+import com.poupa.vinylmusicplayer.upnp.UpnpBottomSheetDialogFragment;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog;
 import com.poupa.vinylmusicplayer.util.ImageUtil;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
@@ -165,6 +166,13 @@ public abstract class AbsPlayerFragment
         int itemId = item.getItemId();
         if (itemId == R.id.action_sleep_timer) {
             new SleepTimerDialog().show(getParentFragmentManager(), "SET_SLEEP_TIMER");
+            return true;
+        } else if (itemId == R.id.action_upnp_device) {
+            UpnpBottomSheetDialogFragment upnpBottomSheetDialog = UpnpBottomSheetDialogFragment
+                    .newInstance();
+
+            upnpBottomSheetDialog
+                    .show( ((AppCompatActivity) callbacks).getSupportFragmentManager(), "upnp_bottom_sheet");
             return true;
         } else if (itemId == R.id.action_toggle_favorite) {
             toggleFavorite(song);
