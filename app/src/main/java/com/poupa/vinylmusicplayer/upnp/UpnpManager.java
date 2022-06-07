@@ -62,19 +62,20 @@ public class UpnpManager {
       rendererCommand.resume();
    }*/
 
-   public ArrayList<String> getUpnpDevices() {
-      ArrayList<String> array = new ArrayList<>();
+   /*public ArrayList<UpnpDevice> getUpnpDevices() {
+      ArrayList<UpnpDevice> array = new ArrayList<>();
       final Collection<UpnpDevice> upnpDevices = getFilteredDeviceList();
 
       Log.d("TOTO_setup", "Number: "+upnpDevices.size());
       for (UpnpDevice upnpDevice : upnpDevices) {
+         Log.d("TOTO_setup", "Udn: "+upnpDevice.getDevice().getIdentity().getUdn());
          Log.d("TOTO_setup", "Name: "+upnpDevice.getFriendlyName());
 
-         array.add(upnpDevice.getFriendlyName());
+         array.add(upnpDevice);
       }
 
       return array;
-   }
+   }*/
 
    public void setup(Activity activity) {
       if (rendererCommand == null)
@@ -134,10 +135,14 @@ public class UpnpManager {
       try
       {
          if(upnpService != null && upnpService.getRegistry() != null) {
+            Log.d("TOTO_setup", "Number: "+upnpService.getRegistry().getDevices().size());
             for (Device device : upnpService.getRegistry().getDevices()) {
                UpnpDevice upnpDevice = new UpnpDevice(device);
-               if (rendererCommand.filter(upnpDevice))
+               if (rendererCommand.filter(upnpDevice)) {
+                  //Log.d("TOTO_setup", "Udn: "+upnpDevice.getDevice().getIdentity().getUdn());
+                  Log.d("TOTO_setup", "Name: "+upnpDevice.getFriendlyName());
                   deviceList.add(upnpDevice);
+               }
             }
          }
       }

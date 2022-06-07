@@ -53,7 +53,38 @@ public class UpnpDevice {
 
     public boolean equals(UpnpDevice otherDevice)
     {
-        return device.getIdentity().getUdn().equals(((UpnpDevice) otherDevice).getDevice().getIdentity().getUdn());
+        if (this == otherDevice)
+            return true;
+        return device.getIdentity().getUdn().equals(otherDevice.getDevice().getIdentity().getUdn());
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        UpnpDevice that = (UpnpDevice) o;
+        return this.equals(that);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        if (device == null)
+            return 0;
+
+        return device.hashCode();
+    }
+
+    @Override
+    public String toString()
+    {
+        if (device == null)
+            return "";
+
+        return getFriendlyName();
     }
 
     /*public String getUID()

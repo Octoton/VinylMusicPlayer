@@ -1,6 +1,8 @@
 package com.poupa.vinylmusicplayer.upnp;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -10,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -21,19 +24,21 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.poupa.vinylmusicplayer.R;
+import com.poupa.vinylmusicplayer.upnp.controller.UpnpDevice;
 
 
 public class UpnpBottomSheetDialogFragment extends BottomSheetDialogFragment {
    public static UpnpBottomSheetDialogFragment newInstance() { return new UpnpBottomSheetDialogFragment(); }
 
    private ListView listView;
-   private ArrayList<String> listItems = new ArrayList<String>();
-   private ArrayAdapter<String> adapter;
+   private ArrayAdapter<UpnpDevice> adapter;
 
    // for testing
    public UpnpManager upnpManager;
+   private boolean setup = false;
 
    private Handler handler;
+   private Runnable runnable;
 
    @NonNull
    @Override
@@ -54,22 +59,22 @@ public class UpnpBottomSheetDialogFragment extends BottomSheetDialogFragment {
             behaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
             listView = (ListView) d.findViewById(R.id.list_view);
-            adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, listItems);
+            adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1);
             listView.setAdapter(adapter);
 
-            adapter.add("Pixel 4A (local)");
+            //adapter.add("Pixel 4A (local)");
 
             handler = new Handler();
 
-            final Runnable r = new Runnable() {
+            runnable = new Runnable() {
                public void run() {
                   handler.post(new Runnable() {
                      @Override
                      public void run () {
                         // make operation on the UI
-                        ArrayList<String> returnedList = upnpManager.getUpnpDevices();
+                        Collection<UpnpDevice> returnedList = upnpManager.getFilteredDeviceList(); //getUpnpDevices();
 
-                        for (String el : returnedList) {
+                        for (UpnpDevice el : returnedList) {
                            int position = adapter.getPosition(el);
 
                            if (position < 0)
@@ -82,13 +87,31 @@ public class UpnpBottomSheetDialogFragment extends BottomSheetDialogFragment {
                }
             };
 
-            handler.postDelayed(r, 1000);
+            handler.postDelayed(runnable, 1000);
+
+            ((TextView) d.findViewById(R.id.local)).setOnClickListener(new View.OnClickListener() {
+               @Override
+               public void onClick(View view) {
+                  dismiss();
+               }
+            });
          }
       });
 
       return dialog;
    }
 
+   @Override
+   public void dismiss() {
+      if (!setup) {
+         if (upnpManager.getRendererCommand() != null)
+            upnpManager.getRendererCommand().pause();
+         upnpManager.stop();
+      }
+
+      handler.removeCallbacks(runnable);
+      super.dismiss();
+   }
 
    @Nullable
    @Override
@@ -99,8 +122,6 @@ public class UpnpBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
       TextView title = view.findViewById(R.id.setting_title);
       title.setTextColor(accentColor);
-
-      // dismiss();
 
       return view;
    }
