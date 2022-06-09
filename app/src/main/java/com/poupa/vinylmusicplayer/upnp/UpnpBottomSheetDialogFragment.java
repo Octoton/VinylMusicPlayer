@@ -6,13 +6,18 @@ import java.util.Iterator;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckedTextView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -30,6 +35,7 @@ import com.poupa.vinylmusicplayer.upnp.controller.UpnpDevice;
 public class UpnpBottomSheetDialogFragment extends BottomSheetDialogFragment {
    public static UpnpBottomSheetDialogFragment newInstance() { return new UpnpBottomSheetDialogFragment(); }
 
+   private CheckedTextView localDevice;
    private ListView listView;
    private ArrayAdapter<UpnpDevice> adapter;
 
@@ -46,7 +52,7 @@ public class UpnpBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
       BottomSheetDialog dialog = new BottomSheetDialog(getActivity());
 
-      upnpManager = new UpnpManager(getActivity());
+      upnpManager = UpnpManager.getInstance();
       upnpManager.setup(getActivity());
 
       dialog.setOnShowListener(new DialogInterface.OnShowListener() {
@@ -58,13 +64,25 @@ public class UpnpBottomSheetDialogFragment extends BottomSheetDialogFragment {
             BottomSheetBehavior behaviour = BottomSheetBehavior.from(bottomSheet);
             behaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
+            localDevice = (CheckedTextView) d.findViewById(R.id.local);
+            localDevice.setChecked(true);
+
             listView = (ListView) d.findViewById(R.id.list_view);
-            adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1);
+            listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+            adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_single_choice); //simple_list_item_1);
             listView.setAdapter(adapter);
 
-            //adapter.add("Pixel 4A (local)");
-
             handler = new Handler();
+
+            if (upnpManager.getRendererCommand() != null &&
+            upnpManager.getRendererCommand().getRegistryListener() != null &&
+            upnpManager.getRendererCommand().getRegistryListener().getSelectedRenderer() != null) {
+
+               adapter.add(upnpManager.getRendererCommand().getRegistryListener().getSelectedRenderer());
+               listView.setItemChecked(0, true);
+               localDevice.setChecked(false);
+
+            }
 
             runnable = new Runnable() {
                public void run() {
@@ -72,6 +90,7 @@ public class UpnpBottomSheetDialogFragment extends BottomSheetDialogFragment {
                      @Override
                      public void run () {
                         // make operation on the UI
+                        Log.d("TOTO_setup", "handler bootomsheet");
                         Collection<UpnpDevice> returnedList = upnpManager.getFilteredDeviceList(); //getUpnpDevices();
 
                         for (UpnpDevice el : returnedList) {
@@ -86,13 +105,30 @@ public class UpnpBottomSheetDialogFragment extends BottomSheetDialogFragment {
                   handler.postDelayed(this, 1000);
                }
             };
-
             handler.postDelayed(runnable, 1000);
 
-            ((TextView) d.findViewById(R.id.local)).setOnClickListener(new View.OnClickListener() {
+            localDevice.setOnClickListener(new View.OnClickListener() {
                @Override
                public void onClick(View view) {
-                  dismiss();
+                  //dismiss();
+                  setup = false;
+                  //upnpManager.stop(); ??? or just stop upnp connection
+
+                  localDevice.setChecked(true);
+                  for (int i = 0; i < listView.getCount(); i++)
+                     listView.setItemChecked(i, false);
+               }
+            });
+            listView.setOnItemClickListener(new OnItemClickListener(){
+               @Override
+               public void onItemClick(AdapterView<?> adapter, View v, int position, long id){
+                  UpnpDevice item = (UpnpDevice)adapter.getItemAtPosition(position);
+
+                  listView.setItemChecked(position, true);
+                  localDevice.setChecked(false);
+
+                  setup = true;
+                  upnpManager.setup_upnp_connection(item);
                }
             });
          }
@@ -102,7 +138,8 @@ public class UpnpBottomSheetDialogFragment extends BottomSheetDialogFragment {
    }
 
    @Override
-   public void dismiss() {
+   public void onCancel(DialogInterface dialog)
+   {
       if (!setup) {
          if (upnpManager.getRendererCommand() != null)
             upnpManager.getRendererCommand().pause();
@@ -110,7 +147,7 @@ public class UpnpBottomSheetDialogFragment extends BottomSheetDialogFragment {
       }
 
       handler.removeCallbacks(runnable);
-      super.dismiss();
+      super.onCancel(dialog);
    }
 
    @Nullable

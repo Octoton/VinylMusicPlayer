@@ -65,7 +65,7 @@ public class MediaServer extends fi.iki.elonen.SimpleWebServer
     private LocalDevice localDevice = null;
     private Context ctx = null;
 
-    private final static int port = 8080; //8192; was already used by droidupnp i suppose
+    private final static int port = 8090; //8080; //8192; was already used by droidupnp i suppose, what to do??
     private final InetAddress localAddress;
 
     public MediaServer(Context ctx, ControlPoint controlPoint) throws ValidationException,  UnknownHostException

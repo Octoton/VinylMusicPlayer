@@ -20,6 +20,7 @@ import com.poupa.vinylmusicplayer.upnp.controller.UpnpDevice;
 import com.poupa.vinylmusicplayer.upnp.localserver.MediaServer;
 import com.poupa.vinylmusicplayer.upnp.remoterenderer.RendererCommand;
 import com.poupa.vinylmusicplayer.model.Song;
+import com.poupa.vinylmusicplayer.upnp.remoterenderer.RendererState;
 import org.fourthline.cling.android.AndroidUpnpService;
 import org.fourthline.cling.model.ValidationException;
 import org.fourthline.cling.model.meta.Device;
@@ -32,13 +33,13 @@ public class UpnpManager {
    private MediaServer mediaServer;
    private RendererCommand rendererCommand;
 
-   private final Context ctx;
+   private Context ctx;
    private Activity activity;
 
-   public UpnpManager(Context ctx) {
+   private static final UpnpManager ourInstance = new UpnpManager();
+   public static UpnpManager getInstance() { return ourInstance; }
+   private UpnpManager() {
       waitingListener = new ArrayList<>();
-
-      this.ctx = ctx;
    }
 
    public RendererCommand getRendererCommand() {
@@ -84,6 +85,7 @@ public class UpnpManager {
       // rendererCommand.resume();
 
       this.activity = activity;
+      this.ctx = activity;
 
       // This will start the UPnP service if it wasn't already started
       Log.d(TAG, "Start upnp service");
@@ -91,6 +93,14 @@ public class UpnpManager {
               Context.BIND_AUTO_CREATE);
 
       addListener(rendererCommand.getRegistryListener());
+   }
+
+   public void setup_upnp_connection(UpnpDevice upnpDevice) {
+      Log.d("TOTO_setup", "Begin device connection");
+      rendererCommand.setSelectedRenderer(upnpDevice, true);
+
+      rendererCommand.setup(upnpService.getControlPoint(), new RendererState());
+      rendererCommand.resume();
    }
 
    public void stop() {
@@ -122,6 +132,8 @@ public class UpnpManager {
 
    public void sendSong(Song song)
    {
+      if (rendererCommand == null)
+         return;
       String uri = "http://"+mediaServer.getAddress()+"/"+ MediaServer.AUDIO_PREFIX + song.id;
 
       Log.d(TAG, "Send song: "+uri);
