@@ -15,12 +15,12 @@
         android:paddingRight="15dp"
         android:paddingBottom="0dp"
         android:textStyle="bold"
-        android:text="Sélectionnez un appareil" />
+        android:text="Sélectionnez un appareil (upnp)" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="List des appareil upnp enable sur le réseau + local one"
+        android:text="Celui-ci sera utilisé comme audio source"
         android:paddingTop="5dp"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
@@ -35,17 +35,16 @@
         android:paddingRight="15dp"
         android:paddingBottom="0dp"/>-->
 
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    <CheckedTextView
         android:id="@+id/local"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?android:attr/listPreferredItemHeightSmall"
         android:textAppearance="?android:attr/textAppearanceListItemSmall"
         android:gravity="center_vertical"
+        android:checkMark="?android:attr/listChoiceIndicatorSingle"
         android:paddingStart="?android:attr/listPreferredItemPaddingStart"
         android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-        android:minHeight="?android:attr/listPreferredItemHeightSmall"
-
-        android:text="Pixel 4A (local)"/>
+        android:text="Your phone" />
 
     <View
         android:layout_width="match_parent"
