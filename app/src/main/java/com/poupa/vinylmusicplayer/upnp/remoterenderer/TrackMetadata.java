@@ -25,7 +25,7 @@ public class TrackMetadata {
    public String toString()
    {
       return "TrackMetadata [id=" + id + ", title=" + title + ", artist=" + artist + ", genre=" + genre + ", artURI="
-              + artURI + "res=" + res + ", itemClass=" + itemClass + "]";
+              + artURI + ", itemClass=" + itemClass + "]";
    }
 
    public TrackMetadata(String xml)
@@ -37,8 +37,8 @@ public class TrackMetadata {
    {
    }
 
-   public TrackMetadata(String id, String title, String artist, String genre, String artURI, String res,
-           String itemClass)
+   public TrackMetadata(String id, String title, String artist, String genre, String artURI,
+           String itemClass, int size, String duration)
    {
       super();
       this.id = id;
@@ -46,8 +46,10 @@ public class TrackMetadata {
       this.artist = artist;
       this.genre = genre;
       this.artURI = artURI;
-      this.res = res;
       this.itemClass = itemClass;
+
+      this.size = size;
+      this.duration = duration;
    }
 
    public String id;
@@ -55,8 +57,12 @@ public class TrackMetadata {
    public String artist;
    public String genre;
    public String artURI;
-   public String res;
    public String itemClass;
+
+   private int size;
+   private String duration;
+   private int bitrate = 44100;
+   private String protocolInfo = "http-get:*:audio/flac:*";
 
    private XMLReader initializeReader() throws ParserConfigurationException, SAXException
    {
@@ -141,10 +147,13 @@ public class TrackMetadata {
             s.endTag(null, "upnp:albumArtURI");
          }
 
-         if(res!=null)
+         if(duration!=null)
          {
             s.startTag(null, "res");
-            s.text(res);
+            s.attribute(null, "size", String.valueOf(size));
+            s.attribute(null, "duration", duration);
+            s.attribute(null, "bitrate", String.valueOf(bitrate));
+            s.attribute(null, "protocolInfo", protocolInfo);
             s.endTag(null, "res");
          }
 
@@ -216,10 +225,10 @@ public class TrackMetadata {
          {
             itemClass = buffer.toString();
          }
-         else if (localName.equals("res"))
+         /*else if (localName.equals("res"))
          {
             res = buffer.toString();
-         }
+         }*/
       }
 
       @Override

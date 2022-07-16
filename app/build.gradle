@@ -137,8 +137,7 @@ dependencies {
 
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
-    //Cling, 2.1.2 is not compatible with android without fix: https://github.com/4thline/cling/issues/247
-    implementation 'org.fourthline.cling:cling-core:2.1.1'
+    implementation 'org.fourthline.cling:cling-core:2.1.2'
     implementation 'org.fourthline.cling:cling-support:2.1.1'
     implementation 'org.eclipse.jetty:jetty-server:8.1.18.v20150929'
     implementation 'org.eclipse.jetty:jetty-servlet:8.1.18.v20150929'

@@ -154,6 +154,14 @@ public class MusicUtil {
         }
     }
 
+    public static String getReadableHoursDurationString(long songDurationMillis) {
+        long minutes = (songDurationMillis / 1000) / 60;
+        long seconds = (songDurationMillis / 1000) % 60;
+            long hours = minutes / 60;
+            minutes = minutes % 60;
+            return String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
+    }
+
     /**
      * Build a concatenated string from the provided arguments
      * The intended purpose is to show extra annotations

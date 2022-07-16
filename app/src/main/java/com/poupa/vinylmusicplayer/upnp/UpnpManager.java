@@ -11,6 +11,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -21,9 +22,12 @@ import com.poupa.vinylmusicplayer.upnp.localserver.MediaServer;
 import com.poupa.vinylmusicplayer.upnp.remoterenderer.RendererCommand;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.upnp.remoterenderer.RendererState;
+import com.poupa.vinylmusicplayer.util.MusicUtil;
 import org.fourthline.cling.android.AndroidUpnpService;
 import org.fourthline.cling.model.ValidationException;
 import org.fourthline.cling.model.meta.Device;
+import org.fourthline.cling.support.model.Res;
+
 
 public class UpnpManager {
    private static final String TAG = "TOTO_Manager";
@@ -33,7 +37,6 @@ public class UpnpManager {
    private MediaServer mediaServer;
    private RendererCommand rendererCommand;
 
-   private Context ctx;
    private Activity activity;
 
    private static final UpnpManager ourInstance = new UpnpManager();
@@ -46,38 +49,6 @@ public class UpnpManager {
       return rendererCommand;
    }
 
-   // TODO: should be put in fragment for each devices found and called on click (+ on resume??, see "FIX" below)
-   /*public void setup_hometheater_connection() {
-      Log.d("TOTO_setup", "begin test cling");
-      final Collection<UpnpDevice> upnpDevices = getFilteredDeviceList();
-
-      Log.d("TOTO_setup", "Number: "+upnpDevices.size());
-      for (UpnpDevice upnpDevice : upnpDevices) {
-         Log.d("TOTO_setup", "Name: "+upnpDevice.getFriendlyName());
-
-         if (upnpDevice.getFriendlyName().contains("Home Theater"))
-            rendererCommand.setSelectedRenderer(upnpDevice, true);
-      }
-
-      rendererCommand.setup(upnpService.getControlPoint(), new RendererState());
-      rendererCommand.resume();
-   }*/
-
-   /*public ArrayList<UpnpDevice> getUpnpDevices() {
-      ArrayList<UpnpDevice> array = new ArrayList<>();
-      final Collection<UpnpDevice> upnpDevices = getFilteredDeviceList();
-
-      Log.d("TOTO_setup", "Number: "+upnpDevices.size());
-      for (UpnpDevice upnpDevice : upnpDevices) {
-         Log.d("TOTO_setup", "Udn: "+upnpDevice.getDevice().getIdentity().getUdn());
-         Log.d("TOTO_setup", "Name: "+upnpDevice.getFriendlyName());
-
-         array.add(upnpDevice);
-      }
-
-      return array;
-   }*/
-
    public void setup(Activity activity) {
       if (rendererCommand == null)
          rendererCommand = new RendererCommand();
@@ -85,7 +56,6 @@ public class UpnpManager {
       // rendererCommand.resume();
 
       this.activity = activity;
-      this.ctx = activity;
 
       // This will start the UPnP service if it wasn't already started
       Log.d(TAG, "Start upnp service");
@@ -101,6 +71,12 @@ public class UpnpManager {
 
       rendererCommand.setup(upnpService.getControlPoint(), new RendererState());
       rendererCommand.resume();
+
+      rendererCommand.updateFull();
+   }
+
+   public void setOnCompletion(MediaPlayer.OnCompletionListener callback, String currentURI) {
+      rendererCommand.setOnCompletion(callback, currentURI);
    }
 
    public void stop() {
@@ -130,16 +106,34 @@ public class UpnpManager {
       removeListener(rendererCommand.getRegistryListener());
    }
 
+   public String getAddress() {
+      return mediaServer.getAddress();
+   }
+
    public void sendSong(Song song)
    {
       if (rendererCommand == null)
          return;
       String uri = "http://"+mediaServer.getAddress()+"/"+ MediaServer.AUDIO_PREFIX + song.id;
 
-      Log.d(TAG, "Send song: "+uri);
-
-      getRendererCommand().launchItem(Long.toString(song.id), song.title, "", "", "", null, uri);
+      rendererCommand.launchItem(song, uri);
    }
+
+   /*public void sendPath(String path) {
+      Log.d(TAG, "Send temporary path: "+path);
+      if (rendererCommand == null)
+         return;
+
+      // testing
+      String mimeType = "audio/flac";
+      Res test = new Res(mimeType, 2222222l, "00:03:35", 8192l, null);
+
+      Log.d(TAG, "RES: "+test.getProtocolInfo().toString());
+
+      String res = "size=\"22310000\" duration=\"0:03:35.000\" bitrate=\"860000\" resolution=\"640x360\" protocolInfo=\"http-get:*:audio/flac:*";
+
+      rendererCommand.launchItem("todo", "todo", "", "", "", res, path);
+   }*/
 
    public Collection<UpnpDevice> getFilteredDeviceList()
    {
@@ -178,7 +172,7 @@ public class UpnpManager {
             // Local content directory: not working yet
             if(mediaServer == null)
             {
-               mediaServer = new MediaServer(ctx, upnpService.getControlPoint());
+               mediaServer = new MediaServer(activity, upnpService.getControlPoint());
                mediaServer.start();
             }
             else

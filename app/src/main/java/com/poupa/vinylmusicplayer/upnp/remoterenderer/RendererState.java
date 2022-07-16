@@ -19,7 +19,10 @@
 
 package com.poupa.vinylmusicplayer.upnp.remoterenderer;
 
+import org.fourthline.cling.support.model.MediaInfo;
 import org.fourthline.cling.support.model.PositionInfo;
+import org.fourthline.cling.support.model.TransportInfo;
+import org.fourthline.cling.support.model.TransportState;
 
 import android.util.Log;
 
@@ -53,8 +56,8 @@ public class RendererState {
 
    // / Track info
    private PositionInfo positionInfo;
-   //private MediaInfo mediaInfo;
-   //private TransportInfo transportInfo;
+   private MediaInfo mediaInfo;
+   private TransportInfo transportInfo;
 
    // / Getter/Setter
 
@@ -126,7 +129,7 @@ public class RendererState {
 
    }
 
-   /*public MediaInfo getMediaInfo()
+   public MediaInfo getMediaInfo()
    {
       return mediaInfo;
    }
@@ -138,9 +141,9 @@ public class RendererState {
 
       this.mediaInfo = mediaInfo;
       // notifyAllObservers();
-   }*/
+   }
 
-   /*public TransportInfo getTransportInfo()
+   public TransportInfo getTransportInfo()
    {
       return transportInfo;
    }
@@ -157,7 +160,7 @@ public class RendererState {
       else
          // if(transportInfo.getCurrentTransportState() == TransportState.STOPPED)
          setState(State.STOP);
-   }*/
+   }
 
    private TrackMetadata getTrackMetadata()
    {
@@ -188,6 +191,11 @@ public class RendererState {
       return formatTime(h, m, s);
    }
 
+   public long getDurationSeconds()
+   {
+      return positionInfo.getTrackDurationSeconds();
+   }
+
    public String getPosition()
    {
       long t = positionInfo.getTrackElapsedSeconds();
@@ -197,15 +205,15 @@ public class RendererState {
       return formatTime(h, m, s);
    }
 
-   public long getDurationSeconds()
+   public long getPositionSeconds()
    {
-      return positionInfo.getTrackDurationSeconds();
+      return positionInfo.getTrackElapsedSeconds();
    }
 
    public void resetTrackInfo()
    {
       positionInfo = new PositionInfo();
-      //mediaInfo = new MediaInfo();
+      mediaInfo = new MediaInfo();
       //notifyAllObservers();
    }
 
