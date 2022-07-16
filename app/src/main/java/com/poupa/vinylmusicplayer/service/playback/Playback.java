@@ -1,15 +1,20 @@
 package com.poupa.vinylmusicplayer.service.playback;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.poupa.vinylmusicplayer.model.Song;
+
 
 /**
  * @author Karim Abou Zeid (kabouzeid)
  */
 public interface Playback {
 
-    boolean setDataSource(String path);
+    String getPath(@NonNull Song song);
 
-    void setNextDataSource(@Nullable String path);
+    boolean setDataSource(Song song);
+
+    void setNextDataSource(@Nullable Song song);
 
     void setCallbacks(PlaybackCallbacks callbacks);
 

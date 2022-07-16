@@ -66,6 +66,7 @@ import com.poupa.vinylmusicplayer.service.notification.PlayingNotificationImplAp
 import com.poupa.vinylmusicplayer.service.notification.PlayingNotificationImplApi24;
 import com.poupa.vinylmusicplayer.service.playback.Playback;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog.Type;
+import com.poupa.vinylmusicplayer.upnp.UpnpPlayer;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
 import com.poupa.vinylmusicplayer.util.OopsHandler;
 import com.poupa.vinylmusicplayer.util.PackageValidator;
@@ -241,7 +242,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
             playbackHandlerThread.start();
             playbackHandler = new PlaybackHandler(this, playbackHandlerThread.getLooper());
 
-            playback = new MultiPlayer(this);
+            playback = new UpnpPlayer(this); //new MultiPlayer(this); // TODO: dynamic management of player required
             playback.setCallbacks(this);
         }
 
@@ -582,7 +583,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
     private boolean openCurrent() {
         synchronized (this) {
             try {
-                return (playback != null) && playback.setDataSource(getTrackUri(getCurrentSong()));
+                return (playback != null) && playback.setDataSource(getCurrentSong());
             } catch (Exception e) {
                 OopsHandler.collectStackTrace(e);
                 return false;
@@ -606,7 +607,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
                 if (getRepeatMode() == REPEAT_MODE_NONE && playingQueue.isLastTrack()) {
                     playback.setNextDataSource(null);
                 } else {
-                    playback.setNextDataSource(getTrackUri(getSongAt(nextPosition)));
+                    playback.setNextDataSource(getSongAt(nextPosition));
                 }
                 playingQueue.setNextPosition(nextPosition);
             } catch (Exception e) {
@@ -1063,7 +1064,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
         }
     }
 
-    public void pause() {
+    public void UpnpPlayerpause() {
         synchronized (this) {
             pausedByTransientLossOfFocus = false;
             if (playback.isPlaying()) {
@@ -1075,11 +1076,15 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     public void play() {
         synchronized (this) {
+            Log.d(TAG, "Play !");
             if (requestFocus()) {
+                Log.d(TAG, "Focus !");
                 if (!playback.isPlaying()) {
                     if (!playback.isInitialized()) {
+                        Log.d(TAG, "Play song at: "+getPosition());
                         playSongAt(getPosition(), false);
                     } else {
+                        Log.d(TAG, "Play start playback");
                         playback.start();
                         if (!becomingNoisyReceiverRegistered) {
                             registerReceiver(becomingNoisyReceiver, becomingNoisyReceiverIntentFilter);

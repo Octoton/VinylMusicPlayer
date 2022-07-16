@@ -104,7 +104,7 @@ final class PlaybackHandler extends Handler {
 
                     case AudioManager.AUDIOFOCUS_LOSS:
                         // Lost focus for an unbounded amount of time: stop playback and release media playback
-                        service.pause();
+                        //service.pause(); //TODO: only pause on loss focus when local devices is selected
                         break;
 
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
@@ -112,7 +112,7 @@ final class PlaybackHandler extends Handler {
                         // playback. We don't release the media playback because playback
                         // is likely to resume
                         boolean wasPlaying = service.isPlaying();
-                        service.pause();
+                        service.pause(); //TODO: should I do something there too ?
                         service.setPausedByTransientLossOfFocus(wasPlaying);
                         break;
 

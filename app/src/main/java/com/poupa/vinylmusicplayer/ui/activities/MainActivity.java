@@ -9,11 +9,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
@@ -46,6 +48,7 @@ import com.poupa.vinylmusicplayer.ui.activities.base.AbsSlidingMusicPanelActivit
 import com.poupa.vinylmusicplayer.ui.activities.intro.AppIntroActivity;
 import com.poupa.vinylmusicplayer.ui.fragments.mainactivity.folders.FoldersFragment;
 import com.poupa.vinylmusicplayer.ui.fragments.mainactivity.library.LibraryFragment;
+import com.poupa.vinylmusicplayer.upnp.UpnpManager;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -71,6 +74,33 @@ public class MainActivity extends AbsSlidingMusicPanelActivity implements Palett
     private View navigationDrawerHeader;
 
     private boolean blockRequestPermissions;
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event){
+    // TODO: find a way to only intercept this when player is active and upnp connected, had graphic interface to show volume change
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP){
+            if (UpnpManager.getInstance().getRendererCommand() != null) {
+                int volume = UpnpManager.getInstance().getRendererCommand().getVolume() + 1;
+                if (volume > 100) // TODO: is 100 the max ?
+                    volume = 100;
+                UpnpManager.getInstance().getRendererCommand().setVolume(volume);
+                return true;
+            }
+            return true; //so internal phone volume doesn't change
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
+            if (UpnpManager.getInstance().getRendererCommand() != null) {
+                int volume = UpnpManager.getInstance().getRendererCommand().getVolume() - 1;
+                if (volume < 0)
+                    volume = 0;
+                UpnpManager.getInstance().getRendererCommand().setVolume(volume);
+                return true;
+            }
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -1,61 +1,62 @@
-package com.poupa.vinylmusicplayer.service;
+package com.poupa.vinylmusicplayer.upnp;
 
-import android.content.Context;
+
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.audiofx.AudioEffect;
-import android.media.audiofx.DynamicsProcessing;
 import android.net.Uri;
-import android.os.Build;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.poupa.vinylmusicplayer.R;
+import com.poupa.vinylmusicplayer.upnp.remoterenderer.RendererState.State;
+import com.poupa.vinylmusicplayer.util.PreferenceUtil;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
+import android.content.Context;
+import android.widget.Toast;
 
-import com.poupa.vinylmusicplayer.App;
-import com.poupa.vinylmusicplayer.R;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.service.playback.Playback;
-import com.poupa.vinylmusicplayer.util.MusicUtil;
-import com.poupa.vinylmusicplayer.util.OopsHandler;
-import com.poupa.vinylmusicplayer.util.PreferenceUtil;
-import com.poupa.vinylmusicplayer.util.SafeToast;
+import com.poupa.vinylmusicplayer.upnp.localserver.MediaServer;
+import org.fourthline.cling.support.model.DIDLObject.Property.UPNP.STORAGE_TOTAL;
 
-/**
- * @author Andrew Neal, Karim Abou Zeid (kabouzeid)
- */
-public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
-    public static final String TAG = MultiPlayer.class.getSimpleName();
 
-    private MediaPlayer mCurrentMediaPlayer = new MediaPlayer();
-    private MediaPlayer mNextMediaPlayer;
-
-    @Nullable
-    private DynamicsProcessing mDynamicsProcessing;
+public class UpnpPlayer implements Playback, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
 
     private final Context context;
+    private Song song; //need to be a song
+    private Song nextSong; //need to be a song
+
     @Nullable
     private Playback.PlaybackCallbacks callbacks;
 
     private boolean mIsInitialized = false;
+    private final UpnpManager upnpManager;
 
-    private float duckingFactor = 1;
-    private float replaygain = Float.NaN;
+    private boolean playerCannotBePlaying = true;
 
-    /**
-     * Constructor of <code>MultiPlayer</code>
-     */
-    public MultiPlayer(final Context context) {
+    public UpnpPlayer(final Context context) {
+        upnpManager = UpnpManager.getInstance();
         this.context = context;
-        mCurrentMediaPlayer.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
+    }
+
+    // TODO: put in utility class
+    public static String getPathExtern(@NonNull Song song, @NonNull UpnpManager upnpManager) {
+        return "http://"+upnpManager.getAddress()+"/"+ MediaServer.AUDIO_PREFIX + song.id;
     }
 
     @Override
     public String getPath(@NonNull Song song) {
-        return MusicUtil.getSongFileUri(song.id).toString();
+        if (upnpManager.getAddress() == null)
+            return null;
+
+        return "http://"+upnpManager.getAddress()+"/"+ MediaServer.AUDIO_PREFIX + song.id;
+
+        //Log.d("TOTO_player", "uri: "+song.id);
+        //return uri;
     }
 
     /**
@@ -66,9 +67,14 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
      */
     @Override
     public boolean setDataSource(@NonNull final Song song) {
-        String path = getPath(song);
+        Log.d("TOTO_player", "current data source: "+song);
+        upnpManager.setOnCompletion(this, getPath(song));
+
+        this.song = song;
+
         mIsInitialized = false;
-        mIsInitialized = setDataSourceImpl(mCurrentMediaPlayer, path);
+        mIsInitialized = true; //setDataSourceImpl(path);
+        playerCannotBePlaying = true;
         if (mIsInitialized) {
             setNextDataSource(null);
         }
@@ -76,13 +82,12 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
     }
 
     /**
-     * @param player The {@link MediaPlayer} to use
      * @param path   The path of the file, or the http/rtsp URL of the stream
      *               you want to play
      * @return True if the <code>player</code> has been prepared and is
      * ready to play, false otherwise
      */
-    private boolean setDataSourceImpl(@NonNull final MediaPlayer player, @NonNull final String path) {
+    /*private boolean setDataSourceImpl(@NonNull final String path) {
         if (context == null) {
             return false;
         }
@@ -94,11 +99,7 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
             } else {
                 player.setDataSource(path);
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                player.setAudioAttributes(MusicService.PLAYBACK_ATTRIBUTE);
-            } else {
-                player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            }
+            player.setAudioStreamType(AudioManager.STREAM_MUSIC);
             player.prepare();
         } catch (Exception e) {
             return false;
@@ -111,7 +112,7 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
         intent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
         context.sendBroadcast(intent);
         return true;
-    }
+    }*/
 
     /**
      * Set the MediaPlayer to start when this MediaPlayer finishes playback.
@@ -121,8 +122,9 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
      */
     @Override
     public void setNextDataSource(@Nullable final Song song) {
-        String path = getPath(song);
-        if (context == null) {
+        Log.d("TOTO_player", "next data source: "+song);
+        this.nextSong = song;
+        /*if (context == null) {
             return;
         }
         try {
@@ -160,7 +162,7 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
                     mNextMediaPlayer = null;
                 }
             }
-        }
+        }*/
     }
 
     /**
@@ -186,11 +188,14 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
      */
     @Override
     public void start() {
-        try {
+        Log.d("TOTO_Player", "START");
+        upnpManager.sendSong(song);
+        playerCannotBePlaying = false;
+        /*try {
             mCurrentMediaPlayer.start();
         } catch (IllegalStateException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     /**
@@ -198,8 +203,9 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
      */
     @Override
     public void stop() {
-        mCurrentMediaPlayer.reset();
+        //mCurrentMediaPlayer.reset();
         mIsInitialized = false;
+        upnpManager.stop();
     }
 
     /**
@@ -208,14 +214,10 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
     @Override
     public void release() {
         stop();
-        mCurrentMediaPlayer.release();
+        /*mCurrentMediaPlayer.release();
         if (mNextMediaPlayer != null) {
             mNextMediaPlayer.release();
-        }
-        if (mDynamicsProcessing != null) {
-            mDynamicsProcessing.release();
-            mDynamicsProcessing = null;
-        }
+        }*/
     }
 
     /**
@@ -223,11 +225,13 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
      */
     @Override
     public void pause() {
-        try {
+        /*try {
             mCurrentMediaPlayer.pause();
         } catch (IllegalStateException e) {
             e.printStackTrace();
-        }
+        }*/
+        if (upnpManager.getRendererCommand() != null)
+            upnpManager.getRendererCommand().commandPause();
     }
 
     /**
@@ -235,7 +239,10 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
      */
     @Override
     public boolean isPlaying() {
-        return mIsInitialized && mCurrentMediaPlayer.isPlaying();
+        if (playerCannotBePlaying || upnpManager.getRendererCommand() == null || upnpManager.getRendererCommand().getRendererState() == null)
+            return false;
+
+        return mIsInitialized && (upnpManager.getRendererCommand().getRendererState().getState() == State.PLAY); //&& mCurrentMediaPlayer.isPlaying();
     }
 
     /**
@@ -245,15 +252,19 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
      */
     @Override
     public int duration() {
+        if (upnpManager.getRendererCommand() == null || upnpManager.getRendererCommand().getRendererState() == null)
+            return -1;
+
         if (!mIsInitialized) {
             return -1;
         }
-        try {
+        /*try {
             return mCurrentMediaPlayer.getDuration();
         } catch (IllegalStateException e) {
             e.printStackTrace();
             return -1;
-        }
+        }*/
+        return (int)(upnpManager.getRendererCommand().getRendererState().getDurationSeconds() * 1000);
     }
 
     /**
@@ -263,15 +274,19 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
      */
     @Override
     public int position() {
+        if (upnpManager.getRendererCommand() == null || upnpManager.getRendererCommand().getRendererState() == null)
+            return -1;
+
         if (!mIsInitialized) {
             return -1;
         }
-        try {
+        /*try {
             return mCurrentMediaPlayer.getCurrentPosition();
         } catch (IllegalStateException e) {
             e.printStackTrace();
             return -1;
-        }
+        }*/
+        return (int)(upnpManager.getRendererCommand().getRendererState().getPositionSeconds() * 1000);
     }
 
     /**
@@ -281,20 +296,36 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
      */
     @Override
     public void seek(final int whereto) {
-        try {
+        if (upnpManager.getRendererCommand() == null)
+            return;
+        /*try {
             mCurrentMediaPlayer.seekTo(whereto);
         } catch (IllegalStateException e) {
             e.printStackTrace();
-        }
+        }*/
+        // TODO: put in utility class
+        long h = whereto / (3600 * 1000);
+        long m = ((whereto / 1000) - h * 3600) / 60;
+        long s = whereto - h * 3600 * 1000 - m * 60 * 1000;
+        String seek = formatTime(h, m, s);
+
+        Log.d("TOTO_player", "Seek to " + seek);
+
+        upnpManager.getRendererCommand().commandSeek(seek);
+    }
+    private String formatTime(long h, long m, long s)
+    {
+        return ((h >= 10) ? "" + h : "0" + h) + ":" + ((m >= 10) ? "" + m : "0" + m) + ":"
+                + ((s >= 10) ? "" + s : "0" + s);
     }
 
-    private void setVolume(final float vol) {
+    /*private void setVolume(final float vol) {
         try {
             mCurrentMediaPlayer.setVolume(vol, vol);
-        } catch (final IllegalStateException e) {
-            OopsHandler.collectStackTrace(e);
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
         }
-    }
+    }*/
 
     /**
      * Sets the audio session ID.
@@ -303,13 +334,14 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
      */
     @Override
     public boolean setAudioSessionId(final int sessionId) {
-        try {
+        /*try {
             mCurrentMediaPlayer.setAudioSessionId(sessionId);
             return true;
         } catch (@NonNull IllegalArgumentException | IllegalStateException e) {
             e.printStackTrace();
             return false;
-        }
+        }*/
+        return true;
     }
 
     /**
@@ -319,84 +351,39 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
      */
     @Override
     public int getAudioSessionId() {
-        return mCurrentMediaPlayer.getAudioSessionId();
+        return -1; //mCurrentMediaPlayer.getAudioSessionId();
     }
 
-    /**
-     * Set the replay gain to be applied immediately. It should match the tags of the current song.
-     *
-     * @param replaygain gain in dB, or NaN for no replay gain (equivalent to 0dB)
-     */
-    @Override
     public void setReplayGain(float replaygain) {
-        this.replaygain = replaygain;
-        updateVolume();
+        /*this.replaygain = replaygain;
+        updateVolume();*/
     }
 
-    /**
-     * Set the ducking factor to be applied immediately.
-     *
-     * @param duckingFactor gain as a linear factor, between 0.0 and 1.0.
-     */
-    @Override
     public void setDuckingFactor(float duckingFactor) {
-        this.duckingFactor = duckingFactor;
-        updateVolume();
+        /*this.duckingFactor = duckingFactor;
+        updateVolume();*/
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.P)
-    private void applyReplayGainOnDynamicsProcessing() {
-        if (Float.isNaN(replaygain)) {
-            if (mDynamicsProcessing != null) {
-                mDynamicsProcessing.release();
-                mDynamicsProcessing = null;
-            }
-        } else {
-            if (mDynamicsProcessing == null) {
-                mDynamicsProcessing = new DynamicsProcessing(mCurrentMediaPlayer.getAudioSessionId());
-                mDynamicsProcessing.setEnabled(true);
-            }
-
-            // setInputGainAllChannelsTo uses a dB scale
-            mDynamicsProcessing.setInputGainAllChannelsTo(replaygain);
-        }
-    }
-
-    private void updateVolume() {
+    /*private void updateVolume() {
         float volume = 1.0f;
-
         if (!Float.isNaN(replaygain)) {
-            // setVolume uses a linear scale
-            float rgResult = ((float) Math.pow(10.0, (replaygain / 20.0)));
-            volume = Math.max(0.0F, Math.min(1.0F, rgResult));
-        }
-
-        if (App.DYNAMICS_PROCESSING_AVAILABLE) {
-            try {
-                applyReplayGainOnDynamicsProcessing();
-
-                // DynamicsProcessing is in charge of replay gain, revert volume to 100%
-                volume = 1.0f;
-            } catch (final RuntimeException error) {
-                // This can happen with:
-                // - UnsupportedOperationException: an external equalizer is in use
-                // - RuntimeException: AudioEffect: set/get parameter error
-                // Fallback to volume modification in this case
-                OopsHandler.collectStackTrace(error);
-                //SafeToast.show(App.getStaticContext(), "Could not apply replay gain using DynamicsProcessing");
-            }
+            volume = replaygain;
         }
 
         volume *= duckingFactor;
 
         setVolume(volume);
-    }
+    }*/
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onError(final MediaPlayer mp, final int what, final int extra) {
-        if (mp == mCurrentMediaPlayer) {
+        Log.d("TOTO_player", "ERROR");
+        /*if (mp == mCurrentMediaPlayer) {
             if (context != null) {
-                SafeToast.show(context, context.getResources().getString(R.string.unplayable_file));
+                Toast.makeText(context, context.getResources().getString(R.string.unplayable_file), Toast.LENGTH_SHORT).show();
             }
             mIsInitialized = false;
             mCurrentMediaPlayer.release();
@@ -417,15 +404,32 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
             mCurrentMediaPlayer = new MediaPlayer();
             mCurrentMediaPlayer.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
             if (context != null) {
-                SafeToast.show(context, context.getResources().getString(R.string.unplayable_file));
+                Toast.makeText(context, context.getResources().getString(R.string.unplayable_file), Toast.LENGTH_SHORT).show();
             }
         }
+        return false;*/
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onCompletion(final MediaPlayer mp) {
-        if (mp == mCurrentMediaPlayer && mNextMediaPlayer != null) {
+        Log.d("TOTO_player", "COMPLETION test");
+        if (nextSong != null) {
+            mIsInitialized = false;
+            setDataSource(nextSong);
+            mIsInitialized = true;
+            nextSong = null;
+            start();
+            if (callbacks != null)
+                callbacks.onTrackWentToNext();
+        } else {
+            if (callbacks != null)
+                callbacks.onTrackEnded();
+        }
+        /*if (mp == mCurrentMediaPlayer && mNextMediaPlayer != null) {
             mIsInitialized = false;
             mCurrentMediaPlayer.release();
             mCurrentMediaPlayer = mNextMediaPlayer;
@@ -436,6 +440,6 @@ public class MultiPlayer implements Playback, MediaPlayer.OnErrorListener, Media
         } else {
             if (callbacks != null)
                 callbacks.onTrackEnded();
-        }
+        }*/
     }
 }
