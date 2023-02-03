@@ -32,6 +32,13 @@
             android:summary="@string/pref_summary_remember_dynamic_element"
             android:title="@string/pref_title_remember_dynamic_element" />
 
+        <com.kabouzeid.appthemehelper.common.prefs.supportv7.ATESwitchPreference
+            app:iconSpaceReserved="false"
+            android:defaultValue="true"
+            android:key="always_show_dynamic_settings"
+            android:summary="@string/pref_summary_always_show_dynamic_element_settings"
+            android:title="@string/pref_title_always_show_dynamic_element_settings" />
+
         <com.kabouzeid.appthemehelper.common.prefs.supportv7.ATEPreference
             app:iconSpaceReserved="false"
             android:key="equalizer"

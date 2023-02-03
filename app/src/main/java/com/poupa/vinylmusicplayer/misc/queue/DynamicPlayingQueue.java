@@ -1,6 +1,5 @@
 package com.poupa.vinylmusicplayer.misc.queue;
 
-
 import java.util.ArrayList;
 
 import android.content.Context;
@@ -30,15 +29,21 @@ public class DynamicPlayingQueue extends StaticPlayingQueue {
         this.queueLoader = queueLoader;
     }
 
-    public DynamicPlayingQueue(DynamicPlayingQueue queue) {
+    public DynamicPlayingQueue(DynamicPlayingQueue queue, DynamicQueueLoader queueLoader) {
         super(queue);
 
-        queueLoader = queue.queueLoader;
+        this.queueLoader = queueLoader;
+        this.queueLoader.transferDynamicElement(queue.queueLoader);
     }
 
     @Override
     public boolean restoreQueue(Context context, int restoredPosition) {
         return super.restoreQueue(context, restoredPosition) && queueLoader.restoreQueue(context, lastSong());
+    }
+
+    @Override
+    public void stop() {
+        queueLoader.stop();
     }
 
     private void loadNextQueue() {

@@ -105,6 +105,8 @@ public final class PreferenceUtil {
 
     private static final String REMEMBER_SHUFFLE = "remember_shuffle";
     private static final String REMEMBER_DYNAMIC_QUEUE = "remember_dynamic_queue";
+    private static final String ALWAYS_SHOW_DYNAMIC_SETTINGS = "always_show_dynamic_settings";
+    private static final String DYNAMIC_QUEUE_STYLE = "dynamic_queue_style";
 
     @Deprecated public static final String RG_SOURCE_MODE = "replaygain_srource_mode";
     public static final String RG_SOURCE_MODE_V2 = "replaygain_source_mode";
@@ -609,6 +611,18 @@ public final class PreferenceUtil {
 
     public final boolean rememberDynamicQueue() {
         return mPreferences.getBoolean(REMEMBER_DYNAMIC_QUEUE, true);
+    }
+
+    public final boolean alwaysShowDynamicSettings() {
+        return mPreferences.getBoolean(ALWAYS_SHOW_DYNAMIC_SETTINGS, true);
+    }
+
+    public final int getDynamicQueueStyle() {
+        return mPreferences.getInt(DYNAMIC_QUEUE_STYLE, 0);
+    }
+
+    public final void setDynamicQueueStyle(int value) {
+        mPreferences.edit().putInt(DYNAMIC_QUEUE_STYLE, value).apply();
     }
 
     public final String autoDownloadImagesPolicy() {

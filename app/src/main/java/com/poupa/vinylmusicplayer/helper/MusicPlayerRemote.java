@@ -282,9 +282,9 @@ public class MusicPlayerRemote {
         }
     }
 
-    public static void setQueueToDynamicQueue() {
+    public static void setQueueToDynamicQueue(boolean force) {
         if (musicService != null) {
-            musicService.setQueueToDynamicQueue();
+            musicService.setQueueToDynamicQueue(force);
         }
     }
 
@@ -421,9 +421,9 @@ public class MusicPlayerRemote {
         }
     }
 
-    public static void clearQueue() {
+    public static void closeQueue() {
         if (musicService != null) {
-            musicService.clearQueue();
+            musicService.closeQueue();
         }
     }
 

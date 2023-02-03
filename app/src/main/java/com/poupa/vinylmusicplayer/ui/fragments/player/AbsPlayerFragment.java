@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.media.audiofx.AudioEffect;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -30,11 +31,13 @@ import com.poupa.vinylmusicplayer.dialogs.SleepTimerDialog;
 import com.poupa.vinylmusicplayer.dialogs.SongDetailDialog;
 import com.poupa.vinylmusicplayer.dialogs.SongShareDialog;
 import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
+import com.poupa.vinylmusicplayer.helper.menu.MenuHelper;
 import com.poupa.vinylmusicplayer.interfaces.PaletteColorHolder;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.ui.activities.tageditor.AbsTagEditorActivity;
 import com.poupa.vinylmusicplayer.ui.activities.tageditor.SongTagEditorActivity;
 import com.poupa.vinylmusicplayer.ui.fragments.AbsMusicServiceFragment;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
 import com.poupa.vinylmusicplayer.util.NavigationUtil;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -90,6 +93,13 @@ public abstract class AbsPlayerFragment extends AbsMusicServiceFragment implemen
                     false,
                     null,
                     MusicPlayerRemote.getDynamicAdapter());
+
+            if (toolbar != null) {
+                Menu menu = toolbar.getMenu();
+                MenuHelper.decorateDestructiveItems(menu, this.getContext());
+                menu.findItem(R.id.action_start_dynamic_queue).setTitle(R.string.change_dynamic_queue);
+                menu.findItem(R.id.action_delete_dynamic_element).setVisible(true);
+            }
         } else {
             playingQueueAdapter = new StaticPlayingQueueAdapter(
                     ((AppCompatActivity) getActivity()),
@@ -97,6 +107,11 @@ public abstract class AbsPlayerFragment extends AbsMusicServiceFragment implemen
                     MusicPlayerRemote.getPosition(),
                     false,
                     null);
+            if (toolbar != null) {
+                Menu menu = toolbar.getMenu();
+                menu.findItem(R.id.action_start_dynamic_queue).setTitle(R.string.start_dynamic_queue);
+                menu.findItem(R.id.action_delete_dynamic_element).setVisible(false);
+            }
         }
 
         wrappedAdapter = recyclerViewDragDropManager.createWrappedAdapter(playingQueueAdapter);
@@ -147,10 +162,17 @@ public abstract class AbsPlayerFragment extends AbsMusicServiceFragment implemen
             AddToPlaylistDialog.create(song).show(getParentFragmentManager(), "ADD_PLAYLIST");
             return true;
         } else if (itemId == R.id.action_clear_playing_queue) {
-            MusicPlayerRemote.clearQueue();
+            MusicPlayerRemote.closeQueue();
             return true;
-        } else if (itemId == R.id.action_dynamic_queue) {
-            MusicPlayerRemote.setQueueToDynamicQueue();
+        } else if (itemId == R.id.action_start_dynamic_queue) {
+            DynamicElementBottomSheetDialog dynamicElementBottomSheetDialog = DynamicElementBottomSheetDialog
+                    .newInstance();
+
+            dynamicElementBottomSheetDialog
+                    .show( ((AppCompatActivity) getContext()).getSupportFragmentManager(), "dynamic_element_bottom_sheet");
+            return true;
+        } else if (itemId == R.id.action_delete_dynamic_element) {
+            MusicPlayerRemote.setQueueToStaticQueue();
             return true;
         } else if (itemId == R.id.action_save_playing_queue) {
             CreatePlaylistDialog.create(MusicPlayerRemote.getPlayingQueue()).show(getActivity().getSupportFragmentManager(), "ADD_TO_PLAYLIST");

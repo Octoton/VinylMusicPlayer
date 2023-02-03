@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
@@ -34,6 +35,7 @@ import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
 import com.poupa.vinylmusicplayer.helper.menu.MenuHelper;
 import com.poupa.vinylmusicplayer.interfaces.CabHolder;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingQueueLoader;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog.Type;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Artist;
 import com.poupa.vinylmusicplayer.model.Song;
@@ -49,6 +51,7 @@ import com.poupa.vinylmusicplayer.ui.fragments.mainactivity.library.pager.Albums
 import com.poupa.vinylmusicplayer.ui.fragments.mainactivity.library.pager.ArtistsFragment;
 import com.poupa.vinylmusicplayer.ui.fragments.mainactivity.library.pager.PlaylistsFragment;
 import com.poupa.vinylmusicplayer.ui.fragments.mainactivity.library.pager.SongsFragment;
+import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 import com.poupa.vinylmusicplayer.util.Util;
 
@@ -248,8 +251,21 @@ public class LibraryFragment extends AbsMainActivityFragment implements CabHolde
         final int id = item.getItemId();
         if (id == R.id.action_shuffle_all) {
             if (currentFragment instanceof AlbumsFragment) {
-                MusicPlayerRemote.openQueue(AlbumShufflingQueueLoader.getNextRandomQueue(), 0, true);
-                MusicPlayerRemote.setQueueToDynamicQueue();
+                if (PreferenceUtil.getInstance().alwaysShowDynamicSettings()) {
+                    DynamicElementBottomSheetDialog dynamicElementBottomSheetDialog = DynamicElementBottomSheetDialog.newInstance();
+
+                    Bundle args = new Bundle();
+                    args.putParcelableArrayList(DynamicElementBottomSheetDialog.NEW_QUEUE_SONGS,
+                            AlbumShufflingQueueLoader.getNextRandomQueue());
+                    args.putBoolean(DynamicElementBottomSheetDialog.ALBUM_TYPE, true);
+                    dynamicElementBottomSheetDialog.setArguments(args);
+
+                    dynamicElementBottomSheetDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(),"dynamic_element_bottom_sheet");
+                } else {
+                    MusicPlayerRemote.openQueue(AlbumShufflingQueueLoader.getNextRandomQueue(), 0, true);
+                    PreferenceUtil.getInstance().setDynamicQueueStyle(Type.ALBUM.id);
+                    MusicPlayerRemote.setQueueToDynamicQueue(true);
+                }
             } else {
                 MusicPlayerRemote.openAndShuffleQueue(Discography.getInstance().getAllSongs(), true);
             }

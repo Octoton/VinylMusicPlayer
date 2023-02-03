@@ -15,7 +15,7 @@ public abstract class AbstractQueueLoader implements DynamicQueueLoader {
     protected Song songUsedForSearching;
 
     public AbstractQueueLoader() {
-        this.songUsedForSearching = Song.EMPTY_SONG;
+        this.songUsedForSearching = null;
     }
 
     public boolean restoreQueue(Song song) {
@@ -24,7 +24,7 @@ public abstract class AbstractQueueLoader implements DynamicQueueLoader {
         return true;
     }
 
-    private boolean tryUpdateDynamicElementUpdatable(Song song, boolean force) {
+    private boolean tryUpdateDynamicElement(Song song, boolean force) {
         if ( !(song != null && (force || isSongDifferentEnough(song))) )
             return false;
 
@@ -33,11 +33,11 @@ public abstract class AbstractQueueLoader implements DynamicQueueLoader {
     }
 
     public boolean setNextDynamicQueue(Context context, Song song, boolean force) {
-        return tryUpdateDynamicElementUpdatable(song, force);
+        return tryUpdateDynamicElement(song, force);
     }
 
     public boolean setNextDynamicQueue(Bundle criteria, Context context, Song song, boolean force) {
-        return tryUpdateDynamicElementUpdatable(song, force);
+        return tryUpdateDynamicElement(song, force);
     }
 
     @NonNull
@@ -46,6 +46,10 @@ public abstract class AbstractQueueLoader implements DynamicQueueLoader {
             return createEmptyDynamicElement(context);
 
         return createNewDynamicElement(context);
+    }
+
+    public void stop() {
+        songUsedForSearching = null;
     }
 
     /** @return an DynamicElement that show to the user that nothing was found and no next queue will be loaded */

@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.snackbar.Snackbar;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.DraggableItemAdapter;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.annotation.DraggableItemStateFlags;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemAdapter;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemConstants;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultAction;
@@ -209,9 +208,6 @@ public class StaticPlayingQueueAdapter extends SongAdapter
     }
 
     public class ViewHolder extends SongAdapter.ViewHolder {
-        @DraggableItemStateFlags
-        private int mDragStateFlags;
-
         public ViewHolder(@NonNull ItemListBinding binding) {
             super(binding);
         }
@@ -234,16 +230,6 @@ public class StaticPlayingQueueAdapter extends SongAdapter
                 return true;
             }
             return super.onSongMenuItemClick(item);
-        }
-
-        @Override
-        public void setDragStateFlags(int flags) {
-            mDragStateFlags = flags;
-        }
-
-        @Override
-        public int getDragStateFlags() {
-            return mDragStateFlags;
         }
 
         @Override
