@@ -832,7 +832,7 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
         }
     }
 
-    public void UpnpPlayerpause() {
+    public void pause() {
         pausedByTransientLossOfFocus = false;
         if (playback.isPlaying()) {
             playback.pause();

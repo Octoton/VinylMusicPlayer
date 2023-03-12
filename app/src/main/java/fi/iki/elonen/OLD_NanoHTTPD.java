@@ -15,7 +15,7 @@ import java.util.*;
  * A simple, tiny, nicely embeddable HTTP server in Java
  * <p/>
  * <p/>
- * NanoHTTPD
+ * OLD_NanoHTTPD
  * <p></p>Copyright (c) 2012-2013 by Paul S. Hawke, 2001,2005-2013 by Jarno Elonen, 2010 by Konstantinos Togias</p>
  * <p/>
  * <p/>
@@ -55,7 +55,7 @@ import java.util.*;
  * <p/>
  * See the separate "LICENSE.md" file for the distribution license (Modified BSD licence)
  */
-public abstract class NanoHTTPD {
+public abstract class OLD_NanoHTTPD {
     /**
      * Common mime type for dynamic content: plain text
      */
@@ -80,14 +80,14 @@ public abstract class NanoHTTPD {
     /**
      * Constructs an HTTP server on given port.
      */
-    public NanoHTTPD(int port) {
+    public OLD_NanoHTTPD(int port) {
         this(null, port);
     }
 
     /**
      * Constructs an HTTP server on given hostname and port.
      */
-    public NanoHTTPD(String hostname, int port) {
+    public OLD_NanoHTTPD(String hostname, int port) {
         this.hostname = hostname;
         this.myPort = port;
         setTempFileManagerFactory(new DefaultTempFileManagerFactory());
@@ -422,7 +422,7 @@ public abstract class NanoHTTPD {
         private OutputStream fstream;
 
         public DefaultTempFile(String tempdir) throws IOException {
-            file = File.createTempFile("NanoHTTPD-", "", new File(tempdir));
+            file = File.createTempFile("OLD_NanoHTTPD-", "", new File(tempdir));
             fstream = new FileOutputStream(file);
         }
 
@@ -659,7 +659,7 @@ public abstract class NanoHTTPD {
                     int read = inputStream.read(buf, 0, BUFSIZE);
                     if(read == -1){
                         // socket was been closed
-                        throw new SocketException();
+                        throw new SocketException(); //TODO: is called when connecting to revo
                     }
                     while (read > 0) {
                         rlen += read;
