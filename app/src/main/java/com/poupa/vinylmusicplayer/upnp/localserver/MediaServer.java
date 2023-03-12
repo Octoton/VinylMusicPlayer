@@ -28,8 +28,11 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import com.poupa.vinylmusicplayer.R;
+import fi.iki.elonen.nanohttpd.protocols.http.IHTTPSession;
+import fi.iki.elonen.nanohttpd.protocols.http.NanoHTTPD;
 import org.fourthline.cling.controlpoint.ControlPoint;
 import org.fourthline.cling.model.ValidationError;
 import org.fourthline.cling.model.ValidationException;
@@ -54,8 +57,13 @@ import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import fi.iki.elonen.nanohttpd.protocols.http.response.Status;
+import fi.iki.elonen.nanohttpd.protocols.http.request.Method;
+import fi.iki.elonen.nanohttpd.protocols.http.response.Response;
+import fi.iki.elonen.nanohttpd.webserver.SimpleWebServer;
+
 @SuppressWarnings("rawtypes")
-public class MediaServer extends fi.iki.elonen.SimpleWebServer
+public class MediaServer extends SimpleWebServer
 {
     private final static String TAG = "TOTO_MediaServer";
 
@@ -65,12 +73,12 @@ public class MediaServer extends fi.iki.elonen.SimpleWebServer
     private LocalDevice localDevice = null;
     private Context ctx = null;
 
-    private final static int port = 8090; //8080; //8192; was already used by droidupnp i suppose, what to do??
+    private final static int port = 8090; //8080; //8192; TODO: was already used by droidupnp i suppose, what to do??
     private final InetAddress localAddress;
 
     public MediaServer(Context ctx, ControlPoint controlPoint) throws ValidationException,  UnknownHostException
     {
-        super(null, port, null, true);
+        super(null, port, (File)null, true);
 
         udn = UDN.valueOf(new UUID(0,10).toString());
         this.ctx = ctx;
@@ -251,11 +259,22 @@ public class MediaServer extends fi.iki.elonen.SimpleWebServer
         throw new InvalidIdentificatorException(id + " was not found in media database");
     }
 
-    @Override
+    /*@Override
     public Response serve(String uri, Method method, Map<String, String> header, Map<String, String> parms,
-            Map<String, String> files)
+            Map<String, String> files)*/
+    @Override
+    public Response serve(IHTTPSession session)
     {
+        Map<String, String> header = session.getHeaders();
+        Map<String, String> parms = session.getParms();
+        String uri = session.getUri();
+
         Response res = null;
+
+        NanoHTTPD.LOG.log(Level.SEVERE, "HEADER: "+header);
+        NanoHTTPD.LOG.log(Level.SEVERE, "PARAM: "+parms);
+        NanoHTTPD.LOG.log(Level.SEVERE, "URI: "+uri);
+        NanoHTTPD.LOG.log(Level.SEVERE, "METHOD: "+session.getMethod());
 
         Log.i(TAG, "Serve uri : " + uri);
 
@@ -265,8 +284,8 @@ public class MediaServer extends fi.iki.elonen.SimpleWebServer
         for(Map.Entry<String, String> entry : parms.entrySet())
             Log.d(TAG, "Params : key=" + entry.getKey() + " value=" + entry.getValue());
 
-        for(Map.Entry<String, String> entry : files.entrySet())
-            Log.d(TAG, "Files : key=" + entry.getKey() + " value=" + entry.getValue());
+        //for(Map.Entry<String, String> entry : session.getInputStream(). files.entrySet())
+        //    Log.d(TAG, "Files : key=" + entry.getKey() + " value=" + entry.getValue());
 
         try
         {
@@ -275,11 +294,13 @@ public class MediaServer extends fi.iki.elonen.SimpleWebServer
                 ServerObject obj = getFileServerObject(uri);
 
                 Log.i(TAG, "Will serve " + obj.path);
-                res = serveFile(new File(obj.path), obj.mime, header);
+                res = serveFile(uri, header, new File(obj.path), obj.mime); // new File(obj.path), obj.mime, header);
+
+                NanoHTTPD.LOG.log(Level.SEVERE, "TRY");
             }
             catch(InvalidIdentificatorException e)
             {
-                return new Response(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Error 404, file not found.");
+                return Response.newFixedLengthResponse(Status.NOT_FOUND, MIME_PLAINTEXT, "Error 404, file not found.");
             }
 
             if( res != null )
@@ -292,11 +313,16 @@ public class MediaServer extends fi.iki.elonen.SimpleWebServer
                 }
 
                 // Some DLNA header option
-                res.addHeader("realTimeInfo.dlna.org", "DLNA.ORG_TLAG=*");
-                res.addHeader("contentFeatures.dlna.org", "");
+                //res.addHeader("realTimeInfo.dlna.org", "DLNA.ORG_TLAG=*");
+                //res.addHeader("contentFeatures.dlna.org", "");
+                res.addHeader("Cache-Control", "no-cache");
+                //res.addHeader("Last-Modified", "Sun, 09 Aug 2020 15:35:00 GMT");
                 res.addHeader("transferMode.dlna.org", "Streaming");
-                res.addHeader("Server", "DLNADOC/1.50 UPnP/1.0 Cling/2.0 DroidUPnP/"+version +" Android/" + Build.VERSION.RELEASE);
-            }
+                res.addHeader("contentFeatures.dlna.org", "DLNA.ORG_PN=MP3;DLNA.ORG_OP=01;DLNA.ORG_FLAGS=01700000000000000000000000000000");
+                res.addHeader("Server", "\"Android, UPnP/1.0 DLNADOC/1.50, VinylMusicPlayer/1.3.0\""); //DLNADOC/1.50 UPnP/1.0 Cling/2.0 DroidUPnP/"+version +" Android/" + Build.VERSION.RELEASE);
+
+                NanoHTTPD.LOG.log(Level.SEVERE, "ADD HEADER");
+            } //Android, UPnP/1.0 DLNADOC/1.50, BubbleUPnP/3.6.8.2
 
             return res;
         }
@@ -306,6 +332,6 @@ public class MediaServer extends fi.iki.elonen.SimpleWebServer
             Log.e(TAG, "exception", e);
         }
 
-        return new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "INTERNAL ERROR: unexpected error.");
+        return Response.newFixedLengthResponse(Status.INTERNAL_ERROR, MIME_PLAINTEXT, "INTERNAL ERROR: unexpected error.");
     }
 }
