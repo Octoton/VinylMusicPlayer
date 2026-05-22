@@ -459,38 +459,44 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     void restoreQueuesAndPosition() {
         synchronized (this) {
-            // The current playback state
-            final long savedSongId = getCurrentSong().id;
+            try {
+                // The current playback state
+                final long savedSongId = getCurrentSong().id;
 
-            // The saved state
-            final int restoredPosition = PreferenceManager.getDefaultSharedPreferences(this)
-                    .getInt(SAVED_POSITION, StaticPlayingQueue.INVALID_POSITION);
-            final int restoredPositionInTrack = PreferenceManager.getDefaultSharedPreferences(this)
-                    .getInt(SAVED_POSITION_IN_TRACK, -1);
+                // The saved state
+                final int restoredPosition = PreferenceManager.getDefaultSharedPreferences(this)
+                        .getInt(SAVED_POSITION, StaticPlayingQueue.INVALID_POSITION);
+                final int restoredPositionInTrack = PreferenceManager.getDefaultSharedPreferences(this)
+                        .getInt(SAVED_POSITION_IN_TRACK, -1);
 
-            queueIsDynamic = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SAVED_QUEUE_TYPE, false);
-            if (queueIsDynamic) {
-                playingQueue = new DynamicPlayingQueue(playingQueue, new AlbumShufflingQueueLoader()); // For album shuffling V2: Will depend on a saved preference to have the same than before
+                queueIsDynamic = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SAVED_QUEUE_TYPE, false);
+                if (queueIsDynamic) {
+                    playingQueue = new DynamicPlayingQueue(playingQueue, new AlbumShufflingQueueLoader()); // For album shuffling V2: Will depend on a saved preference to have the same than before
+                }
+
+                if (playingQueue.restoreQueue(this, restoredPosition)) {
+                    // Before altering the player state, check that it is really necessary
+                    // ie. we are changing song in between
+                    // This prevents changing the player state, as it will stop the playback
+                    final long currentSongId = getCurrentSong().id;
+                    if (currentSongId != savedSongId) {
+                        if (openCurrent() && (restoredPositionInTrack > 0)) {
+                            seek(restoredPositionInTrack);
+                        }
+                        notHandledMetaChangedForCurrentTrack = true;
+                        sendChangeInternal(META_CHANGED);
+                    } // else just leave the playback with the current song
+
+                    prepareNext();
+                    sendChangeInternal(QUEUE_CHANGED);
+                }
+
+                queuesRestored = true;
+            } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException queueCopiesOutOfSync) {
+                // fallback, when the copies of the restored queues are out of sync or the queues are corrupted
+                OopsHandler.collectStackTrace(queueCopiesOutOfSync);
+                SafeToast.show(this, R.string.failed_restore_playing_queue);
             }
-
-            if (playingQueue.restoreQueue(this, restoredPosition)) {
-                // Before altering the player state, check that it is really necessary
-                // ie. we are changing song in between
-                // This prevents changing the player state, as it will stop the playback
-                final long currentSongId = getCurrentSong().id;
-                if (currentSongId != savedSongId) {
-                    if (openCurrent() && (restoredPositionInTrack > 0)) {
-                        seek(restoredPositionInTrack);
-                    }
-                    notHandledMetaChangedForCurrentTrack = true;
-                    sendChangeInternal(META_CHANGED);
-                } // else just leave the playback with the current song
-
-                prepareNext();
-                sendChangeInternal(QUEUE_CHANGED);
-            }
-
-            queuesRestored = true;
         }
     }
 

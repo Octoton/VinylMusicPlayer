@@ -149,8 +149,8 @@ public abstract class AbsSlidingMusicPanelActivity extends AbsMusicServiceActivi
         super.onQueueChanged();
 
         AbsPlayerFragment fragment = (AbsPlayerFragment) getSupportFragmentManager().findFragmentById(R.id.player_fragment_container);
-        if ((MusicPlayerRemote.isDynamicQueueActivated() && !(fragment.playingQueueAdapter instanceof DynamicPlayingQueueAdapter)) ||
-                (!MusicPlayerRemote.isDynamicQueueActivated() && (fragment.playingQueueAdapter instanceof DynamicPlayingQueueAdapter))) {
+        if ((MusicPlayerRemote.isDynamicQueueActivated() && fragment.isQueueStatic()) ||
+                (!MusicPlayerRemote.isDynamicQueueActivated() && !fragment.isQueueStatic())) {
             fragment.recreate();
         }
 

@@ -37,14 +37,13 @@ public class DynamicPlayingQueue extends StaticPlayingQueue {
     }
 
     @Override
-    public boolean restoreQueue(Context context, int restoredPosition) {
+    public boolean restoreQueue(Context context, int restoredPosition) throws IllegalArgumentException {
         return super.restoreQueue(context, restoredPosition) && queueLoader.restoreQueue(context, lastSong());
     }
 
     private void loadNextQueue() {
         clear();
         addAll(queueLoader.getNextQueue());
-        this.songsIsStale = true;
     }
 
     private Song lastSong() {
@@ -60,12 +59,6 @@ public class DynamicPlayingQueue extends StaticPlayingQueue {
 
     public void setNextDynamicQueue(Bundle criteria, Context context) {
         queueLoader.setNextDynamicQueue(criteria, context, lastSong(), true);
-    }
-
-    @Override
-    public ArrayList<Song> getPlayingQueueSongOnly() {
-        queueLoader.setNextDynamicQueue(null, lastSong(), false); // best way of updating this element (method is always called when queue is updated)
-        return super.getPlayingQueueSongOnly();
     }
 
     /**

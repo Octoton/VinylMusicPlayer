@@ -8,6 +8,8 @@ import android.content.Context;
 import com.poupa.vinylmusicplayer.helper.ShuffleHelper;
 import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.provider.MusicPlaybackQueueStore;
+import com.poupa.vinylmusicplayer.util.OopsHandler;
+import com.poupa.vinylmusicplayer.util.SafeToast;
 
 import static com.poupa.vinylmusicplayer.service.MusicService.TAG;
 
@@ -38,7 +40,7 @@ public class StaticPlayingQueue {
     /** List of element currently saved (way better than songs to ensure only the correct occurrence of a song is modified) */
     protected ArrayList<IndexedSong> queue;
     /** Copy of the queue used to allow revert of history last operation */
-    protected final ArrayList<IndexedSong> originalQueue;
+    protected ArrayList<IndexedSong> originalQueue;
 
     private long nextUniqueId;
 
@@ -89,34 +91,35 @@ public class StaticPlayingQueue {
     }
 
     /** @return is restore successful */
-    public boolean restoreQueue(Context context, int restoredPosition) {
-        ArrayList<IndexedSong> restoredQueue = MusicPlaybackQueueStore.getInstance(context).getSavedPlayingQueue();
-        ArrayList<IndexedSong> restoredOriginalQueue = MusicPlaybackQueueStore.getInstance(context).getSavedOriginalPlayingQueue();
+    public boolean restoreQueue(Context context, int restoredPosition) throws ArrayIndexOutOfBoundsException, IllegalArgumentException {
+        try {
+            ArrayList<IndexedSong> restoredQueue = MusicPlaybackQueueStore.getInstance(context).getSavedPlayingQueue();
+            ArrayList<IndexedSong> restoredOriginalQueue = MusicPlaybackQueueStore.getInstance(context).getSavedOriginalPlayingQueue();
 
-        if (restoredQueue.size() > 0 && restoredQueue.size() == restoredOriginalQueue.size() && restoredPosition != -1) {
-            this.queue = restoredQueue;
-            this.originalQueue = restoredOriginalQueue;
-            this.currentPosition = restoredPosition;
+            if (restoredQueue.size() > 0 && restoredQueue.size() == restoredOriginalQueue.size() && restoredPosition != -1) {
+                this.queue = restoredQueue;
+                this.originalQueue = restoredOriginalQueue;
+                this.currentPosition = restoredPosition;
 
-            // Adjust for removed songs, marked with Song.EMPTY in the restored queues
-            // See MusicPlaybackQueueStore.getSongPosition
-            for (int i = restoredQueue.size() - 1; i >= 0; --i) {
-                if (restoredQueue.get(i).id == Song.EMPTY_SONG.id) {
-                    remove(i);
+                // Adjust for removed songs, marked with Song.EMPTY in the restored queues
+                // See MusicPlaybackQueueStore.getSongPosition
+                for (int i = restoredQueue.size() - 1; i >= 0; --i) {
+                    if (restoredQueue.get(i).id == Song.EMPTY_SONG.id) {
+                        remove(i);
+                    }
                 }
-            }
 
-            try {
                 restoreUniqueId();
-            } catch (ArrayIndexOutOfBoundsException queueCopiesOutOfSync) {
-                // fallback, when the copies of the restored queues are out of sync or the queues are corrupted
-                Log.e(TAG, "Restored queues are corrupted", queueCopiesOutOfSync);
-                this.queue = new ArrayList<>();
-                this.originalQueue = new ArrayList<>();
-                this.currentPosition = INVALID_POSITION;
-            }
 
-            return true;
+                return true;
+            }
+        } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException queueCopiesOutOfSync) {
+            // fallback, when the copies of the restored queues are out of sync or the queues are corrupted
+            this.queue = new ArrayList<>();
+            this.originalQueue = new ArrayList<>();
+            this.currentPosition = INVALID_POSITION;
+
+            throw queueCopiesOutOfSync;
         }
 
         return false;

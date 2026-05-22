@@ -2,6 +2,7 @@ package com.poupa.vinylmusicplayer.adapter.song;
 
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -9,13 +10,13 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import com.poupa.vinylmusicplayer.databinding.ItemGridBinding;
 import com.poupa.vinylmusicplayer.databinding.ItemListBinding;
 
-import com.poupa.vinylmusicplayer.interfaces.CabHolder;
+import com.poupa.vinylmusicplayer.interfaces.PaletteColorHolder;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueItemAdapter;
 import com.poupa.vinylmusicplayer.model.Song;
+import com.poupa.vinylmusicplayer.ui.activities.base.AbsThemeActivity;
 
 /**
  * Extension of StaticPlayingQueueAdapter that manage the list of song + an item showing the queue to be loaded at the end of the current one
@@ -29,8 +30,8 @@ public class DynamicPlayingQueueAdapter extends StaticPlayingQueueAdapter {
     /** Provide next queue item management (menu & binding) */
     private DynamicQueueItemAdapter dynamicQueueItemAdapter;
 
-    public DynamicPlayingQueueAdapter(AppCompatActivity activity, ArrayList<Song> dataSet, int current, boolean usePalette, @Nullable CabHolder cabHolder, DynamicQueueItemAdapter dynamicQueueItemAdapter) {
-        super(activity, dataSet, current, usePalette, cabHolder);
+    public DynamicPlayingQueueAdapter(@NonNull final AbsThemeActivity activity, List<? extends Song> dataSet, int current, boolean usePalette, @Nullable PaletteColorHolder palette, DynamicQueueItemAdapter dynamicQueueItemAdapter) {
+        super(activity, dataSet, current, usePalette, palette);
 
         this.dynamicQueueItemAdapter = dynamicQueueItemAdapter;
     }

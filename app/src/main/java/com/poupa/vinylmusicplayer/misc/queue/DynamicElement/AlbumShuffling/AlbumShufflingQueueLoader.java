@@ -2,6 +2,7 @@ package com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 import android.content.Context;
@@ -17,6 +18,7 @@ import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueItemAdap
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicQueueLoader;
 import com.poupa.vinylmusicplayer.model.Album;
 import com.poupa.vinylmusicplayer.model.Song;
+import com.poupa.vinylmusicplayer.sort.AlbumSortOrder;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
 
 
@@ -68,7 +70,7 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
 
         ArrayList<Album> albums;
         synchronized (Discography.getInstance()) {
-            albums = new ArrayList<>(Discography.getInstance().getAllAlbums());
+            albums = new ArrayList<>(Discography.getInstance().getAllAlbums(AlbumSortOrder.BY_YEAR_DESC));
         }
 
         ArrayList<Album> subList = new ArrayList<>();
@@ -80,11 +82,10 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
                         isAlbumInCriteria = true;
                         break;
                     case ARTIST_SEARCH:
-                        isAlbumInCriteria = album.getArtistId() == song.artistId;
+                        isAlbumInCriteria = !Collections.disjoint(song.artistNames, album.getArtistNames());
                         break;
                     case GENRE_SEARCH:
-                        isAlbumInCriteria = album.songs != null && album.songs.size() > 0 &&
-                                song.genre.equals(album.songs.get(0).genre);
+                        isAlbumInCriteria = !album.songs.isEmpty() && !Collections.disjoint(song.genres, album.songs.get(0).genres);
                         break;
                 }
 
@@ -113,7 +114,7 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
     public static ArrayList<Song> getNextRandomQueue() {
         ArrayList<Album> albums;
         synchronized (Discography.getInstance()) {
-            albums = new ArrayList<>(Discography.getInstance().getAllAlbums());
+            albums = new ArrayList<>(Discography.getInstance().getAllAlbums(AlbumSortOrder.BY_YEAR_DESC));
         }
         Random rand = new Random();
         Album album = albums.get(rand.nextInt(albums.size()));
@@ -141,8 +142,12 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
 
     @Override
     protected DynamicElement createNewDynamicElement(Context context) {
+        // needed or it will crash sometime randomly, why ?
+        String artistName = "";
+        if (!this.nextAlbum.getArtistNames().isEmpty()) artistName = this.nextAlbum.getArtistNames().get(0);
+
         return new DynamicElement(context.getResources().getString(R.string.next_album),
-                MusicUtil.buildInfoString(this.nextAlbum.getArtistName(), this.nextAlbum.getTitle()),
+                MusicUtil.buildInfoString(artistName, this.nextAlbum.getTitle()),
                 R.drawable.ic_shuffle_album_white_24dp); //"-");
     }
 

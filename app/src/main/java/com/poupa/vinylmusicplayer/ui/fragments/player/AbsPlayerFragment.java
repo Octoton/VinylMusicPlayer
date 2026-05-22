@@ -57,6 +57,7 @@ public abstract class AbsPlayerFragment
     @Nullable
     private Callbacks callbacks;
 
+    private boolean IsStaticQueue;
     protected StaticPlayingQueueAdapter playingQueueAdapter;
     private RecyclerView.Adapter wrappedAdapter;
     protected RecyclerViewDragDropManager recyclerViewDragDropManager;
@@ -93,6 +94,7 @@ public abstract class AbsPlayerFragment
         animator.setSupportsChangeAnimations(false);
 
         if (MusicPlayerRemote.isDynamicQueueActivated()) {
+            IsStaticQueue = false;
             playingQueueAdapter = new DynamicPlayingQueueAdapter(
                     ((AbsThemeActivity) requireActivity()),
                     MusicPlayerRemote.getPlayingQueue(),
@@ -101,6 +103,7 @@ public abstract class AbsPlayerFragment
                     null,
                     MusicPlayerRemote.getDynamicAdapter());
         } else {
+            IsStaticQueue = true;
             playingQueueAdapter = new StaticPlayingQueueAdapter(
                     ((AbsThemeActivity) requireActivity()),
                     MusicPlayerRemote.getPlayingQueue(),
@@ -135,6 +138,10 @@ public abstract class AbsPlayerFragment
         });
 
         layoutManager.scrollToPositionWithOffset(MusicPlayerRemote.getPosition() + 1, 0);
+    }
+
+    public boolean isQueueStatic() {
+        return IsStaticQueue;
     }
 
     @Override
