@@ -142,12 +142,8 @@ public class AlbumShufflingQueueLoader extends AbstractQueueLoader {
 
     @Override
     protected DynamicElement createNewDynamicElement(Context context) {
-        // needed or it will crash sometime randomly, why ?
-        String artistName = "";
-        if (!this.nextAlbum.getArtistNames().isEmpty()) artistName = this.nextAlbum.getArtistNames().get(0);
-
         return new DynamicElement(context.getResources().getString(R.string.next_album),
-                MusicUtil.buildInfoString(artistName, this.nextAlbum.getTitle()),
+                MusicUtil.buildInfoString(this.nextAlbum.getArtistNames().get(0), this.nextAlbum.getTitle()),
                 R.drawable.ic_shuffle_album_white_24dp); //"-");
     }
 

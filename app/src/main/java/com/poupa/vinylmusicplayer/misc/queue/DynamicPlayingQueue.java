@@ -61,6 +61,12 @@ public class DynamicPlayingQueue extends StaticPlayingQueue {
         queueLoader.setNextDynamicQueue(criteria, context, lastSong(), true);
     }
 
+    @Override
+    public ArrayList<IndexedSong> getPlayingQueue() {
+        queueLoader.setNextDynamicQueue(null, lastSong(), false); // best way of updating this element (method is always called when queue is updated)
+        return super.getPlayingQueue();
+    }
+
     /**
      * @return new position was valid or queue as changed as next queue was loaded
      */
