@@ -805,7 +805,7 @@ public final class PreferenceUtil {
 
     public ArrayList<CategoryInfo> getLibraryCategoryInfos() {
         String data = mPreferences.getString(LIBRARY_CATEGORIES, null);
-        if (data != null) {
+        if (data != null) { // make app crash when going from v1 to v2 branch, unless removal of all app data
             final Gson gson = new Gson();
             final Type collectionType = new TypeToken<ArrayList<CategoryInfo>>() {
             }.getType();

@@ -53,6 +53,7 @@ import com.poupa.vinylmusicplayer.util.NavigationUtil;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 import com.poupa.vinylmusicplayer.util.SafeToast;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -301,7 +302,7 @@ public class AlbumDetailActivity
                 DynamicElementBottomSheetDialog dynamicElementBottomSheetDialog = DynamicElementBottomSheetDialog.newInstance();
 
                 Bundle args = new Bundle();
-                args.putParcelableArrayList(DynamicElementBottomSheetDialog.NEW_QUEUE_SONGS, songs);
+                args.putParcelableArrayList(DynamicElementBottomSheetDialog.NEW_QUEUE_SONGS, new ArrayList<>(songs));
                 args.putBoolean(DynamicElementBottomSheetDialog.ALBUM_TYPE, true);
                 dynamicElementBottomSheetDialog.setArguments(args);
 

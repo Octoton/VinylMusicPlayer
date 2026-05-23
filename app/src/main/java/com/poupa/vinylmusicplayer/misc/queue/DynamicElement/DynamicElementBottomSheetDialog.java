@@ -18,10 +18,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.poupa.vinylmusicplayer.R;
+import com.poupa.vinylmusicplayer.dialogs.BottomSheetDialog.BottomSheetDialog;
 import com.poupa.vinylmusicplayer.helper.MusicPlayerRemote;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AbstractShuffling.AbstractQueueLoader;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.AlbumShuffling.AlbumShufflingPreferenceFragment;
@@ -30,7 +29,7 @@ import com.poupa.vinylmusicplayer.model.Song;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
 
 
-public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
+public class DynamicElementBottomSheetDialog extends BottomSheetDialog {
     public static DynamicElementBottomSheetDialog newInstance() { return new DynamicElementBottomSheetDialog(); }
 
     public final static String NEW_QUEUE_SONGS = "newQueueSongs";
@@ -41,7 +40,8 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
     private DynamicElementPreferenceFragment preferenceFragment;
     private Type searchType;
 
-    @NonNull @Override
+    // With this bottomsheet background is transparent, seems to be because of newly introduced bottomsheet style in https://github.com/VinylMusicPlayer/VinylMusicPlayer/pull/679/
+    /*@NonNull @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         Bundle bundle = this.getArguments();
@@ -52,12 +52,12 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
             songs = null;
         }
 
-        BottomSheetDialog dialog = new BottomSheetDialog(getActivity());
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = new com.google.android.material.bottomsheet.BottomSheetDialog(getActivity());
 
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                BottomSheetDialog d = (BottomSheetDialog) dialog;
+                com.google.android.material.bottomsheet.BottomSheetDialog d = (com.google.android.material.bottomsheet.BottomSheetDialog) dialog;
                 FrameLayout bottomSheet = d.findViewById(com.google.android.material.R.id.design_bottom_sheet);
 
                 BottomSheetBehavior behaviour = BottomSheetBehavior.from(bottomSheet);
@@ -79,7 +79,7 @@ public class DynamicElementBottomSheetDialog extends BottomSheetDialogFragment {
         });
 
         return dialog;
-    }
+    }*/
 
     @Nullable
     @Override
