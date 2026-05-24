@@ -86,6 +86,7 @@ class DB extends SQLiteOpenHelper {
                 case 4:
                 case 5:
                 case 6:
+                case 7:
                 case VERSION: // At target. This case is here for consistency check
                     migrateResetAll.accept(dbase);
                     break;
@@ -160,7 +161,7 @@ class DB extends SQLiteOpenHelper {
             values.put(SongColumns.DATE_ADDED, song.dateAdded);
             values.put(SongColumns.DATE_MODIFIED, song.dateModified);
             values.put(SongColumns.DISC_NUMBER, song.discNumber);
-            values.put(SongColumns.GENRE, song.genre);
+            values.put(SongColumns.GENRE, MultiValuesTagUtil.merge(song.genres));
             values.put(SongColumns.REPLAYGAIN_ALBUM, song.replayGainAlbum);
             values.put(SongColumns.REPLAYGAIN_TRACK, song.replayGainTrack);
             values.put(SongColumns.TRACK_DURATION, song.duration);

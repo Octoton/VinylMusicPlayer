@@ -2,6 +2,7 @@ package com.poupa.vinylmusicplayer.adapter.album;
 
 import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -229,29 +230,28 @@ public class AlbumAdapter extends AbsMultiSelectAdapter<AlbumAdapter.ViewHolder,
     @Override
     protected void onMultipleItemAction(@NonNull final MenuItem menuItem, @NonNull final Map<Integer, Album> selection) {
        if (menuItem.getItemId() == R.id.action_toggle_black_list) {
-            for (Album album : selection.values().iterator()) {
-                boolean newBlackListedAlbumFlag = !album.getIsBlackListedFromAlbumSearch();
-                for (Song song : album.songs) {
-                    if (newBlackListedAlbumFlag)
-                        song.addBlackListedFlag(Song.BLACKLISTED_FROM_ALBUM_PERPETUAL_QUEUE);
-                    else
-                        song.removeBlackListedFlag(Song.BLACKLISTED_FROM_ALBUM_PERPETUAL_QUEUE);
-                    Discography.getInstance().updateSong(song);
-                }
-            }
+           for (Album album : selection.values()) {
+               boolean newBlackListedAlbumFlag = !album.getIsBlackListedFromAlbumSearch();
+               for (Song song : album.songs) {
+                   if (newBlackListedAlbumFlag)
+                       song.addBlackListedFlag(Song.BLACKLISTED_FROM_ALBUM_PERPETUAL_QUEUE);
+                   else
+                       song.removeBlackListedFlag(Song.BLACKLISTED_FROM_ALBUM_PERPETUAL_QUEUE);
+                   Discography.getInstance().updateSong(song);
+               }
+           }
         } else {
             SongsMenuHelper.handleMenuClick(activity, getSongList(selection.values().iterator()), menuItem.getItemId());
         }
     }
 
     @Override
-    public boolean onCabCreated(MaterialCab materialCab, Menu menu) {
-        boolean returnValue = super.onCabCreated(materialCab, menu);
+    protected boolean onCabCreated(final ActionMode mode, final Menu menu) {
+        boolean returnValue = super.onCabCreated(mode, menu);
 
         menu.findItem(R.id.action_toggle_black_list).setVisible(true);
 
         return returnValue;
-    }
     }
 
     @NonNull

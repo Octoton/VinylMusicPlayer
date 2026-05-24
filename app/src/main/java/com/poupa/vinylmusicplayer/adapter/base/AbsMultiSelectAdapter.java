@@ -82,7 +82,7 @@ public abstract class AbsMultiSelectAdapter<VH extends RecyclerView.ViewHolder, 
                 actionMode = ActionModeHelper.startActionMode(activity, menuRes, color, new ActionMode.Callback() {
                     @Override
                     public boolean onCreateActionMode(final ActionMode mode, final Menu menu) {
-                        return true;
+                        return onCabCreated(mode, menu);
                     }
 
                     @Override
@@ -130,6 +130,10 @@ public abstract class AbsMultiSelectAdapter<VH extends RecyclerView.ViewHolder, 
     protected abstract I getIdentifier(int position);
 
     protected abstract void onMultipleItemAction(@NonNull final MenuItem menuItem, @NonNull final Map<Integer, I> selection);
+    protected boolean onCabCreated(final ActionMode mode, final Menu menu)
+    {
+        return true;
+    }
 
     public final class ActionModeHelper {
         @Nullable
