@@ -28,7 +28,12 @@ public abstract class BottomSheetDialog extends BottomSheetDialogFragment {
 
     public CopyOnWriteArrayList<Runnable> onBottomSheetCreated = new CopyOnWriteArrayList<>();
 
-    @NonNull @Override
+    protected void onShowInternal(DialogInterface dialog) {
+
+    }
+
+
+        @NonNull @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         com.google.android.material.bottomsheet.BottomSheetDialog
@@ -48,6 +53,8 @@ public abstract class BottomSheetDialog extends BottomSheetDialogFragment {
                 for (Runnable code : onBottomSheetCreated) {
                     code.run();
                 }
+
+                onShowInternal(dialog);
             }
         });
 

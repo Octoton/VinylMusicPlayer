@@ -195,4 +195,7 @@ dependencies {
     implementation 'org.eclipse.jetty:jetty-servlet:8.1.18.v20150929'
     implementation 'org.eclipse.jetty:jetty-client:8.1.18.v20150929'
     implementation 'org.slf4j:slf4j-jdk14:1.7.14'
+
+    // https://stackoverflow.com/questions/75140684/why-does-gradle-7-4-bin-zip-prevent-me-from-using-javax-servlet
+    implementation 'javax.servlet:javax.servlet-api:3.0.1'
 }
