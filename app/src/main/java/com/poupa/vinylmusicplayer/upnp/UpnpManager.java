@@ -11,10 +11,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.poupa.vinylmusicplayer.App;
 import com.poupa.vinylmusicplayer.upnp.controller.RegistryListener;
 import com.poupa.vinylmusicplayer.upnp.controller.RegistryManager;
 import com.poupa.vinylmusicplayer.upnp.controller.UpnpDevice;
@@ -32,6 +34,12 @@ import org.fourthline.cling.support.model.Res;
 public class UpnpManager {
    private static final String TAG = "TOTO_Manager";
 
+   public static final String PREFERENCE_KEY = "upnp_manager_preference";
+   public static final String UPNP_MODE = "upnp_mode";
+
+   private final SharedPreferences mPreferences;
+   private boolean upnpMode;
+
    private ArrayList<RegistryListener> waitingListener = new ArrayList<>();
    private AndroidUpnpService upnpService;
    private MediaServer mediaServer;
@@ -39,10 +47,18 @@ public class UpnpManager {
 
    private Activity activity;
 
-   private static final UpnpManager ourInstance = new UpnpManager();
-   public static UpnpManager getInstance() { return ourInstance; }
+   private static UpnpManager ourInstance;
+   public static UpnpManager getInstance() {
+      if (ourInstance == null) {
+         ourInstance = new UpnpManager();
+      }
+      return ourInstance;
+   }
+
    private UpnpManager() {
       waitingListener = new ArrayList<>();
+      mPreferences = App.getStaticContext().getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE);
+      upnpMode = mPreferences.getBoolean(UPNP_MODE, false);
    }
 
    public RendererCommand getRendererCommand() {
@@ -73,6 +89,16 @@ public class UpnpManager {
       rendererCommand.resume();
 
       rendererCommand.updateFull();
+
+      updateIsUpnpMode(true);
+   }
+
+   public boolean isUpnpMode() { return upnpMode; }
+
+   public void updateIsUpnpMode(boolean isUpnpMode) {
+      mPreferences.edit().putBoolean(UPNP_MODE, isUpnpMode).apply();
+
+      this.upnpMode = isUpnpMode;
    }
 
    public void setOnCompletion(MediaPlayer.OnCompletionListener callback, String currentURI) {

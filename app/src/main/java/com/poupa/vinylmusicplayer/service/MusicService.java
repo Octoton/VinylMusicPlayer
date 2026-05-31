@@ -66,6 +66,7 @@ import com.poupa.vinylmusicplayer.service.notification.PlayingNotificationImplAp
 import com.poupa.vinylmusicplayer.service.notification.PlayingNotificationImplApi24;
 import com.poupa.vinylmusicplayer.service.playback.Playback;
 import com.poupa.vinylmusicplayer.misc.queue.DynamicElement.DynamicElementBottomSheetDialog.Type;
+import com.poupa.vinylmusicplayer.upnp.UpnpManager;
 import com.poupa.vinylmusicplayer.upnp.UpnpPlayer;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
 import com.poupa.vinylmusicplayer.util.OopsHandler;
@@ -242,7 +243,11 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
             playbackHandlerThread.start();
             playbackHandler = new PlaybackHandler(this, playbackHandlerThread.getLooper());
 
-            playback = new UpnpPlayer(this); //new MultiPlayer(this); // TODO: dynamic management of player required
+            if (UpnpManager.getInstance().isUpnpMode()) { // TODO: patch, new real dynamic management of player required, where playback change without musice serivce reboot (down by manual app relauch for now)
+                playback = new UpnpPlayer(this);
+            } else {
+                playback = new MultiPlayer(this);
+            }
             playback.setCallbacks(this);
         }
 

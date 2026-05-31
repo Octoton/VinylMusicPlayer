@@ -99,9 +99,10 @@ public class UpnpBottomSheetDialogFragment extends BottomSheetDialog {
       localDevice.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View view) {
-            //dismiss();
+            dismiss();
             setup = false;
-            //upnpManager.stop(); ??? or just stop upnp connection
+            upnpManager.updateIsUpnpMode(false);
+            //upnpManager.stop(); //??? or just stop upnp connection
 
             localDevice.setChecked(true);
             for (int i = 0; i < listView.getCount(); i++)
