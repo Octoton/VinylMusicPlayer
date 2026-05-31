@@ -297,7 +297,7 @@ public class RendererCommand implements Runnable {
 
       // TODO: put song inside TrackMetadata
       final TrackMetadata trackMetadata = new TrackMetadata(Long.toString(song.id), song.title,
-              song.artistNames.get(0), song.genre, null, "object.item." + "audioItem", 0, MusicUtil.getReadableHoursDurationString(song.duration));
+              song.artistNames.get(0), song.genres.get(0), null, "object.item." + "audioItem", 0, MusicUtil.getReadableHoursDurationString(song.duration));
 
       Log.i(TAG, "TrackMetadata : "+trackMetadata.getXML());
 

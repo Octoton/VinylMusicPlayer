@@ -1076,15 +1076,15 @@ public class MusicService extends MediaBrowserServiceCompat implements SharedPre
 
     public void play() {
         synchronized (this) {
-            Log.d(TAG, "Play !");
+            //Log.d(TAG, "Play !");
             if (requestFocus()) {
-                Log.d(TAG, "Focus !");
+                //Log.d(TAG, "Focus !");
                 if (!playback.isPlaying()) {
                     if (!playback.isInitialized()) {
-                        Log.d(TAG, "Play song at: "+getPosition());
+                        //Log.d(TAG, "Play song at: "+getPosition());
                         playSongAt(getPosition(), false);
                     } else {
-                        Log.d(TAG, "Play start playback");
+                        //Log.d(TAG, "Play start playback");
                         playback.start();
                         if (!becomingNoisyReceiverRegistered) {
                             registerReceiver(becomingNoisyReceiver, becomingNoisyReceiverIntentFilter);
