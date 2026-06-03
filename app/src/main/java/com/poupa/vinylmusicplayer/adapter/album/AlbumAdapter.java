@@ -16,7 +16,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Pair;
 
-import com.afollestad.materialcab.MaterialCab;
 import com.kabouzeid.appthemehelper.util.ColorUtil;
 import com.kabouzeid.appthemehelper.util.MaterialValueHelper;
 import com.poupa.vinylmusicplayer.R;
